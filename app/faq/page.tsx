@@ -1,0 +1,40 @@
+import { Metadata } from 'next'
+import Link from 'next/link'
+import { ChevronRight } from 'lucide-react'
+import { FAQContent } from './FAQContent'
+
+export const metadata: Metadata = {
+  title: 'Sık Sorulan Sorular | Batarya Kit',
+  description: 'Batarya paketleri, sipariş, kargo, ödeme ve teknik konularda sık sorulan sorular ve cevaplar.',
+}
+
+export default function FAQPage() {
+  return (
+    <div className="min-h-screen bg-surface pb-safe" id="main-content">
+      <div className="bg-surface-elevated border-b border-palette">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8 py-4 md:py-5">
+          <nav className="flex items-center gap-2 text-xs font-medium text-ink-muted mb-2 min-h-[44px]" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-brand transition-colors py-2 -my-2 px-1">Ana Sayfa</Link>
+            <ChevronRight className="w-3.5 h-3.5 text-ink-muted" />
+            <span className="text-ink font-semibold">Sık Sorulan Sorular</span>
+          </nav>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-ink uppercase tracking-tight">Sık Sorulan Sorular</h1>
+          <p className="mt-1 text-sm md:text-base text-ink-muted">Sipariş, kargo, ürünler ve teknik konularda merak ettikleriniz</p>
+        </div>
+      </div>
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8 py-5 sm:py-6 md:py-8">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-surface-elevated rounded-xl border border-palette shadow-sm overflow-hidden p-5 sm:p-6 md:p-8">
+            <FAQContent />
+          </div>
+          <div className="mt-6 sm:mt-8 text-center">
+            <p className="text-ink-muted mb-4">Sorunuzun cevabını bulamadınız mı?</p>
+            <Link href="/contact" className="inline-flex items-center gap-2 btn-classic-primary rounded-lg min-h-[44px] px-6 touch-manipulation">
+              İletişime Geçin
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

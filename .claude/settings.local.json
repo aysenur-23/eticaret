@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where:*)",
+      "WebFetch(domain:www.tommatech.com.tr)",
+      "WebFetch(domain:www.solarsanalmarket.com)",
+      "WebFetch(domain:tommatech.de)",
+      "WebFetch(domain:himstech.com)",
+      "WebFetch(domain:www.elektromarketim.com)",
+      "WebFetch(domain:gespak.com.tr)",
+      "WebFetch(domain:www.elektrikmarket.com.tr)",
+      "WebFetch(domain:cw-enerji.com)",
+      "Bash(python:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next build)",
+      "Bash(node:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)",
+      "Bash(curl:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(\"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret -:*)",
+      "Bash(dir \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\public_html\")",
+      "Bash(dir /a \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\public_html\")",
+      "Bash(dir /a \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\public_html\\\\.next\")",
+      "Bash(STATIC_EXPORT=true node node_modules/next/dist/bin/next build:*)",
+      "Bash(taskkill:*)",
+      "Bash(printf:*)",
+      "Bash(\"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\app\\\\admin\\\\orders\\\\[id]\\\\page.tsx\")",
+      "Bash(\"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\app\\\\orders\\\\[id]\\\\page.tsx\")",
+      "Bash(npx next dev -p 3000)"
+    ]
+  }
+}

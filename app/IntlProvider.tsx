@@ -1,0 +1,64 @@
+import React, { Suspense } from 'react'
+import { getLocale, getMessages } from 'next-intl/server'
+import { NextIntlClientProvider } from 'next-intl'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { ToastProvider } from '@/components/ui/toast'
+import { Header } from '@/components/Header'
+import { Footer } from '@/components/Footer'
+import { SidebarLayout } from '@/components/SidebarLayout'
+import { SuppressConsoleWarnings } from '@/components/SuppressConsoleWarnings'
+import { CookieConsent } from '@/components/CookieConsent'
+import { HtmlLangSync } from '@/components/HtmlLangSync'
+import { StructuredData } from '@/components/StructuredData'
+import { CategoriesWithProductsProvider } from '@/components/CategoriesWithProductsProvider'
+
+const DEFAULT_LOCALE = 'tr' as const
+const DEFAULT_MESSAGES: Record<string, unknown> = {}
+
+export default async function IntlProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  let locale = DEFAULT_LOCALE
+  let messages = DEFAULT_MESSAGES
+  try {
+    locale = (await getLocale()) || DEFAULT_LOCALE
+    messages = (await getMessages()) ?? DEFAULT_MESSAGES
+  } catch (e) {
+    console.error('IntlProvider getLocale/getMessages error:', e)
+  }
+  const skipToContent = locale === 'en' ? 'Skip to content' : 'İçeriğe atla'
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <HtmlLangSync />
+      <SuppressConsoleWarnings />
+      <StructuredData />
+      <TooltipProvider>
+        <ToastProvider>
+          <CategoriesWithProductsProvider>
+          <div className="min-h-screen min-h-dvh flex flex-col bg-background w-full max-w-full overflow-x-hidden">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] bg-brand text-brand-foreground px-4 py-3 rounded-lg min-h-[44px] flex items-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand"
+            >
+              {skipToContent}
+            </a>
+            <Suspense fallback={<div className="h-14 md:h-16 bg-white border-b border-slate-200 shrink-0" />}>
+              <Header />
+            </Suspense>
+            <main className="flex-1 min-h-0 pb-safe min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto" id="main-content">
+              <Suspense fallback={null}>
+                <SidebarLayout>{children}</SidebarLayout>
+              </Suspense>
+            </main>
+            <Footer />
+            <CookieConsent />
+          </div>
+          </CategoriesWithProductsProvider>
+        </ToastProvider>
+      </TooltipProvider>
+    </NextIntlClientProvider>
+  )
+}

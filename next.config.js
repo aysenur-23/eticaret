@@ -1,0 +1,109 @@
+/** @type {import('next').NextConfig} */
+const path = require('path')
+const createNextIntlPlugin = require('next-intl/plugin')
+const isProduction = process.env.NODE_ENV === 'production'
+const isStaticExport = process.env.STATIC_EXPORT === 'true'
+
+// Argümansız: plugin ./i18n/request.ts ve ./src/i18n/request.ts'yi otomatik arar (path çözümleme sorunlarını önler)
+const withNextIntl = createNextIntlPlugin()
+
+const nextConfig = {
+  images: {
+    domains: ['firebasestorage.googleapis.com', 'images.unsplash.com', 'tommatech.de'],
+    // Yerel/harici görsellerde 400 hatasını önlemek için optimizasyonu kapat (tüm ortamlarda)
+    unoptimized: true,
+    // Image optimization hatalarını önlemek için
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+  },
+  // Production optimizasyonları
+  compress: true,
+  poweredByHeader: false,
+  swcMinify: true,
+  reactStrictMode: true,
+  // TypeScript hatalarını build sırasında atla (static export için)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // Headers for CSP and security (ONLY in production)
+  // Development'ta CSP tamamen devre dışı - browser extension'lar ve dev server ile uyumluluk için
+  // CSP sadece production build'de aktif olacak
+  ...(isProduction && !process.env.NEXT_PHASE?.includes('phase-development-server') && {
+    async headers() {
+      return [
+        {
+          source: '/:path*',
+          headers: [
+            {
+              key: 'Content-Security-Policy',
+              value: [
+                "default-src 'self'",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'inline-speculation-rules' https://bataryakit.com https://*.bataryakit.com https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://*.googleapis.com chrome-extension:",
+                "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' 'inline-speculation-rules' https://bataryakit.com https://*.bataryakit.com https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://*.googleapis.com chrome-extension:",
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+                "img-src 'self' data: https: blob:",
+                "font-src 'self' data: https://fonts.gstatic.com",
+                "connect-src 'self' https: https://www.google-analytics.com https://www.googletagmanager.com https://*.google-analytics.com https://*.googleapis.com https://*.google.com",
+                "frame-ancestors 'self'",
+              ].join('; '),
+            },
+          ],
+        },
+      ]
+    },
+  }),
+  // Static export sadece production build için ve STATIC_EXPORT=true olduğunda
+  ...(isStaticExport && {
+    output: 'export',
+    distDir: 'out',
+    trailingSlash: true,
+    // Static export için gerekli ayarlar
+    skipTrailingSlashRedirect: true,
+    // Asset prefix yok (root'ta serve edilecek)
+  }),
+  // Production'da standalone build (Hostinger için)
+  ...(isProduction && !isStaticExport && {
+    output: 'standalone',
+  }),
+  experimental: {
+    serverComponentsExternalPackages: ['undici'],
+  },
+  // Development'ta output belirtilmemeli (Next.js default kullanır)
+  webpack: (config, { isServer }) => {
+    // Client bundle'da undici kullanma; #target parse hatası veriyor. Tarayıcıda native fetch kullan.
+    if (!isServer) {
+      const undiciStub = path.join(__dirname, 'lib/undici-browser-stub.js').replace(/\\/g, '/')
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        undici: undiciStub,
+      }
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        undici: undiciStub,
+        'undici/lib/web/fetch/util': undiciStub,
+        'undici/lib/web/fetch/util.js': undiciStub,
+        'undici/lib/web/fetch/index': undiciStub,
+        'undici/lib/web/fetch/index.js': undiciStub,
+        'undici/lib/fetch/index': undiciStub,
+        'undici/lib/fetch/index.js': undiciStub,
+      }
+      const webpack = require('webpack')
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^undici$/, undiciStub),
+        new webpack.NormalModuleReplacementPlugin(/^undici\//, undiciStub),
+        new webpack.NormalModuleReplacementPlugin(/[\\/]undici[\\/]/, undiciStub)
+      )
+    }
+    return config
+  },
+}
+
+module.exports = withNextIntl(nextConfig)

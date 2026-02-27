@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Next.js Dev",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Next.js Production Preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "start"],
+      "port": 3000
+    },
+    {
+      "name": "Prisma Studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/.bin/prisma", "studio"],
+      "port": 5555
+    },
+    {
+      "name": "Playwright Test UI",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/.bin/playwright", "test", "--ui"],
+      "port": 9323
+    }
+  ]
+}

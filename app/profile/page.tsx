@@ -1,0 +1,913 @@
+'use client'
+
+import React, { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+import { useFirebaseAuthStore } from '@/lib/store/useFirebaseAuth'
+import { useCartStore } from '@/lib/store/useCartStore'
+import { getAddresses, addAddress, updateAddress, deleteAddress, getOrders, setUserProfile, getFavorites, removeFavorite, getUserProfile } from '@/lib/firebase/firestore'
+import { getAuth } from '@/lib/firebase/config'
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
+import { User, ShoppingCart, Settings, Trash2, MapPin, Heart, Package, Truck, CheckCircle2, Clock, XCircle, Plus } from 'lucide-react'
+import { fmtPrice } from '@/lib/format'
+import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
+import { useExchangeRates } from '@/lib/useExchangeRates'
+import Link from 'next/link'
+import { useToast } from '@/components/ui/toast'
+import { ClassicPageShell } from '@/components/ClassicPageShell'
+import { useTranslations } from 'next-intl'
+import { getCategoryKey } from '@/lib/categories'
+
+function ProfilePageContent() {
+  const tHeader = useTranslations('header')
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { user, isAuthenticated, token } = useAuthStore()
+  const authReady = useFirebaseAuthStore((s) => s.authReady)
+  const { addToast } = useToast()
+  const addToCart = useCartStore((state) => state.addItem)
+  const currency = useCurrencyStore((s) => s.currency)
+  const { rates } = useExchangeRates()
+  const formatPrice = (amount: number) => fmtPrice(amount, currency, rates?.rates ?? null)
+  const [orders, setOrders] = useState<any[]>([])
+  const [addresses, setAddresses] = useState<any[]>([])
+  const [favorites, setFavorites] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [profileEdit, setProfileEdit] = useState({ name: '', phone: '' })
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null)
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' })
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [updatingPassword, setUpdatingPassword] = useState(false)
+  const [profileCustomerNo, setProfileCustomerNo] = useState<string | null>(null)
+  const [addressForm, setAddressForm] = useState({
+    title: '',
+    name: '',
+    phone: '',
+    addressLine: '',
+    city: '',
+    district: '',
+    postalCode: '',
+    country: 'Türkiye',
+    isDefault: false,
+  })
+  const activeTab = searchParams.get('tab') || 'orders'
+
+  useEffect(() => {
+    if (!authReady) return
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+  }, [authReady, isAuthenticated, router])
+
+  const loadOrders = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      // Static hosting: yalnızca Firestore'dan siparişleri yükle (Prisma API yok)
+      const firestoreList = await getOrders(user.id)
+      const normalized = firestoreList.map((o: any) => ({
+        ...o,
+        createdAt: o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt?.seconds ? o.createdAt.seconds * 1000 : 0),
+      }))
+      normalized.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      setOrders(normalized)
+    } catch (error) {
+      console.error('Error loading orders:', error)
+    }
+  }, [user?.id])
+
+  const loadAddresses = useCallback(async () => {
+    if (!user?.id) return
+    try {
+      const list = await getAddresses(user.id)
+      setAddresses(list)
+    } catch (error) {
+      console.error('Error loading addresses:', error)
+    }
+  }, [user?.id])
+
+  const loadFavorites = useCallback(async () => {
+    if (!user?.id) {
+      setFavorites([])
+      return
+    }
+    try {
+      const list = await getFavorites(user.id)
+      // Static hosting: ürün verisi mock'tan alınır (API yok)
+      const { mockProducts } = await import('@/lib/products-mock')
+      const enriched = list.map((f) => {
+        const product = mockProducts.find((p) => p.id === f.productId) ?? null
+        if (!product) return { id: f.id, productId: f.productId, product: null }
+        const firstVariant = product.variants?.[0]
+        const price = firstVariant ? Number(firstVariant.price) : 0
+        const images = product.images as { url?: string }[] | null
+        return {
+          id: f.id,
+          productId: f.productId,
+          product: {
+            image: images?.[0]?.url ?? null,
+            name: product.name,
+            description: product.description,
+            price,
+            category: null,
+            slug: product.id,
+          },
+        }
+      })
+      setFavorites(enriched)
+    } catch (error) {
+      console.error('Error loading favorites:', error)
+      setFavorites([])
+    }
+  }, [user?.id])
+
+  useEffect(() => {
+    if (!authReady) {
+      setLoading(true)
+      return
+    }
+    if (user?.id) {
+      loadOrders()
+      loadAddresses()
+      loadFavorites()
+      getUserProfile(user.id).then((p) => setProfileCustomerNo(p?.customerNo ?? null))
+    } else {
+      setFavorites([])
+      setProfileCustomerNo(null)
+    }
+    setLoading(false)
+  }, [authReady, user?.id, loadOrders, loadAddresses, loadFavorites])
+
+  const resetAddressForm = () => {
+    setAddressForm({
+      title: '',
+      name: '',
+      phone: '',
+      addressLine: '',
+      city: '',
+      district: '',
+      postalCode: '',
+      country: 'Türkiye',
+      isDefault: false,
+    })
+    setEditingAddressId(null)
+  }
+
+  const handleSaveAddress = async () => {
+    if (!user?.id) return
+    if (!addressForm.title?.trim() || !addressForm.name?.trim() || !addressForm.phone?.trim() || !addressForm.addressLine?.trim() || !addressForm.city?.trim() || !addressForm.district?.trim() || !addressForm.postalCode?.trim()) {
+      addToast({ type: 'error', title: 'Hata', description: 'Zorunlu alanları doldurun.' })
+      return
+    }
+    try {
+      if (editingAddressId) {
+        await updateAddress(user.id, editingAddressId, addressForm)
+        addToast({ type: 'success', title: 'Başarılı', description: 'Adres güncellendi.' })
+      } else {
+        await addAddress(user.id, addressForm)
+        addToast({ type: 'success', title: 'Başarılı', description: 'Adres eklendi.' })
+      }
+      setAddressDialogOpen(false)
+      resetAddressForm()
+      loadAddresses()
+    } catch (error) {
+      console.error('Error saving address:', error)
+      addToast({ type: 'error', title: 'Hata', description: 'Adres kaydedilemedi.' })
+    }
+  }
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!user?.id || !confirm('Bu adresi silmek istediğinize emin misiniz?')) return
+    try {
+      await deleteAddress(user.id, addressId)
+      addToast({ type: 'success', title: 'Başarılı', description: 'Adres silindi.' })
+      loadAddresses()
+    } catch (error) {
+      addToast({ type: 'error', title: 'Hata', description: 'Adres silinemedi.' })
+    }
+  }
+
+  const handleSetDefaultAddress = async (addressId: string) => {
+    if (!user?.id) return
+    try {
+      await updateAddress(user.id, addressId, { isDefault: true })
+      addToast({ type: 'success', title: 'Başarılı', description: 'Varsayılan adres güncellendi.' })
+      loadAddresses()
+    } catch (error) {
+      addToast({ type: 'error', title: 'Hata', description: 'Güncellenemedi.' })
+    }
+  }
+
+  const openEditAddress = (address: typeof addresses[0]) => {
+    setAddressForm({
+      title: address.title,
+      name: address.name,
+      phone: address.phone,
+      addressLine: address.addressLine,
+      city: address.city,
+      district: address.district,
+      postalCode: address.postalCode,
+      country: address.country || 'Türkiye',
+      isDefault: address.isDefault,
+    })
+    setEditingAddressId(address.id)
+    setAddressDialogOpen(true)
+  }
+
+  useEffect(() => {
+    if (user) setProfileEdit({ name: user.name || '', phone: user.phone || '' })
+  }, [user?.id, user?.name, user?.phone])
+
+  const refreshUserProfile = useFirebaseAuthStore((s) => s.refreshUserProfile)
+  const handleSaveProfile = async () => {
+    if (!user?.id) return
+    try {
+      await setUserProfile(user.id, {
+        email: user.email,
+        name: profileEdit.name.trim(),
+        phone: profileEdit.phone.trim() || undefined,
+      })
+      await refreshUserProfile(user.id)
+      addToast({ type: 'success', title: 'Başarılı', description: 'Profil güncellendi.' })
+    } catch (error) {
+      addToast({ type: 'error', title: 'Hata', description: 'Profil güncellenemedi.' })
+    }
+  }
+
+  const handleUpdatePassword = async () => {
+    setPasswordError('')
+    setPasswordSuccess(false)
+    if (!passwordForm.current.trim()) {
+      setPasswordError('Mevcut şifrenizi girin.')
+      return
+    }
+    if (passwordForm.new.length < 6) {
+      setPasswordError('Yeni şifre en az 6 karakter olmalıdır.')
+      return
+    }
+    if (passwordForm.new !== passwordForm.confirm) {
+      setPasswordError('Yeni şifre ve tekrarı eşleşmiyor.')
+      return
+    }
+    const auth = getAuth()
+    const currentUser = auth.currentUser
+    if (!currentUser?.email) {
+      setPasswordError('Oturum bulunamadı. Lütfen tekrar giriş yapın.')
+      return
+    }
+    setUpdatingPassword(true)
+    try {
+      const credential = EmailAuthProvider.credential(currentUser.email, passwordForm.current)
+      await reauthenticateWithCredential(currentUser, credential)
+      await updatePassword(currentUser, passwordForm.new)
+      setPasswordForm({ current: '', new: '', confirm: '' })
+      setPasswordSuccess(true)
+      addToast({ type: 'success', title: 'Başarılı', description: 'Şifreniz güncellendi.' })
+    } catch (err: unknown) {
+      const message = err && typeof err === 'object' && 'code' in err
+        ? (err as { code: string }).code === 'auth/wrong-password'
+          ? 'Mevcut şifre hatalı.'
+          : (err as { code: string }).code === 'auth/requires-recent-login'
+            ? 'Güvenlik için lütfen tekrar giriş yapıp şifre değiştirmeyi deneyin.'
+            : 'Şifre güncellenemedi.'
+        : 'Şifre güncellenemedi.'
+      setPasswordError(message)
+      addToast({ type: 'error', title: 'Hata', description: message })
+    } finally {
+      setUpdatingPassword(false)
+    }
+  }
+
+  const handleDeleteFavorite = async (productId: string) => {
+    if (!user?.id) return
+    try {
+      await removeFavorite(user.id, productId)
+      addToast({ type: 'success', title: 'Başarılı', description: 'Ürün favorilerden kaldırıldı.' })
+      setFavorites((prev) => prev.filter((f) => f.productId !== productId))
+    } catch (error) {
+      console.error('Error deleting favorite:', error)
+      addToast({ type: 'error', title: 'Hata', description: 'Favori kaldırılırken bir hata oluştu.' })
+    }
+  }
+
+  if (!authReady) {
+    return (
+      <ClassicPageShell breadcrumbs={[{ label: 'Hesabım' }]} noTitle>
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand border-t-transparent" />
+        </div>
+      </ClassicPageShell>
+    )
+  }
+
+  return (
+    <ClassicPageShell breadcrumbs={[{ label: 'Hesabım' }]} title="Hesabım" description="Siparişler, adresler ve ayarlar">
+      <Tabs value={activeTab} onValueChange={(value) => router.push(`/profile?tab=${value}`)} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto rounded-lg bg-surface p-1 min-w-0">
+          <TabsTrigger value="orders" className="rounded-lg py-3 min-h-[44px] touch-manipulation data-[state=active]:bg-surface-elevated data-[state=active]:shadow-sm data-[state=active]:text-brand">Siparişlerim</TabsTrigger>
+          <TabsTrigger value="addresses" className="rounded-lg py-3 min-h-[44px] touch-manipulation data-[state=active]:bg-surface-elevated data-[state=active]:shadow-sm data-[state=active]:text-brand">Adreslerim</TabsTrigger>
+          <TabsTrigger value="favorites" className="rounded-lg py-3 min-h-[44px] touch-manipulation data-[state=active]:bg-surface-elevated data-[state=active]:shadow-sm data-[state=active]:text-brand">Favorilerim</TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-lg py-3 min-h-[44px] touch-manipulation data-[state=active]:bg-surface-elevated data-[state=active]:shadow-sm data-[state=active]:text-brand">Ayarlar</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="orders" className="space-y-4">
+              {loading ? (
+                <Card className="classic-card rounded-lg">
+                  <CardContent className="py-12 text-center">
+                    <p className="text-ink-muted">Yükleniyor...</p>
+                  </CardContent>
+                </Card>
+              ) : orders.length === 0 ? (
+                <Card className="classic-card rounded-lg">
+                  <CardContent className="py-12 text-center">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-surface mb-4">
+                      <ShoppingCart className="w-8 h-8 text-ink-muted" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-ink mb-2">Henüz sipariş yok</h3>
+                    <p className="text-ink-muted mb-4">
+                      Siparişleriniz burada görünecek.
+                    </p>
+                    <Button asChild className="btn-classic-primary rounded-lg">
+                      <Link href="/products">
+                        Ürünlere Git
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <Card key={order.id} className="classic-card rounded-lg hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <CardTitle className="text-lg">Sipariş #{order.orderId}</CardTitle>
+                            <p className="text-sm text-ink-muted mt-1">
+                              {new Date(order.createdAt).toLocaleDateString('tr-TR', {
+                                day: '2-digit',
+                                month: 'long',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge
+                              className={
+                                order.status === 'delivered'
+                                  ? 'bg-green-100 text-green-800'
+                                  : order.status === 'shipped'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : order.status === 'cancelled'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }
+                            >
+                              {order.status === 'pending' && 'Beklemede'}
+                              {order.status === 'confirmed' && 'Onaylandı'}
+                              {order.status === 'processing' && 'İşleniyor'}
+                              {order.status === 'shipped' && 'Kargoda'}
+                              {order.status === 'delivered' && 'Teslim Edildi'}
+                              {order.status === 'cancelled' && 'İptal'}
+                            </Badge>
+                            <div className="text-lg font-bold text-brand">
+                              {formatPrice(order.pricing?.total || 0)}
+                            </div>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-ink-muted">
+                            {order.trackingNumber && (
+                              <div className="flex items-center gap-1">
+                                <Truck className="w-4 h-4" />
+                                <span>Takip: {order.trackingNumber}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Package className="w-4 h-4" />
+                              <span>{order.items?.length || order.pricing?.items?.length || 0} ürün</span>
+                            </div>
+                          </div>
+                          <Button asChild variant="outline" size="sm" className="rounded-xl">
+                            <Link href={`/orders/${order.id}`}>
+                              Detayları Gör
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="addresses" className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Kayıtlı Adreslerim</h3>
+                        <Dialog open={addressDialogOpen} onOpenChange={(open) => { setAddressDialogOpen(open); if (!open) resetAddressForm() }}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="rounded-xl" onClick={() => { resetAddressForm(); setAddressDialogOpen(true) }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Yeni Adres Ekle
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Yeni Adres Ekle</DialogTitle>
+                      <DialogDescription>
+                        Teslimat adresinizi ekleyin.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="title">Adres Başlığı *</Label>
+                          <Input
+                            id="title"
+                            placeholder="Ev, İş, vb."
+                            value={addressForm.title}
+                            onChange={(e) => setAddressForm({ ...addressForm, title: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="name">Ad Soyad *</Label>
+                          <Input
+                            id="name"
+                            value={addressForm.name}
+                            onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Telefon *</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={addressForm.phone}
+                          onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="addressLine">Adres *</Label>
+                        <Input
+                          id="addressLine"
+                          value={addressForm.addressLine}
+                          onChange={(e) => setAddressForm({ ...addressForm, addressLine: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="district">İlçe *</Label>
+                          <Input
+                            id="district"
+                            value={addressForm.district}
+                            onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="city">Şehir *</Label>
+                          <Input
+                            id="city"
+                            value={addressForm.city}
+                            onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="postalCode">Posta Kodu *</Label>
+                          <Input
+                            id="postalCode"
+                            value={addressForm.postalCode}
+                            onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="country">Ülke</Label>
+                        <Input
+                          id="country"
+                          value={addressForm.country}
+                          onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="isDefault"
+                          checked={addressForm.isDefault}
+                          onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                          className="w-4 h-4 text-brand border-palette rounded focus:ring-brand"
+                        />
+                        <Label htmlFor="isDefault" className="cursor-pointer">
+                          Varsayılan adres olarak ayarla
+                        </Label>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" className="rounded-xl" onClick={() => setAddressDialogOpen(false)}>
+                        İptal
+                      </Button>
+                      <Button className="rounded-full" onClick={handleSaveAddress}>
+                        {editingAddressId ? 'Güncelle' : 'Kaydet'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              {addresses.length === 0 ? (
+                <Card className="classic-card rounded-lg">
+                  <CardContent className="py-12 text-center">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-surface mb-4">
+                      <MapPin className="w-8 h-8 text-ink-muted" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-ink mb-2">Henüz adres yok</h3>
+                    <p className="text-ink-muted mb-4">
+                      Teslimat adreslerinizi kaydedin.
+                    </p>
+                    <Dialog open={addressDialogOpen} onOpenChange={setAddressDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="rounded-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          İlk Adresimi Ekle
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Yeni Adres Ekle</DialogTitle>
+                          <DialogDescription>
+                            Teslimat adresinizi ekleyin.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="title-empty">Adres Başlığı *</Label>
+                              <Input
+                                id="title-empty"
+                                placeholder="Ev, İş, vb."
+                                value={addressForm.title}
+                                onChange={(e) => setAddressForm({ ...addressForm, title: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="name-empty">Ad Soyad *</Label>
+                              <Input
+                                id="name-empty"
+                                value={addressForm.name}
+                                onChange={(e) => setAddressForm({ ...addressForm, name: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="phone-empty">Telefon *</Label>
+                            <Input
+                              id="phone-empty"
+                              type="tel"
+                              value={addressForm.phone}
+                              onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="addressLine-empty">Adres *</Label>
+                            <Input
+                              id="addressLine-empty"
+                              value={addressForm.addressLine}
+                              onChange={(e) => setAddressForm({ ...addressForm, addressLine: e.target.value })}
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div>
+                              <Label htmlFor="district-empty">İlçe *</Label>
+                              <Input
+                                id="district-empty"
+                                value={addressForm.district}
+                                onChange={(e) => setAddressForm({ ...addressForm, district: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="city-empty">Şehir *</Label>
+                              <Input
+                                id="city-empty"
+                                value={addressForm.city}
+                                onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="postalCode-empty">Posta Kodu *</Label>
+                              <Input
+                                id="postalCode-empty"
+                                value={addressForm.postalCode}
+                                onChange={(e) => setAddressForm({ ...addressForm, postalCode: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="country-empty">Ülke</Label>
+                            <Input
+                              id="country-empty"
+                              value={addressForm.country}
+                              onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                            />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id="isDefault-empty"
+                              checked={addressForm.isDefault}
+                              onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                              className="w-4 h-4 text-brand border-palette rounded focus:ring-brand"
+                            />
+                            <Label htmlFor="isDefault-empty" className="cursor-pointer">
+                              Varsayılan adres olarak ayarla
+                            </Label>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" className="rounded-xl" onClick={() => setAddressDialogOpen(false)}>
+                            İptal
+                          </Button>
+                          <Button className="rounded-full" onClick={handleSaveAddress}>
+                            {editingAddressId ? 'Güncelle' : 'Kaydet'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {addresses.map((address) => (
+                    <Card key={address.id} className="relative classic-card rounded-lg">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-base">{address.title}</CardTitle>
+                          {address.isDefault && (
+                            <Badge className="bg-brand-light text-brand">Varsayılan</Badge>
+                          )}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 text-sm">
+                          <p className="font-medium">{address.name}</p>
+                          <p className="text-ink-muted">{address.addressLine}</p>
+                          <p className="text-ink-muted">
+                            {address.district} / {address.city} {address.postalCode}
+                          </p>
+                          <p className="text-ink-muted">{address.phone}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          {!address.isDefault && (
+                            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => handleSetDefaultAddress(address.id)}>
+                              Varsayılan yap
+                            </Button>
+                          )}
+                          <Button variant="outline" size="sm" className="flex-1 rounded-xl" onClick={() => openEditAddress(address)}>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Düzenle
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-brand rounded-xl" onClick={() => handleDeleteAddress(address.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="favorites" className="space-y-4">
+              {favorites.length === 0 ? (
+                <Card className="classic-card rounded-lg">
+                  <CardContent className="py-12 text-center">
+                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-surface mb-4">
+                      <Heart className="w-8 h-8 text-ink-muted" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-ink mb-2">Henüz favori yok</h3>
+                    <p className="text-ink-muted mb-4">
+                      Beğendiğiniz ürünleri favorilerinize ekleyin.
+                    </p>
+                    <Button asChild className="btn-classic-primary rounded-lg">
+                      <Link href="/products">
+                        Ürünlere Git
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {favorites.map((favorite) => (
+                    <Card key={favorite.id} className="classic-card rounded-lg hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        {favorite.product && (
+                          <>
+                            {favorite.product.image && (
+                              <div className="relative h-48 bg-surface rounded-xl mb-4 overflow-hidden">
+                                <img
+                                  src={favorite.product.image}
+                                  alt={favorite.product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <h4 className="font-semibold text-lg mb-2">{favorite.product.name}</h4>
+                            {favorite.product.description && (
+                              <p className="text-sm text-ink-muted mb-3 line-clamp-2">{favorite.product.description}</p>
+                            )}
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="text-xl font-bold text-brand">
+                                {favorite.product.price > 0 ? formatPrice(favorite.product.price) : 'Fiyat bilgisi yok'}
+                              </div>
+                              {favorite.product.category && (
+                                <Badge variant="outline">
+                                  {getCategoryKey(favorite.product.category) ? tHeader(getCategoryKey(favorite.product.category)!) : favorite.product.category}
+                                </Badge>
+                              )}
+                            </div>
+                          </>
+                        )}
+                        {!favorite.product && (
+                          <div className="mb-2">
+                            <h4 className="font-semibold">Ürün #{favorite.productId}</h4>
+                            <p className="text-sm text-ink-muted">Ürün bilgisi yüklenemedi</p>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <Button asChild variant="outline" size="sm" className="flex-1 rounded-xl">
+                            <Link href={favorite.product?.slug ? `/products/${favorite.product.slug}` : `/products/${favorite.productId}`}>
+                              Detaylar
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" size="sm" className="rounded-xl text-brand hover:text-brand-hover hover:bg-brand-light" onClick={() => handleDeleteFavorite(favorite.productId)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-4">
+              <Card className="classic-card rounded-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="w-5 h-5" />
+                    Kişisel Bilgiler
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="profile-name">Ad Soyad</Label>
+                      <Input
+                        id="profile-name"
+                        value={profileEdit.name}
+                        onChange={(e) => setProfileEdit((p) => ({ ...p, name: e.target.value }))}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">E-posta</Label>
+                      <Input id="email" type="email" value={user?.email || ''} disabled className="rounded-xl" />
+                    </div>
+                    <div>
+                      <Label htmlFor="profile-phone">Telefon</Label>
+                      <Input
+                        id="profile-phone"
+                        value={profileEdit.phone}
+                        onChange={(e) => setProfileEdit((p) => ({ ...p, phone: e.target.value }))}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    {profileCustomerNo && (
+                      <div>
+                        <Label>Müşteri No</Label>
+                        <p className="text-sm font-mono text-ink mt-1">{profileCustomerNo}</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button variant="outline" className="rounded-xl" onClick={handleSaveProfile}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Bilgileri Güncelle
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="classic-card rounded-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Hesap Ayarları
+                  </CardTitle>
+                  <p className="text-sm text-ink-muted">Şifrenizi değiştirmek için mevcut şifrenizi girin.</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {passwordSuccess && (
+                    <p className="text-sm text-green-600 font-medium">Şifreniz başarıyla güncellendi.</p>
+                  )}
+                  {passwordError && (
+                    <p className="text-sm text-brand">{passwordError}</p>
+                  )}
+                  <div>
+                    <Label htmlFor="currentPassword">Mevcut Şifre</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.current}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, current: e.target.value }))}
+                      className="rounded-xl"
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newPassword">Yeni Şifre</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="En az 6 karakter"
+                      value={passwordForm.new}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, new: e.target.value }))}
+                      className="rounded-xl"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmNewPassword">Yeni Şifre Tekrar</Label>
+                    <Input
+                      id="confirmNewPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={passwordForm.confirm}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
+                      className="rounded-xl"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={handleUpdatePassword}
+                    disabled={updatingPassword}
+                  >
+                    {updatingPassword ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="havale" className="space-y-4">
+              <Card className="classic-card rounded-lg">
+                <CardHeader>
+                  <CardTitle>Havale Bildirimi</CardTitle>
+                  <p className="text-sm text-ink-muted">Ödeme yaptıktan sonra havale/EFT bilgilerinizi buradan iletebilirsiniz.</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-ink-muted">Bu özellik yakında eklenecektir. Ödeme bildirimi için şimdilik <Link href="/contact" className="text-brand hover:underline">iletişim</Link> sayfamızdan bize ulaşabilirsiniz.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="points" className="space-y-4">
+              <Card className="classic-card rounded-lg">
+                <CardHeader>
+                  <CardTitle>Puan ve Hediye Çekleri</CardTitle>
+                  <p className="text-sm text-ink-muted">Kazanılan puanlar ve hediye çekleriniz burada listelenir.</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-ink-muted">Bu özellik yakında eklenecektir.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+      </Tabs>
+    </ClassicPageShell>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <ClassicPageShell noTitle>
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-800 border-t-transparent" />
+        </div>
+      </ClassicPageShell>
+    }>
+      <ProfilePageContent />
+    </Suspense>
+  )
+}
+
