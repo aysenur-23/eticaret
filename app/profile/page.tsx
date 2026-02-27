@@ -423,7 +423,7 @@ function ProfilePageContent() {
                       Yeni Adres Ekle
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
                     <DialogHeader>
                       <DialogTitle>Yeni Adres Ekle</DialogTitle>
                       <DialogDescription>
@@ -542,7 +542,7 @@ function ProfilePageContent() {
                           İlk Adresimi Ekle
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onOpenAutoFocus={(e) => e.preventDefault()}>
                         <DialogHeader>
                           <DialogTitle>Yeni Adres Ekle</DialogTitle>
                           <DialogDescription>

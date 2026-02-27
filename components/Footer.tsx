@@ -17,6 +17,55 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+function NewsletterForm() {
+  const [email, setEmail] = React.useState('')
+  const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return
+    setStatus('loading')
+    try {
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore')
+      const { getDb } = await import('@/lib/firebase/config')
+      const db = getDb()
+      await addDoc(collection(db, 'newsletter'), {
+        email: email.trim().toLowerCase(),
+        createdAt: serverTimestamp(),
+      })
+      setStatus('success')
+      setEmail('')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (status === 'success') {
+    return <p className="text-sm text-green-400 py-2">Kaydınız alındı, teşekkürler!</p>
+  }
+
+  return (
+    <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="E-posta adresiniz"
+        value={email}
+        onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
+        required
+        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand transition-colors"
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+      >
+        {status === 'loading' ? 'Kaydediliyor...' : 'Kayıt Ol'}
+      </button>
+      {status === 'error' && <p className="text-xs text-red-400">Bir hata oluştu, tekrar deneyin.</p>}
+    </form>
+  )
+}
+
 export function Footer() {
   const t = useTranslations('footer')
   const currentYear = new Date().getFullYear()
@@ -118,17 +167,7 @@ export function Footer() {
             <div className="space-y-4">
               <h3 className="text-white font-bold text-lg">Bültene Katılın</h3>
               <p className="text-sm text-slate-400 leading-relaxed">Yeni ürünler ve kampanyalardan ilk siz haberdar olun.</p>
-              <form className="flex flex-col gap-2" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  suppressHydrationWarning
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand transition-colors"
-                />
-                <button className="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 rounded-xl transition-colors">
-                  Kayıt Ol
-                </button>
-              </form>
+              <NewsletterForm />
             </div>
             <div className="space-y-4">
               <h3 className="text-white font-semibold text-lg">{t('paymentTrust')}</h3>

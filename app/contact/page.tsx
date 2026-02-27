@@ -99,7 +99,7 @@ export default function ContactPage() {
     } catch (error) {
       console.error('Contact form error:', error)
       setIsSubmitting(false)
-      alert('Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.')
+      setErrors({ general: 'Mesaj gönderilirken bir hata oluştu. Lütfen tekrar deneyin.' })
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
@@ -134,6 +134,11 @@ export default function ContactPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
+                    {errors.general && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                        {errors.general}
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="name">Ad Soyad *</Label>

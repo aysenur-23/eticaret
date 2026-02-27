@@ -309,24 +309,21 @@ export default function ProductDetailClient({ initialProduct, productId: product
                           if (contactSubmitting || !contactForm.name.trim() || !contactForm.email.trim() || !contactForm.phone.trim() || !contactForm.message.trim()) return
                           setContactSubmitting(true)
                           try {
-                            const res = await fetch('/api/contact', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                name: contactForm.name.trim(),
-                                email: contactForm.email.trim(),
-                                phone: contactForm.phone.trim(),
-                                subject: 'Bu ürün bana uygun mu?',
-                                message: `[Ürün: ${product.name}]\n\n${contactForm.message.trim()}`,
-                              }),
+                            const { collection, addDoc, serverTimestamp } = await import('firebase/firestore')
+                            const { getDb } = await import('@/lib/firebase/config')
+                            const db = getDb()
+                            await addDoc(collection(db, 'contactMessages'), {
+                              name: contactForm.name.trim(),
+                              email: contactForm.email.trim(),
+                              phone: contactForm.phone.trim(),
+                              subject: 'Bu ürün bana uygun mu?',
+                              message: `[Ürün: ${product.name}]\n\n${contactForm.message.trim()}`,
+                              productId: product.id,
+                              createdAt: serverTimestamp(),
+                              status: 'new',
                             })
-                            const data = await res.json()
-                            if (data.success) {
-                              setContactSent(true)
-                              addToast({ type: 'success', title: 'Gönderildi', description: data.message })
-                            } else {
-                              addToast({ type: 'error', title: 'Hata', description: data.error || 'Gönderilemedi.' })
-                            }
+                            setContactSent(true)
+                            addToast({ type: 'success', title: 'Gönderildi', description: 'Mesajınız iletildi. En kısa sürede dönüş yapacağız.' })
                           } catch {
                             addToast({ type: 'error', title: 'Hata', description: 'Gönderilemedi. Lütfen tekrar deneyin.' })
                           } finally {

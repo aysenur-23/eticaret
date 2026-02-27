@@ -111,7 +111,7 @@ export function CategoryPageClient({ id: groupId }: { id: string }) {
     >
       <div className="min-w-0">
         <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
-          <SheetContent side="left" className="w-[85vw] sm:max-w-md overflow-y-auto min-w-0">
+          <SheetContent side="left" className="w-[85vw] sm:max-w-md overflow-y-auto min-w-0" onOpenAutoFocus={(e) => e.preventDefault()}>
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2">
                 <Menu className="w-5 h-5" />

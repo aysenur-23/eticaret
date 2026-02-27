@@ -118,39 +118,39 @@ export const useCartStore = create<CartState>()(
       },
       storage: {
         getItem: (name: string) => {
-          const str = localStorage.getItem(name)
-          if (!str) return null
+          if (typeof window === 'undefined') return null
           try {
+            const str = localStorage.getItem(name)
+            if (!str) return null
             const data = JSON.parse(str)
-            const now = Date.now()
-            if (data?.expire && now > data.expire) {
+            if (data?.expire && Date.now() > data.expire) {
               localStorage.removeItem(name)
               return null
             }
             if (data?.state) {
-              return JSON.stringify({ state: data.state, version: data.version || 0 }) as any
+              return { state: data.state, version: data.version || 0 }
             }
-            return str as any
+            return null
           } catch {
             localStorage.removeItem(name)
             return null
           }
         },
-        setItem: (name: string, value: any): void => {
+        setItem: (name: string, value: { state: any; version?: number }): void => {
+          if (typeof window === 'undefined') return
           try {
-            const valueStr = typeof value === 'string' ? value : JSON.stringify(value)
-            const data = JSON.parse(valueStr)
             const isAuthenticated = isUserAuthenticated()
             const expire = isAuthenticated
               ? Date.now() + 60 * 24 * 60 * 60 * 1000 // 60 gün
               : Date.now() + 7 * 24 * 60 * 60 * 1000  // misafir: 7 gün
-            localStorage.setItem(name, JSON.stringify({ ...data, expire }))
+            localStorage.setItem(name, JSON.stringify({ ...value, expire }))
           } catch {
-            const valueStr = typeof value === 'string' ? value : JSON.stringify(value)
-            localStorage.setItem(name, valueStr)
+            localStorage.setItem(name, JSON.stringify(value))
           }
         },
-        removeItem: (name: string): void => localStorage.removeItem(name),
+        removeItem: (name: string): void => {
+          if (typeof window !== 'undefined') localStorage.removeItem(name)
+        },
       } as PersistStorage<CartState>,
     }
   )

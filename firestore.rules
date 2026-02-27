@@ -27,5 +27,29 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+
+    // İletişim formu mesajları — herkes yazabilir, okuma yok
+    match /contactMessages/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // GES teklif talepleri — herkes yazabilir, okuma yok
+    match /gesQuotes/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // GES teklif doğrulama talepleri — herkes yazabilir, okuma yok
+    match /gesVerifications/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
+
+    // Bülten abonelikleri
+    match /newsletter/{id} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
   }
 }
