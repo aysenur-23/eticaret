@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Generate reset URL
-    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://bataryakit.com'}/reset-password?token=${resetToken}`
+    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://imora.com'}/reset-password?token=${resetToken}`
 
     // Send password reset email
     const emailContent = React.createElement(PasswordResetEmail, {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     try {
       const emailResult = await sendEmailSMTP(
         user.email,
-        'Şifre Sıfırlama - Batarya Kit',
+        'Şifre Sıfırlama - IMORA',
         emailContent
       )
 

@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { checkAdmin } from '@/lib/adminAuth'
 import { getMergedProducts } from '@/lib/catalog-merge'
@@ -80,19 +81,19 @@ export async function POST(request: NextRequest) {
         fullDescription: fullDescription != null ? String(fullDescription) : null,
         price: Number(price),
         image: image != null ? String(image) : null,
-        images: Array.isArray(images) ? images : null,
+        images: Array.isArray(images) ? images : Prisma.JsonNull,
         category: String(category).trim(),
         stock: stock != null ? Math.max(0, Math.floor(Number(stock))) : null,
         featured: featured === true,
         specifications:
           specifications != null && typeof specifications === 'object'
-            ? specifications
-            : null,
-        features: Array.isArray(features) ? features : null,
-        variants: Array.isArray(variants) ? variants : null,
+            ? (specifications as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
+        features: Array.isArray(features) ? features : Prisma.JsonNull,
+        variants: Array.isArray(variants) ? variants : Prisma.JsonNull,
         brand: brand != null ? String(brand) : null,
         sku: sku != null ? String(sku) : null,
-        tags: Array.isArray(tags) ? tags : null,
+        tags: Array.isArray(tags) ? tags : Prisma.JsonNull,
         slogan: slogan != null ? String(slogan) : null,
         warranty: warranty != null ? String(warranty) : null,
       },

@@ -1,12 +1,7 @@
-# robots.txt
-User-agent: *
+User-Agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api
 
-# Disallow admin and API routes
-Disallow: /admin/
-Disallow: /api/
-
-# Sitemap
-Sitemap: https://bataryakit.com/sitemap.xml
-
-
+Host: http://localhost:3000
+Sitemap: http://localhost:3000/sitemap.xml

@@ -6,7 +6,7 @@
 import { mockProducts, type MockProduct } from '@/lib/products-mock'
 import { prisma } from '@/lib/prisma'
 
-export type MergedProduct = MockProduct & { id: string }
+export type MergedProduct = MockProduct & { id: string; slug?: string }
 
 function applyOverride(base: MergedProduct, override: {
   name?: string | null
@@ -91,14 +91,14 @@ function overrideOnlyToMerged(override: {
     stock: override.stock ?? 0,
     featured: override.featured ?? false,
     isVariantProduct: Array.isArray(override.variants) && override.variants.length > 0,
-    fullDescription: override.fullDescription,
+    fullDescription: override.fullDescription ?? undefined,
     features: override.features as string[] | undefined,
     specifications: override.specifications as Record<string, string> | undefined,
     variants: override.variants as MockProduct['variants'],
     brand: override.brand ?? undefined,
     tags: override.tags as string[] | undefined,
-    slogan: override.slogan,
-    warranty: override.warranty,
+    slogan: override.slogan ?? undefined,
+    warranty: override.warranty ?? undefined,
   }
 }
 

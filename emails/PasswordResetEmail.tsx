@@ -25,7 +25,7 @@ export default function PasswordResetEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>🔋 Batarya Kit</Text>
+            <Text style={logo}>🔋 IMORA</Text>
           </Section>
           
           <Section style={content}>

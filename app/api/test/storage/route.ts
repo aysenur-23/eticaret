@@ -11,7 +11,7 @@ import path from 'path'
 export async function GET(request: NextRequest) {
   try {
     const uploadBaseDir = process.env.UPLOAD_BASE_DIR || path.join(process.cwd(), 'public', 'uploads')
-    const publicUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://bataryakit.com'
+    const publicUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://imora.com'
 
     // Check if upload directory exists and is writable
     let dirExists = false

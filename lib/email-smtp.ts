@@ -98,7 +98,7 @@ export async function sendEmailSMTP(
     }
 
     const mailOptions: nodemailer.SendMailOptions = {
-      from: process.env.SMTP_FROM || `"Batarya Kit" <${process.env.SMTP_USER}>`,
+      from: process.env.SMTP_FROM || `"IMORA" <${process.env.SMTP_USER}>`,
       to: to,
       subject: subject,
       html: htmlContent,

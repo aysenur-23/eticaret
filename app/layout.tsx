@@ -6,6 +6,8 @@ import IntlProvider from './IntlProvider'
 import { FirebaseAnalyticsInit } from '@/components/FirebaseAnalyticsInit'
 
 const inter = Inter({ subsets: ['latin'] })
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
+const SITE_NAME = 'voltekno'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -17,40 +19,157 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bataryakit.com'),
-  title: 'TommaTech Türkiye | Güneş Paneli, İnverter, Batarya & EV Şarj Sistemleri',
-  description: 'TommaTech ürünleri: güneş paneli, hibrit inverter, lityum batarya paketi, EV şarj istasyonu ve ısı pompası. Türkiye geneli hızlı kargo, teknik destek.',
-  keywords: 'güneş paneli, inverter, lityum batarya, ev şarj istasyonu, ısı pompası, ges sistemi, tommatech, enerji depolama, solar panel, hibrit inverter, off-grid',
-  authors: [{ name: 'TommaTech Türkiye' }],
-  creator: 'TommaTech Türkiye',
-  publisher: 'TommaTech Türkiye',
-  robots: 'index, follow',
-  // Favicon: app/icon.png ve app/icon.svg Next.js tarafından otomatik kullanılır
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'voltekno | Güneş Paneli, Akü, İnverter, EV Şarj ve Enerji Sistemleri',
+    template: '%s | voltekno',
+  },
+  description:
+    'Güneş paneli, lityum akü, hibrit inverter, EV şarj istasyonu ve enerji depolama sistemleri. GES hesaplama, bağ evi – villa – karavan – sulama – marin enerji paketleri. Hızlı teslimat, uzman teknik destek.',
+  keywords: [
+    'güneş paneli',
+    'güneş paneli fiyatları',
+    'monokristal güneş paneli',
+    'lityum akü',
+    'lifepo4 akü',
+    'akü fiyatları',
+    'hibrit inverter',
+    'off grid inverter',
+    'ges hesaplama',
+    'güneş enerji sistemi',
+    'enerji depolama',
+    'ev şarj istasyonu',
+    'ev şarj kablosu',
+    'araç şarj kablosu',
+    'tip2 şarj kablosu',
+    'solar panel',
+    'güneş enerjisi',
+    'bağ evi enerji paketi',
+    'villa güneş paneli',
+    'karavan güneş paneli',
+    'sulama güneş enerjisi',
+    'marin batarya',
+    'taşınabilir güç istasyonu',
+    'enerji yönetim sistemi',
+    'voltekno',
+  ],
+  authors: [{ name: 'voltekno', url: SITE_URL }],
+  creator: 'voltekno',
+  publisher: 'voltekno',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
-    url: 'https://bataryakit.com',
-    siteName: 'TommaTech Türkiye',
-    title: 'TommaTech Türkiye | Güneş Paneli, İnverter, Batarya & EV Şarj Sistemleri',
-    description: 'TommaTech ürünleri: güneş paneli, hibrit inverter, lityum batarya paketi, EV şarj istasyonu ve ısı pompası. Türkiye geneli hızlı kargo, teknik destek.',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: 'voltekno | Güneş Paneli, Akü, İnverter ve Enerji Sistemleri',
+    description:
+      'Güneş paneli, lityum akü, inverter, EV şarj ve enerji depolama ürünleri. GES hesaplama ve teknik destek. Türkiye\'ye hızlı teslimat.',
     images: [
       {
         url: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&h=630&fit=crop&q=80',
         width: 1200,
         height: 630,
-        alt: 'TommaTech - Güneş Enerjisi ve Batarya Sistemleri',
+        alt: 'voltekno enerji sistemleri',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'TommaTech Türkiye | Güneş Paneli, İnverter, Batarya & EV Şarj Sistemleri',
-    description: 'TommaTech ürünleri: güneş paneli, hibrit inverter, lityum batarya paketi, EV şarj istasyonu ve ısı pompası.',
+    title: 'voltekno | Güneş Paneli, Akü, İnverter ve Enerji Sistemleri',
+    description:
+      'Güneş paneli, lityum akü, inverter, EV şarj ve enerji depolama ürünleri. GES hesaplama ve teknik destek.',
     images: ['https://images.unsplash.com/photo-1509391366360-2e959784a276?w=1200&h=630&fit=crop&q=80'],
   },
   alternates: {
-    canonical: 'https://bataryakit.com',
+    canonical: SITE_URL,
+    languages: {
+      'tr-TR': SITE_URL,
+    },
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
+  },
+}
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'voltekno',
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.png`,
+  description: 'Güneş paneli, akü, inverter, EV şarj istasyonu ve enerji depolama sistemleri satışı.',
+  sameAs: [],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+90-534-328-83-83',
+    contactType: 'customer service',
+    availableLanguage: ['Turkish', 'English'],
+    areaServed: 'TR',
+  },
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Antalya',
+    addressCountry: 'TR',
+  },
+}
+
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'voltekno',
+  url: SITE_URL,
+  description: 'Güneş paneli, akü, inverter ve enerji sistemleri e-ticaret sitesi.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${SITE_URL}/products?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
+
+const localBusinessJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'voltekno',
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.png`,
+  telephone: '+90-534-328-83-83',
+  email: 'info@voltekno.com',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Antalya',
+    addressCountry: 'TR',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: '36.8969',
+    longitude: '30.7133',
+  },
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '18:00',
+    },
+  ],
+  priceRange: '₺₺',
+  currenciesAccepted: 'TRY',
+  paymentAccepted: 'Cash, Credit Card, Bank Transfer',
+  areaServed: 'TR',
 }
 
 export default function RootLayout({
@@ -61,6 +180,10 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([organizationJsonLd, websiteJsonLd, localBusinessJsonLd]) }}
+        />
         <IntlProvider>
           <FirebaseAnalyticsInit />
           {children}

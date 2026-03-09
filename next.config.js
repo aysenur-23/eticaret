@@ -29,9 +29,8 @@ const nextConfig = {
   poweredByHeader: false,
   swcMinify: true,
   reactStrictMode: true,
-  // TypeScript hatalarını build sırasında atla (static export için)
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   // Headers for CSP and security (ONLY in production)
   // Development'ta CSP tamamen devre dışı - browser extension'lar ve dev server ile uyumluluk için

@@ -93,7 +93,7 @@ function ResetPasswordForm() {
             <Card className="classic-card rounded-lg overflow-hidden">
               <CardHeader className="space-y-1 text-center pb-4">
                 <div className="flex justify-center mb-4">
-                  <div className="w-14 h-14 bg-red-600 rounded-lg flex items-center justify-center">
+                  <div className="w-14 h-14 bg-brand rounded-lg flex items-center justify-center">
                     <CheckCircle2 className="w-7 h-7 text-white" />
                   </div>
                 </div>
@@ -123,7 +123,7 @@ function ResetPasswordForm() {
           <Card className="classic-card rounded-lg overflow-hidden">
             <CardHeader className="space-y-1 text-center pb-4">
               <div className="flex justify-center mb-4">
-                <div className="w-14 h-14 bg-red-600 rounded-lg flex items-center justify-center">
+                <div className="w-14 h-14 bg-brand rounded-lg flex items-center justify-center">
                   <Lock className="w-7 h-7 text-white" />
                 </div>
               </div>
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
                 {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Şifre Sıfırlanıyor...</> : 'Şifreyi Sıfırla'}
               </Button>
               <div className="text-center text-sm text-gray-600">
-                <Link href="/login" className="text-red-600 hover:text-red-700 font-semibold flex items-center justify-center gap-2">
+                <Link href="/login" className="text-brand hover:text-brand-hover font-semibold flex items-center justify-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   Giriş Sayfasına Dön
                 </Link>
@@ -177,7 +177,7 @@ export default function ResetPasswordPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50/80 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-brand border-t-transparent mx-auto mb-4"></div>
           <p className="text-gray-600">Yükleniyor...</p>
         </div>
       </div>

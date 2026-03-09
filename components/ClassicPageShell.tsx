@@ -37,7 +37,7 @@ export function ClassicPageShell({
   return (
     <div className={`min-h-screen bg-slate-50 pb-safe w-full max-w-full min-w-0 overflow-x-hidden ${className}`} id="main-content">
       <div className="bg-white border-b border-slate-200 shadow-sm">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8 py-4 md:py-5 min-w-0">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8 pt-5 pb-4 md:pt-6 md:pb-5 min-w-0">
           {breadcrumbs.length > 0 && (
             <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-500 mb-2 min-h-[44px] items-center" aria-label="Breadcrumb">
               <Link href="/" className="py-2 -my-2 px-1 hover:text-slate-900 transition-colors touch-manipulation">

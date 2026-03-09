@@ -152,7 +152,6 @@ export class PostgresSearchAdapter {
               stock: true,
             },
           },
-          stock: true,
         },
         skip,
         take: pageSize,

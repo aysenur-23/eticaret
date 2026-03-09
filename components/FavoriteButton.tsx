@@ -80,12 +80,12 @@ export function FavoriteButton({ productId, className = '' }: FavoriteButtonProp
       <button
         onClick={handleToggleFavorite}
         disabled={loading}
-        className={`p-1.5 bg-white rounded-full shadow-sm hover:bg-brand-light transition-colors z-30 relative ${className} ${
+        className={`p-0.5 sm:p-1.5 bg-white rounded-full shadow-sm hover:bg-brand-light transition-colors z-30 relative ${className} ${
           isFavorite ? 'text-brand' : 'text-ink-muted hover:text-brand'
         }`}
         title={isFavorite ? 'Favorilerden kaldır' : 'Favorilere ekle'}
       >
-        <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+        <Heart className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
       </button>
 
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>

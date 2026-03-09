@@ -26,16 +26,7 @@ export async function POST(request: NextRequest) {
       where: { email: email.toLowerCase() },
     })
 
-    if (!user) {
-      console.log('Login attempt - User not found:', email.toLowerCase())
-      return NextResponse.json(
-        { success: false, error: 'E-posta veya şifre hatalı' },
-        { status: 401 }
-      )
-    }
-
-    if (!user.password) {
-      console.log('Login attempt - User has no password:', user.id)
+    if (!user || !user.password) {
       return NextResponse.json(
         { success: false, error: 'E-posta veya şifre hatalı' },
         { status: 401 }
@@ -46,21 +37,20 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password)
 
     if (!isValidPassword) {
-      console.log('Login attempt - Invalid password for user:', user.id)
       return NextResponse.json(
         { success: false, error: 'E-posta veya şifre hatalı' },
         { status: 401 }
       )
     }
 
-    console.log('Login successful for user:', user.id, user.email)
+    if (!process.env.JWT_SECRET) {
+      return NextResponse.json({ success: false, error: 'Sunucu yapılandırma hatası.' }, { status: 503 })
+    }
 
-    // Generate token with expiration based on rememberMe
-    // If rememberMe is true, token expires in 7 days (1 week), otherwise session-based
     const expiresIn = rememberMe ? '7d' : '24h'
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn }
     )
 

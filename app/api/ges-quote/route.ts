@@ -265,7 +265,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@bataryakit.com'
+    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
     const emailResult = await sendEmailSMTP(
       adminEmail,
       `Yeni GES Teklif İsteği: ${fullName} - ${city}`,

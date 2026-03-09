@@ -37,9 +37,22 @@ export default function AdminAuthPage() {
       const db = getDb()
       const userDoc = await getDoc(doc(db, 'users', cred.user.uid))
       if (userDoc.exists() && userDoc.data().role === 'admin') {
-        // Admin oturum bilgisini localStorage'a kaydet
+        const idToken = await cred.user.getIdToken()
+        // Backend'e token gönderip admin_session cookie set ettir (middleware bu cookie ile erişime izin verir)
+        const res = await fetch('/api/admin/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+          credentials: 'include',
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok || !data.success) {
+          setError(data.error || 'Oturum açılamadı. Tekrar deneyin.')
+          setLoading(false)
+          return
+        }
         localStorage.setItem('admin_uid', cred.user.uid)
-        localStorage.setItem('admin_token', await cred.user.getIdToken())
+        localStorage.setItem('admin_token', idToken)
         router.push('/admin')
         router.refresh()
         return

@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useCartStore } from '@/lib/store/useCartStore'
 import { useAuthStore } from '@/lib/store/useAuthStore'
@@ -11,6 +11,10 @@ import { fmtPrice } from '@/lib/format'
 import { CATEGORY_GROUPS, getCategoryKey } from '@/lib/categories'
 import { useCategoriesWithProducts } from '@/components/CategoriesWithProductsProvider'
 import { HeaderInnerUI } from './HeaderInnerUI'
+
+const SEARCH_DEBOUNCE_MS = 280
+const LIVE_SEARCH_MIN_LENGTH = 1
+const LIVE_SEARCH_LIMIT = 8
 
 /** Header ve sidebar aynı kaynaktan (CATEGORY_GROUPS) beslenir; ürünü olmayan alt kategoriler gösterilmez. */
 function buildNavGroups(categoriesWithProducts: Set<string> | null) {
@@ -44,10 +48,15 @@ export function HeaderInnerBody() {
   const t = useTranslations('header')
   const pathname = usePathname()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const currentCategory = searchParams.get('category')
   const categoriesWithProducts = useCategoriesWithProducts()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null)
+  useEffect(() => {
+    setMounted(true)
+    const params = new URLSearchParams(window.location.search)
+    setCurrentCategory(params.get('category'))
+  }, [pathname])
   const cartItems = useCartStore((state) => state.items)
   const cartTotal = useCartStore((state) => state.getTotalPrice())
   const cartItemsCount = React.useMemo(() => cartItems.reduce((t, i) => t + i.quantity, 0), [cartItems])
@@ -55,6 +64,10 @@ export function HeaderInnerBody() {
   const { rates } = useExchangeRates()
   const { user, isAuthenticated, logout } = useAuthStore()
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<Array<{ id: string; name: string; price?: number }>>([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const searchAbortRef = useRef<AbortController | null>(null)
   const cartTotalFormatted = fmtPrice(cartTotal, currency, rates?.rates ?? null)
 
   const navGroups = useMemo(() => buildNavGroups(categoriesWithProducts), [categoriesWithProducts])
@@ -64,29 +77,65 @@ export function HeaderInnerBody() {
     { labelKey: 'navContact', href: '/contact' },
   ]
 
-  const handleSearch = (e: React.FormEvent) => {
+  useEffect(() => {
+    const q = searchQuery.trim()
+    if (q.length < LIVE_SEARCH_MIN_LENGTH) {
+      setSearchResults([])
+      setSearchOpen(false)
+      return
+    }
+    const t = setTimeout(async () => {
+      searchAbortRef.current?.abort()
+      searchAbortRef.current = new AbortController()
+      setSearchLoading(true)
+      setSearchOpen(true)
+      try {
+        const res = await fetch(
+          `/api/products?q=${encodeURIComponent(q)}`,
+          { signal: searchAbortRef.current.signal }
+        )
+        if (!res.ok) throw new Error('Search failed')
+        const data = await res.json()
+        const list = Array.isArray(data) ? data : []
+        setSearchResults(list.slice(0, LIVE_SEARCH_LIMIT))
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') setSearchResults([])
+      } finally {
+        setSearchLoading(false)
+      }
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(t)
+  }, [searchQuery])
+
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
+      setSearchOpen(false)
       router.push(`/products?q=${encodeURIComponent(searchQuery)}`)
     }
-  }
+  }, [searchQuery, router])
 
   return React.createElement(HeaderInnerUI, {
     t,
     pathname,
     router,
-    searchParams,
     currentCategory,
     mobileMenuOpen,
     setMobileMenuOpen,
-    cartItemsCount,
-    cartTotalFormatted,
-    user,
-    isAuthenticated,
+    cartItemsCount: mounted ? cartItemsCount : 0,
+    cartTotalFormatted: mounted ? cartTotalFormatted : fmtPrice(0, currency, null),
+    currency,
+    exchangeRates: rates?.rates ?? null,
+    user: mounted ? user : null,
+    isAuthenticated: mounted ? isAuthenticated : false,
     logout,
     searchQuery,
     setSearchQuery,
     handleSearch,
+    searchResults,
+    searchLoading,
+    searchOpen,
+    setSearchOpen,
     navGroups,
     navLinks,
   })

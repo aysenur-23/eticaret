@@ -13,8 +13,6 @@ import {
   Battery,
   Sun,
   Cpu,
-  Flame,
-  Settings2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,12 +20,12 @@ import { CATEGORY_GROUPS, getCategoryKey } from '@/lib/categories'
 import { useCategoriesWithProducts } from './CategoriesWithProductsProvider'
 
 const GROUP_ICONS: Record<string, React.ElementType> = {
-  'ev-sarj': Zap,
-  'enerji-depolama': Battery,
-  'gunes-enerjisi': Sun,
+  'elektrikli-arac-sarj-urunleri': Zap,
+  'batarya-depolama': Battery,
   'inverterler': Cpu,
-  'isi-pompalari': Flame,
-  'akilli-enerji': Settings2,
+  'gunes-enerjisi': Sun,
+  'isi-pompasi-hvac': Cpu,
+  'enerji-yonetimi': Cpu,
 }
 
 /**
@@ -101,9 +99,9 @@ export function CategorySidebar() {
           </h2>
         </div>
 
-        {/* Arama */}
+        {/* Arama – sadece mobilde (masaüstünde header’da arama var) */}
         <form
-          className="flex gap-2 mt-3"
+          className="flex gap-2 mt-4 lg:hidden"
           onSubmit={(e) => {
             e.preventDefault()
             const params = new URLSearchParams()
@@ -122,20 +120,20 @@ export function CategorySidebar() {
           <Button
             type="submit"
             size="icon"
-            className="h-10 w-10 shrink-0 rounded-lg bg-slate-800 hover:bg-slate-700"
+            className="h-10 w-10 shrink-0 rounded-lg bg-brand hover:bg-brand-hover"
             aria-label="Ara"
           >
             <Search className="w-4 h-4 text-white" />
           </Button>
         </form>
 
-        {/* Kategori listesi */}
+        {/* Kategori listesi – arama ile arasında net boşluk */}
         <nav
-          className="mt-3 rounded-xl lg:rounded-none border border-slate-200 lg:border-0 overflow-hidden bg-white lg:bg-transparent"
+          className="mt-4 lg:mt-4 rounded-xl lg:rounded-none border border-slate-200 lg:border-0 overflow-hidden bg-white lg:bg-transparent"
           aria-label="Ürün kategorileri"
         >
           {/* Mobil başlık */}
-          <div className="lg:hidden bg-slate-800 text-white px-4 py-3 flex items-center gap-2">
+          <div className="lg:hidden bg-brand text-white px-4 py-3 flex items-center gap-2">
             <Menu className="w-5 h-5 shrink-0" />
             <span className="font-semibold text-sm uppercase tracking-wide">Kategoriler</span>
           </div>
@@ -145,11 +143,10 @@ export function CategorySidebar() {
             <li>
               <Link
                 href="/products"
-                className={`flex items-center gap-2 px-3.5 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-colors touch-manipulation ${
-                  isAllActive
-                    ? 'bg-slate-800 text-white'
+                className={`flex items-center gap-2 px-3.5 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-colors touch-manipulation ${isAllActive
+                    ? 'bg-brand text-white'
                     : 'text-slate-700 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 <span>{tCommon('all')}</span>
               </Link>
@@ -166,37 +163,32 @@ export function CategorySidebar() {
                 <li key={group.id}>
                   {/* Grup satırı: link (sol) + toggle butonu (sağ) */}
                   <div
-                    className={`flex items-stretch rounded-lg overflow-hidden transition-colors ${
-                      isGroupActive ? 'bg-slate-800' : 'hover:bg-slate-100'
-                    }`}
+                    className={`flex items-stretch rounded-lg overflow-hidden transition-colors ${isGroupActive ? 'bg-brand' : 'hover:bg-slate-100'
+                      }`}
                   >
                     <Link
                       href={`/category/${group.id}`}
-                      className={`flex-1 flex items-center gap-2.5 px-3.5 py-3 min-h-[44px] text-sm font-semibold min-w-0 transition-colors touch-manipulation ${
-                        isGroupActive ? 'text-white' : 'text-slate-800'
-                      }`}
+                      className={`flex-1 flex items-center gap-2.5 px-3.5 py-3 min-h-[44px] text-sm font-semibold min-w-0 transition-colors touch-manipulation ${isGroupActive ? 'text-white' : 'text-slate-800'
+                        }`}
                     >
                       <Icon
-                        className={`w-4 h-4 shrink-0 ${
-                          isGroupActive ? 'text-white/70' : 'text-slate-400'
-                        }`}
+                        className={`w-4 h-4 shrink-0 ${isGroupActive ? 'text-white/70' : 'text-slate-400'
+                          }`}
                       />
                       <span className="truncate">{label}</span>
                     </Link>
                     <button
                       type="button"
                       onClick={() => toggleGroup(group.id)}
-                      className={`min-h-[44px] min-w-[44px] px-2.5 shrink-0 transition-colors touch-manipulation ${
-                        isGroupActive
+                      className={`min-h-[44px] min-w-[44px] px-2.5 shrink-0 transition-colors touch-manipulation ${isGroupActive
                           ? 'text-white/70 hover:text-white hover:bg-white/10'
                           : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200'
-                      }`}
+                        }`}
                       aria-label={isExpanded ? 'Daralt' : 'Genişlet'}
                     >
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          isExpanded ? 'rotate-180' : ''
-                        }`}
+                        className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''
+                          }`}
                       />
                     </button>
                   </div>
@@ -213,11 +205,10 @@ export function CategorySidebar() {
                           <li key={catValue}>
                             <Link
                               href={`/products?category=${encodeURIComponent(catValue)}`}
-                              className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg text-xs font-medium leading-snug transition-colors touch-manipulation ${
-                                isSubActive
-                                  ? 'bg-slate-800 text-white'
+                              className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-lg text-xs font-medium leading-snug transition-colors touch-manipulation ${isSubActive
+                                  ? 'bg-brand text-white'
                                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                              }`}
+                                }`}
                             >
                               <ChevronRight className="w-3 h-3 shrink-0 opacity-40" />
                               <span className="truncate">{label}</span>

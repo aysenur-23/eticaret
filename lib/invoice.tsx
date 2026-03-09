@@ -128,7 +128,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.companyName}>
-            {process.env.COMPANY_LEGAL_NAME || 'Batarya Kit'}
+            {process.env.COMPANY_LEGAL_NAME || 'IMORA'}
           </Text>
           <View style={styles.companyInfo}>
             <Text>

@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     let paymentResult: { redirectUrl?: string; clientSecret?: string; requiresRedirect: boolean } | undefined
     if (paymentProvider && (paymentProvider === 'stripe' || paymentProvider === 'paytr')) {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || (request.headers.get('origin') || 'https://bataryakit.com')
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || (request.headers.get('origin') || 'https://imora.com')
         const successUrl = `${baseUrl.replace(/\/$/, '')}/checkout/success?order_id=${order.orderNo}&session_id={CHECKOUT_SESSION_ID}`
         const cancelUrl = `${baseUrl.replace(/\/$/, '')}/checkout/cancel`
         const adapter = getPaymentAdapter(paymentProvider as PaymentProvider)

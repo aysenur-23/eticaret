@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Send test email
     const result = await sendEmail(
       to,
-      'Test Email - Batarya Kit',
+      'Test Email - IMORA',
       `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2563eb;">Test Email Başarılı!</h2>

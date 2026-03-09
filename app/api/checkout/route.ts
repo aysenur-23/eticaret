@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user if authenticated
-    let user = null
+    let user: { id: string; email: string } | null = null
     // TODO: Re-enable when NextAuth is properly configured
     // if (session?.user?.email) {
     //   user = await prisma.user.findUnique({
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Calculate shipping
     const shippingEngine = new ShippingRulesEngine()
     const shippingResult = shippingEngine.calculate({
-      items: cartItemsWithData.map((item) => ({
+      items: cartItemsWithData.map((item: any) => ({
         weightG: (variants.find((v: any) => v.id === item.variantId)?.weightG as number) || 0,
         categoryId: (variants.find((v: any) => v.id === item.variantId)?.product as any)?.categoryId || undefined,
         isDangerous: true, // Assume batteries are dangerous
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     const order = await prisma.order.create({
       data: {
         orderNo: orderNo,
-        userId: user?.id,
+        userId: (user as { id: string } | null)?.id,
         status: 'PENDING',
         paymentStatus: 'PENDING',
         shippingName: shippingAddress.name,
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
             return {
               variantId: variant.id,
               productName: (variant.product as any).name,
-              variantMatrix: variant.matrix,
+              variantMatrix: variant.matrix ?? undefined,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
               vatRate: item.vatRate,
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
         amount: Number(totals.total),
         currency: 'TRY',
         customer: {
-          email: user?.email || shippingAddress.email,
+          email: (user as { email: string } | null)?.email || shippingAddress.email,
           name: shippingAddress.name,
           phone: shippingAddress.phone,
         },

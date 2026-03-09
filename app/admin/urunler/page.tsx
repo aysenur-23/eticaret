@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { mockProducts } from '@/lib/products-mock'
-import { Package, Search, ArrowLeft, Save, Loader2 } from 'lucide-react'
+import { Package, Search, Save, Loader2, AlertTriangle } from 'lucide-react'
+
+const LOW_STOCK_THRESHOLD = 5
 
 export default function AdminUrunlerPage() {
   const router = useRouter()
@@ -68,8 +70,13 @@ export default function AdminUrunlerPage() {
       p.id.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const lowStockProducts = mockProducts.filter((p) => {
+    const effectiveStock = overrides[p.id] ?? p.stock
+    return effectiveStock <= LOW_STOCK_THRESHOLD
+  })
+
   return (
-    <div className="space-y-8 pb-safe" id="main-content">
+    <div className="space-y-6 pb-safe" id="main-content">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Stok Yönetimi</h1>
@@ -79,6 +86,34 @@ export default function AdminUrunlerPage() {
           <Button variant="outline" size="sm">Ürünler</Button>
         </Link>
       </div>
+
+      {/* Düşük stok uyarısı */}
+      {!loading && lowStockProducts.length > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+            <span className="font-semibold text-amber-800 text-sm">
+              {lowStockProducts.length} ürünün stoğu kritik seviyede (≤{LOW_STOCK_THRESHOLD} adet)
+            </span>
+          </div>
+          <ul className="space-y-1">
+            {lowStockProducts.slice(0, 5).map((p) => {
+              const stock = overrides[p.id] ?? p.stock
+              return (
+                <li key={p.id} className="text-xs text-amber-700 flex items-center gap-2">
+                  <span className="font-mono bg-amber-100 px-1.5 py-0.5 rounded text-amber-800 font-semibold">
+                    {stock === 0 ? 'TÜKENDI' : stock}
+                  </span>
+                  {p.name}
+                </li>
+              )
+            })}
+            {lowStockProducts.length > 5 && (
+              <li className="text-xs text-amber-600">...ve {lowStockProducts.length - 5} ürün daha</li>
+            )}
+          </ul>
+        </div>
+      )}
 
         <Card className="border-slate-200/80 bg-white shadow-sm">
           <CardHeader>
@@ -115,11 +150,23 @@ export default function AdminUrunlerPage() {
                     {filteredProducts.map((product) => {
                       const currentStock = overrides[product.id] ?? product.stock
                       const editValue = editing[product.id] ?? currentStock
+                      const isOutOfStock = currentStock === 0
+                      const isLowStock = currentStock > 0 && currentStock <= LOW_STOCK_THRESHOLD
                       return (
-                        <tr key={product.id} className="border-b border-palette/70 hover:bg-muted/50">
+                        <tr key={product.id} className={`border-b border-palette/70 hover:bg-muted/50 ${isOutOfStock ? 'bg-red-50/40' : isLowStock ? 'bg-amber-50/40' : ''}`}>
                           <td className="py-3 px-2 font-mono text-xs text-ink-muted">{product.id}</td>
-                          <td className="py-3 px-2 font-medium text-ink">{product.name}</td>
-                          <td className="py-3 px-2 text-ink-muted">{product.stock} (varsayılan)</td>
+                          <td className="py-3 px-2 font-medium text-ink">
+                            {product.name}
+                            {isOutOfStock && (
+                              <span className="ml-2 text-xs font-semibold text-red-600 bg-red-100 px-1.5 py-0.5 rounded">TÜKENDI</span>
+                            )}
+                            {isLowStock && (
+                              <span className="ml-2 text-xs font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">DÜŞÜK STOK</span>
+                            )}
+                          </td>
+                          <td className={`py-3 px-2 font-semibold ${isOutOfStock ? 'text-red-600' : isLowStock ? 'text-amber-600' : 'text-ink-muted'}`}>
+                            {currentStock} {overrides[product.id] !== undefined ? '(güncellendi)' : '(varsayılan)'}
+                          </td>
                           <td className="py-3 px-2">
                             <Input
                               type="number"

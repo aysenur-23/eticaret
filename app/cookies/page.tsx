@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Çerez Politikası | Batarya Kit',
-  description: 'Batarya Kit çerez politikası ve çerez kullanımı hakkında bilgiler.',
+  title: 'Çerez Politikası | IMORA',
+  description: 'IMORA çerez politikası ve çerez kullanımı hakkında bilgiler.',
 }
 
 export default function CookiesPage() {
@@ -13,7 +13,7 @@ export default function CookiesPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-2" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-red-600 transition-colors">Ana Sayfa</Link>
+            <Link href="/" className="hover:text-brand transition-colors">Ana Sayfa</Link>
             <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
             <span className="text-gray-900 font-semibold">Çerez Politikası</span>
           </nav>
@@ -34,7 +34,7 @@ export default function CookiesPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">2. ÇEREZLERİN KULLANIM AMACI</h2>
-              <p className="mb-4">Batarya Kit olarak çerezleri aşağıdaki amaçlarla kullanıyoruz:</p>
+              <p className="mb-4">IMORA olarak çerezleri aşağıdaki amaçlarla kullanıyoruz:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Web sitesinin temel işlevlerinin çalışmasını sağlamak</li>
                 <li>Kullanıcı tercihlerini hatırlamak</li>
@@ -157,10 +157,10 @@ export default function CookiesPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">9. İLETİŞİM</h2>
               <p className="mb-2">Çerez politikamız hakkında sorularınız için:</p>
               <p className="mb-2">
-                <strong>E-posta:</strong> info@revision.com
+                <strong>E-posta:</strong> info@imora.com
               </p>
               <p>
-                <strong>Web:</strong> www.bataryakit.com
+                <strong>Web:</strong> www.imora.com
               </p>
               <p className="mt-4 text-sm text-gray-600">
                 <strong>Son Güncelleme:</strong> {new Date().toLocaleDateString('tr-TR')}

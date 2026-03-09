@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Gizlilik Politikası | Batarya Kit',
-  description: 'Batarya Kit gizlilik politikası ve kişisel verilerin korunması hakkında bilgiler.',
+  title: 'Gizlilik Politikası | voltekno',
+  description: 'voltekno gizlilik politikası ve kişisel verilerin korunması hakkında bilgiler.',
 }
 
 export default function PrivacyPage() {
@@ -23,12 +23,12 @@ export default function PrivacyPage() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="max-w-4xl mx-auto bg-surface-elevated rounded-lg border border-palette shadow-sm p-8 md:p-12">
           <h2 className="sr-only">Gizlilik Politikası metni</h2>
-          
+
           <div className="prose prose-lg max-w-none text-ink space-y-6">
             <section>
               <h2 className="text-2xl font-semibold text-ink mt-8 mb-4">1. GENEL BİLGİLER</h2>
               <p>
-                Bu Gizlilik Politikası, Batarya Kit ("Biz", "Bizim", "Site") olarak, www.bataryakit.com web sitesini ziyaret eden ve hizmetlerimizi kullanan kullanıcıların ("Kullanıcı", "Siz") kişisel bilgilerinin nasıl toplandığını, kullanıldığını, korunduğunu ve paylaşıldığını açıklar.
+                Bu Gizlilik Politikası, voltekno ("Biz", "Bizim", "Site") olarak, www.voltekno.com web sitesini ziyaret eden ve hizmetlerimizi kullanan kullanıcıların ("Kullanıcı", "Siz") kişisel bilgilerinin nasıl toplandığını, kullanıldığını, korunduğunu ve paylaşıldığını açıklar.
               </p>
             </section>
 
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
                 <li>Fatura ve teslimat adresi</li>
                 <li>Ödeme bilgileri (güvenli ödeme sistemleri üzerinden)</li>
               </ul>
-              
+
               <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">2.2. Otomatik Toplanan Bilgiler:</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li>IP adresi</li>
@@ -157,10 +157,10 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">12. İLETİŞİM</h2>
               <p className="mb-2">Gizlilik politikamız hakkında sorularınız için:</p>
               <p className="mb-2">
-                <strong>E-posta:</strong> info@revision.com
+                <strong>E-posta:</strong> info@voltekno.com
               </p>
               <p>
-                <strong>Web:</strong> www.bataryakit.com
+                <strong>Web:</strong> www.voltekno.com
               </p>
               <p className="mt-4 text-sm text-gray-600">
                 <strong>Son Güncelleme:</strong> {new Date().toLocaleDateString('tr-TR')}

@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-03-08T01:15:20.700Z",
+  "critical": [],
+  "warnings": [],
+  "info": [
+    "i18n key count tr=671, en=671",
+    "Admin API routes checked: 15"
+  ]
+}

@@ -16,6 +16,8 @@ import {
   Percent,
   FolderOpen,
   LogOut,
+  Users,
+  MessageSquare,
 } from 'lucide-react'
 
 const navSections = [
@@ -29,8 +31,10 @@ const navSections = [
     title: 'Satış & Siparişler',
     items: [
       { href: '/admin/orders', label: 'Siparişler', icon: ShoppingCart },
+      { href: '/admin/musteriler', label: 'Müşteriler', icon: Users },
       { href: '/admin/ges-teklifler', label: 'GES Teklif İstekleri', icon: FileText },
       { href: '/admin/indirimler', label: 'İndirimler', icon: Percent },
+      { href: '/admin/iletisim', label: 'İletişim Formları', icon: MessageSquare },
     ],
   },
   {
@@ -50,13 +54,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     try {
+      await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' })
+    } catch {}
+    try {
       const { getAuth } = await import('@/lib/firebase/config')
       const { signOut } = await import('firebase/auth')
       const auth = getAuth()
       await signOut(auth)
     } catch {}
-    localStorage.removeItem('admin_uid')
-    localStorage.removeItem('admin_token')
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('admin_uid')
+      localStorage.removeItem('admin_token')
+    }
     router.push('/admin/auth')
   }
 
@@ -69,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar - desktop */}
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-2 px-5 h-16 border-b border-slate-200/80">
-          <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
             <BarChart3 className="w-4 h-4 text-white" />
           </div>
           <span className="font-semibold text-slate-800">Admin Panel</span>
@@ -93,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         href={item.href}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                           isActive
-                            ? 'bg-red-50 text-red-700'
+                            ? 'bg-brand-light text-brand'
                             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                       >
@@ -162,7 +171,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                             href={item.href}
                             onClick={() => setSidebarOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
-                              isActive ? 'bg-red-50 text-red-700' : 'text-slate-600 hover:bg-slate-100'
+                              isActive ? 'bg-brand-light text-brand' : 'text-slate-600 hover:bg-slate-100'
                             }`}
                           >
                             <Icon className="w-5 h-5 shrink-0" />

@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Kullanım Şartları | Batarya Kit',
-  description: 'Batarya Kit kullanım şartları ve uzaktan satış sözleşmesi.',
+  title: 'Kullanım Şartları | voltekno',
+  description: 'voltekno kullanım şartları ve uzaktan satış sözleşmesi.',
 }
 
 export default function TermsPage() {
@@ -13,7 +13,7 @@ export default function TermsPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4">
           <nav className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-2" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-red-600 transition-colors">Ana Sayfa</Link>
+            <Link href="/" className="hover:text-brand transition-colors">Ana Sayfa</Link>
             <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
             <span className="text-gray-900 font-semibold">Kullanım Şartları</span>
           </nav>
@@ -23,7 +23,7 @@ export default function TermsPage() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg border border-gray-200 shadow-sm p-8 md:p-12">
           <h2 className="sr-only">Uzaktan Satış Sözleşmesi metni</h2>
-          
+
           <div className="prose prose-lg max-w-none text-gray-700 space-y-6">
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">1. TARAFLAR</h2>
@@ -32,9 +32,9 @@ export default function TermsPage() {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="mb-2"><strong>SATICI:</strong></p>
-                <p className="mb-1">Batarya Kit</p>
-                <p className="mb-1">Web Sitesi: www.bataryakit.com</p>
-                <p>E-posta: info@revision.com</p>
+                <p className="mb-1">IMORA</p>
+                <p className="mb-1">Web Sitesi: www.imora.com</p>
+                <p>E-posta: info@imora.com</p>
               </div>
               <p className="mt-4">
                 <strong>ALICI:</strong> Bu siteden alışveriş yapan gerçek veya tüzel kişi müşteri.
@@ -141,7 +141,7 @@ export default function TermsPage() {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg mt-4">
                 <p className="mb-2"><strong>Sözleşme Tarihi:</strong> {new Date().toLocaleDateString('tr-TR')}</p>
-                <p><strong>Satıcı:</strong> Batarya Kit</p>
+                <p><strong>Satıcı:</strong> IMORA</p>
               </div>
             </section>
           </div>

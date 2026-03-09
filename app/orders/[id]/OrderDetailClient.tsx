@@ -116,7 +116,7 @@ export default function OrderDetailPage() {
     return (
       <ClassicPageShell breadcrumbs={[{ label: 'Sipariş Detayı' }]} noTitle>
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-2 border-red-600 border-t-transparent" />
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-brand border-t-transparent" />
         </div>
       </ClassicPageShell>
     )
@@ -132,11 +132,11 @@ export default function OrderDetailPage() {
             {isGuestOrderId ? (
               <>
                 <div className="inline-flex h-14 w-14 rounded-lg bg-red-100 items-center justify-center mb-4">
-                  <Package className="w-7 h-7 text-red-600" />
+                  <Package className="w-7 h-7 text-brand" />
                 </div>
                 <h2 className="text-lg font-bold text-gray-900 mb-2">Siparişiniz alındı</h2>
                 <p className="text-gray-600 mb-2">Sipariş numaranız:</p>
-                <p className="font-mono font-semibold text-red-600 mb-4">{id}</p>
+                <p className="font-mono font-semibold text-brand mb-4">{id}</p>
                 <p className="text-sm text-gray-500 mb-6">
                   Giriş yapmadan verdiğiniz siparişler burada detaylı görüntülenemez. Sipariş takibi için e-posta ile iletişime geçebilirsiniz.
                 </p>
@@ -232,7 +232,7 @@ export default function OrderDetailPage() {
             </div>
             <div className="pt-4 border-t flex justify-between items-center">
               <span className="font-semibold text-gray-900">Toplam</span>
-              <span className="text-xl font-bold text-red-600">{formatPrice(order.pricing?.total || 0)}</span>
+              <span className="text-xl font-bold text-brand">{formatPrice(order.pricing?.total || 0)}</span>
             </div>
           </CardContent>
         </Card>

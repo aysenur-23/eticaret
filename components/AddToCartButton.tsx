@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ShoppingCart, Plus, Minus } from 'lucide-react'
 import { useCartStore } from '@/lib/store/useCartStore'
 import { useToast } from '@/components/ui/toast'
+import { useTranslations } from 'next-intl'
 
 export interface ProductVariant {
   key: string
@@ -23,6 +24,8 @@ interface AddToCartButtonProps {
   }
   /** Ürün varyantı (örn. 1 kg). Sepette ayrı kalem olur. */
   selectedVariant?: ProductVariant
+  /** Stok adedi. 0 ise buton "Stok yok" gösterir ve tıklanamaz. */
+  stock?: number
   className?: string
   variant?: 'default' | 'outline'
   size?: 'default' | 'sm' | 'lg'
@@ -34,6 +37,7 @@ interface AddToCartButtonProps {
 export function AddToCartButton({
   product,
   selectedVariant,
+  stock,
   className = '',
   variant = 'default',
   size = 'default',
@@ -42,11 +46,15 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const { addItem, updateQuantity, getItemQuantity } = useCartStore()
   const { addToast } = useToast()
+  const t = useTranslations('addToCart')
   const [mounted, setMounted] = useState(false)
 
   const cartId = selectedVariant ? `${product.id}-${selectedVariant.key}` : product.id
   const displayName = selectedVariant ? `${product.name} (${selectedVariant.label})` : product.name
   const price = selectedVariant ? selectedVariant.price : product.price
+  const outOfStock = typeof stock === 'number' && stock <= 0
+  const effectiveDisabled = disabled || outOfStock
+  const maxQty = typeof stock === 'number' && stock > 0 ? stock : undefined
 
   useEffect(() => {
     setMounted(true)
@@ -58,7 +66,7 @@ export function AddToCartButton({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (disabled) return
+    if (effectiveDisabled || outOfStock) return
     if (selectedVariant && !selectedVariant.key) return
 
     try {
@@ -72,15 +80,14 @@ export function AddToCartButton({
       })
       addToast({
         type: 'success',
-        title: 'Sepete Eklendi',
+        title: t('addedToCart'),
         description: `${displayName} sepete eklendi.`,
       })
-    } catch (error) {
-      console.error('Sepete ekleme hatası:', error)
+    } catch {
       addToast({
         type: 'error',
-        title: 'Hata',
-        description: 'Ürün sepete eklenirken bir hata oluştu.',
+        title: t('errorTitle'),
+        description: t('addError'),
       })
     }
   }
@@ -88,6 +95,14 @@ export function AddToCartButton({
   const handleIncrease = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (maxQty != null && quantity >= maxQty) {
+      addToast({
+        type: 'info',
+        title: t('stockLimit'),
+        description: t('stockLimitDesc', { maxQty }),
+      })
+      return
+    }
     updateQuantity(cartId, quantity + 1)
   }
 
@@ -100,16 +115,33 @@ export function AddToCartButton({
       updateQuantity(cartId, 0)
       addToast({
         type: 'success',
-        title: 'Sepetten Kaldırıldı',
+        title: t('removed'),
         description: `${displayName} sepetten kaldırıldı.`,
       })
     }
+  }
+
+  if (outOfStock) {
+    return (
+      <Button
+        variant={variant}
+        size={size}
+        className={`cursor-not-allowed opacity-70 ${className}`}
+        disabled
+        aria-disabled="true"
+        aria-label={t('outOfStock')}
+      >
+        <ShoppingCart className="w-4 h-4 mr-2 opacity-60" />
+        {t('outOfStock')}
+      </Button>
+    )
   }
 
   if (isInCart && showQuantitySelector) {
     const isSm = size === 'sm'
     const isLg = size === 'lg'
     const iconClass = isLg ? 'w-4 h-4' : isSm ? 'w-3 h-3' : 'w-3.5 h-3.5'
+    const atMax = maxQty != null && quantity >= maxQty
     return (
       <div
         className={`flex items-center w-full max-w-full rounded-md overflow-hidden bg-brand hover:bg-brand-hover transition-colors ${className}`}
@@ -117,9 +149,9 @@ export function AddToCartButton({
         <button
           type="button"
           onClick={handleDecrease}
-          disabled={disabled}
-          className="flex items-center justify-center shrink-0 w-9 sm:w-10 h-full min-h-0 text-brand-foreground hover:bg-white/15 active:bg-white/20 touch-manipulation min-w-[36px]"
-          aria-label="Miktarı azalt"
+          disabled={effectiveDisabled}
+          className="flex items-center justify-center shrink-0 w-9 sm:w-10 h-full min-h-0 text-brand-foreground hover:bg-white/15 active:bg-white/20 touch-manipulation min-w-[36px] disabled:opacity-50 disabled:pointer-events-none"
+          aria-label={t('decreaseQty')}
         >
           <Minus className={iconClass} />
         </button>
@@ -129,9 +161,9 @@ export function AddToCartButton({
         <button
           type="button"
           onClick={handleIncrease}
-          disabled={disabled}
-          className="flex items-center justify-center shrink-0 w-9 sm:w-10 h-full min-h-0 text-brand-foreground hover:bg-white/15 active:bg-white/20 touch-manipulation min-w-[36px]"
-          aria-label="Miktarı artır"
+          disabled={effectiveDisabled}
+          className="flex items-center justify-center shrink-0 w-9 sm:w-10 h-full min-h-0 text-brand-foreground hover:bg-white/15 active:bg-white/20 touch-manipulation min-w-[36px] disabled:opacity-50 disabled:pointer-events-none"
+          aria-label={t('increaseQty')}
         >
           <Plus className={iconClass} />
         </button>
@@ -147,10 +179,10 @@ export function AddToCartButton({
       variant={variant}
       size={size}
       className={`${variant === 'default' ? 'bg-brand hover:bg-brand-hover' : ''} ${className}`}
-      disabled={disabled}
+      disabled={effectiveDisabled}
     >
       <ShoppingCart className="w-4 h-4 mr-2" />
-      Sepete Ekle
+      {t('addToCart')}
     </Button>
   )
 }

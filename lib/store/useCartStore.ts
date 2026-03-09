@@ -116,7 +116,7 @@ export const useCartStore = create<CartState>()(
       onRehydrateStorage: () => () => {
         useCartStore.setState({ _hasHydrated: true })
       },
-      storage: {
+      storage: ({
         getItem: (name: string) => {
           if (typeof window === 'undefined') return null
           try {
@@ -151,7 +151,7 @@ export const useCartStore = create<CartState>()(
         removeItem: (name: string): void => {
           if (typeof window !== 'undefined') localStorage.removeItem(name)
         },
-      } as PersistStorage<CartState>,
+      }) as any,
     }
   )
 )

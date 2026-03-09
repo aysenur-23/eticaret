@@ -62,13 +62,13 @@ export async function POST(request: NextRequest) {
     const verificationCode = verificationToken.slice(-6).toUpperCase()
 
     // Send verification email
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://bataryakit.com'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://imora.com'
     const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`
     
     try {
       await sendEmailSMTP(
         user.email,
-        'E-posta Adresinizi Doğrulayın - Batarya Kit',
+        'E-posta Adresinizi Doğrulayın - IMORA',
         EmailVerification({
           name: user.name,
           verificationUrl,
@@ -80,10 +80,14 @@ export async function POST(request: NextRequest) {
       // Email gönderilemese bile kullanıcı oluşturuldu, sadece log'a yaz
     }
 
+    if (!process.env.JWT_SECRET) {
+      return NextResponse.json({ success: false, error: 'Sunucu yapılandırma hatası.' }, { status: 503 })
+    }
+
     // Generate JWT token (email doğrulanmadan da token ver, ama emailVerified false olacak)
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role, emailVerified: false },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     )
 

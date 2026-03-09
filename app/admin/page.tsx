@@ -199,7 +199,7 @@ export default function AdminPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+          <Loader2 className="w-10 h-10 animate-spin text-brand" />
         </div>
       ) : (
         <>
@@ -207,7 +207,7 @@ export default function AdminPage() {
           <Card className="border-slate-200/80 bg-white shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <ClipboardList className="w-5 h-5 text-red-600" />
+                <ClipboardList className="w-5 h-5 text-brand" />
                 Yapılacaklar
               </CardTitle>
               <CardDescription>Admin olarak öncelikli işlemleriniz</CardDescription>
@@ -224,7 +224,7 @@ export default function AdminPage() {
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                            <Icon className="w-4 h-4 text-slate-600 group-hover:text-red-600" />
+                            <Icon className="w-4 h-4 text-slate-600 group-hover:text-brand" />
                           </div>
                           <span className="text-sm font-medium text-slate-800 truncate">{item.label}</span>
                           {'count' in item && (item as any).count > 0 && (
@@ -233,7 +233,7 @@ export default function AdminPage() {
                             </Badge>
                           )}
                         </div>
-                        <ArrowRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:text-red-600" />
+                        <ArrowRight className="w-4 h-4 text-slate-400 shrink-0 group-hover:text-brand" />
                       </Link>
                     </li>
                   )

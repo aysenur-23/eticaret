@@ -1,70 +1,77 @@
 /**
  * Ürün kategorileri – filtre, URL ve çeviri anahtarları için tek kaynak.
  * Sidebar'da az sayıda ana grup gösterilir; her grup birden fazla product.category değerini toplar.
+ *
+ * Kategori hiyerarşisi:
+ * 1. Elektrikli Araç Şarj Ürünleri  → AC, DC, Mobil
+ * 2. EV Şarj Kabloları              → Tip 2, Çantalı
+ * 3. EV Şarj Aksesuarları           → Adaptörler, Fiş/Priz, Aksesuarlar
+ * 4. Batarya ve Enerji Depolama      → Lityum, Kurşun, Batarya Modülleri
+ * 5. İnverterler                     → Hibrit, Off-Grid, Mikro
+ * 6. Güneş Enerjisi                  → Güneş Panelleri, Taşınabilir, Solar Sistemler
+ * 7. Enerji Depolama Sistemleri      → ESS, Taşınabilir Güç
+ * 8. Isı Pompası ve HVAC             → Isı Pompası ve HVAC
+ * 9. Enerji Yönetimi                 → Enerji Yönetimi
  */
 
 /** Sidebar'da gösterilecek ana kategoriler (gruplar). URL'de category=<id> kullanılır. */
 export const CATEGORY_GROUPS = [
   {
-    id: 'enerji-depolama',
-    labelKey: 'groupEnergyStorage',
+    id: 'elektrikli-arac-sarj-urunleri',
+    labelKey: 'groupEVMobility', // Elektrikli Araç Şarj Ürünleri
     categoryValues: [
-      'Ev Tipi Yüksek Voltaj Lityum',
-      'Marin/Karavan Tipi Düşük Voltaj Lityum',
+      'AC Şarj İstasyonları',
+      'DC Hızlı Şarj İstasyonları',
+      'Mobil / Taşınabilir Şarj İstasyonları',
+      'Tip 2 – Tip 2 Şarj Kabloları',
+      'Çantalı Şarj Kabloları',
+      'Adaptörler',
+      'Fiş / Priz Dönüştürücüler',
+      'EV Şarj Aksesuarları',
+    ],
+  },
+  {
+    id: 'batarya-depolama',
+    labelKey: 'groupBatteryModules', // Batarya ve Enerji Depolama
+    categoryValues: [
+      'Lityum Aküler',
+      'Kurşun Asit Aküler',
+      'Batarya Modülleri',
+      'Enerji Depolama Sistemleri',
       'Taşınabilir Güç İstasyonları',
-      'Endüstriyel ESS Sistemleri',
-      'Taşınabilir Güç Kaynakları',
-      'Akü',
-      'Lityum (LiFePO4) Aküler',
-      'Batarya',
-    ],
-  },
-  {
-    id: 'ev-sarj',
-    labelKey: 'groupEVCharging',
-    categoryValues: [
-      'Duvar Tipi (Sabit) Elektrikli Araç Şarj İstasyonları',
-      'Taşınabilir Şarj İstasyonları',
-      'AC Araç Şarj İstasyonları',
-      'DC Araç Şarj İstasyonları',
-      'Araç Şarj Kabloları',
-      'Elektrikli Araç Şarj ve V2L',
-      'Araç Elektrik Aktarım (V2L / C2L) Adaptörleri ve Dönüştürücüler',
-      'Elektrikli Araç Şarj İstasyonu Standları, Çantalar ve Aksesuarlar',
-      'Şarj İstasyonu Yönetim Yazılımları ve Ticari Çözümler',
-      'Elektrikli Araç (EV) Şarj Sistemleri',
-    ],
-  },
-  {
-    id: 'gunes-enerjisi',
-    labelKey: 'groupSolarGES',
-    categoryValues: [
-      'Güneş Panelleri',
-      'Şarj Kontrol Cihazları',
-      'Solar Dış Mekan Aydınlatma Sistemleri',
-      'Solar Yapı ve Montaj Sistemleri',
-      'Tarımsal Solar Sulama Sistemleri',
     ],
   },
   {
     id: 'inverterler',
-    labelKey: 'groupInverters',
+    labelKey: 'groupInverters', // İnverterler
     categoryValues: [
-      'On-Grid İnverterler',
-      'Hybrid İnverterler',
+      'Hibrit İnverterler',
       'Off-Grid İnverterler',
-      'İnverter Sistemleri',
+      'Mikro İnverter',
     ],
   },
   {
-    id: 'isi-pompalari',
-    labelKey: 'groupHeatPumps',
-    categoryValues: ['Isı Pompaları'],
+    id: 'gunes-enerjisi',
+    labelKey: 'groupSolarEnergy', // Güneş Enerjisi
+    categoryValues: [
+      'Güneş Panelleri',
+      'Taşınabilir Paneller',
+      'Solar Sistemler',
+    ],
   },
   {
-    id: 'akilli-enerji',
-    labelKey: 'groupSmartEnergy',
-    categoryValues: ['Akıllı Enerji Yönetimi ve Aksesuarlar'],
+    id: 'isi-pompasi-hvac',
+    labelKey: 'groupHeatPumpsHVAC', // Isı Pompası ve HVAC
+    categoryValues: [
+      'Isı Pompası ve HVAC',
+    ],
+  },
+  {
+    id: 'enerji-yonetimi',
+    labelKey: 'groupEnergyManagement', // Enerji Yönetimi
+    categoryValues: [
+      'Enerji Yönetimi',
+    ],
   },
 ] as const
 
@@ -76,7 +83,7 @@ export const ALL_CATEGORY_VALUES = CATEGORY_GROUPS.flatMap((g) => [...g.category
 /** Bir product.category değerinin hangi gruba ait olduğunu döndürür (URL ve sidebar filtre için). */
 export function getGroupIdForCategory(category: string): CategoryGroupId | null {
   for (const group of CATEGORY_GROUPS) {
-    if (group.categoryValues.includes(category)) return group.id
+    if ((group.categoryValues as readonly string[]).includes(category)) return group.id
   }
   return null
 }
@@ -93,38 +100,30 @@ export const PRODUCT_CATEGORIES = CATEGORY_GROUPS.flatMap((g) =>
 )
 
 function getCategoryKeyFromValue(value: string): string {
-  const keys: Record<string, string> = {
-    'AC Araç Şarj İstasyonları': 'categoryACCharging',
-    'Duvar Tipi (Sabit) Elektrikli Araç Şarj İstasyonları': 'categoryWallMountedEVCharging',
-    'Taşınabilir Şarj İstasyonları': 'categoryPortableChargingStations',
-    'DC Araç Şarj İstasyonları': 'categoryDCCharging',
-    'Araç Şarj Kabloları': 'categoryChargingCables',
-    'Elektrikli Araç Şarj ve V2L': 'categoryEVChargingV2L',
-    'Şarj İstasyonu Yönetim Yazılımları ve Ticari Çözümler': 'categoryChargingStationSoftware',
-    'Araç Elektrik Aktarım (V2L / C2L) Adaptörleri ve Dönüştürücüler': 'categoryV2LC2LAdapters',
-    'Elektrikli Araç Şarj İstasyonu Standları, Çantalar ve Aksesuarlar': 'categoryEVChargingStandsBags',
-    'Taşınabilir Güç Kaynakları': 'categoryPortablePower',
-    'Akü': 'categoryBattery',
-    'Lityum (LiFePO4) Aküler': 'categoryLiFePO4',
-    'Batarya': 'categoryBatteryPack',
-    'Güneş Panelleri': 'categorySolarPanels',
-    'On-Grid İnverterler': 'categoryOnGridInverters',
-    'Hybrid İnverterler': 'categoryHybridInverters',
-    'Off-Grid İnverterler': 'categoryOffGridInverters',
-    'İnverter Sistemleri': 'categoryInverterSystems',
-    'Şarj Kontrol Cihazları': 'categoryChargeControllers',
-    'Ev Tipi Yüksek Voltaj Lityum': 'categoryEvHighVoltage',
-    'Marin/Karavan Tipi Düşük Voltaj Lityum': 'categoryMarinLowVoltage',
-    'Taşınabilir Güç İstasyonları': 'categoryMobilePowerStations',
-    'Endüstriyel ESS Sistemleri': 'categoryIndustrialESS',
-    'Isı Pompaları': 'categoryHeatPumps',
-    'Elektrikli Araç (EV) Şarj Sistemleri': 'categoryEVCharging',
-    'Tarımsal Solar Sulama Sistemleri': 'categorySolarIrrigation',
-    'Akıllı Enerji Yönetimi ve Aksesuarlar': 'categorySmartEnergyAccessories',
-    'Solar Dış Mekan Aydınlatma Sistemleri': 'categorySolarOutdoorLighting',
-    'Solar Yapı ve Montaj Sistemleri': 'categorySolarStructureMounting',
+  switch (value) {
+    case 'AC Şarj İstasyonları': return 'categoryACStations'
+    case 'DC Hızlı Şarj İstasyonları': return 'categoryDCStations'
+    case 'Mobil / Taşınabilir Şarj İstasyonları': return 'categoryPortableStations'
+    case 'Tip 2 – Tip 2 Şarj Kabloları': return 'categoryTip2Cables'
+    case 'Çantalı Şarj Kabloları': return 'categoryBaggedCables'
+    case 'Adaptörler': return 'categoryAdapters'
+    case 'Fiş / Priz Dönüştürücüler': return 'categoryFişPriz'
+    case 'EV Şarj Aksesuarları': return 'categoryEVAccessories'
+    case 'Lityum Aküler': return 'categoryLiFePO4'
+    case 'Kurşun Asit Aküler': return 'categoryLeadAcid'
+    case 'Batarya Modülleri': return 'categoryBatteryModules'
+    case 'Hibrit İnverterler': return 'categoryHybridInverters'
+    case 'Off-Grid İnverterler': return 'categoryOffGridInverters'
+    case 'Mikro İnverter': return 'categoryMicroInverters'
+    case 'Güneş Panelleri': return 'categorySolarPanels'
+    case 'Taşınabilir Paneller': return 'categoryPortablePanels'
+    case 'Solar Sistemler': return 'categorySolarSystems'
+    case 'Enerji Depolama Sistemleri': return 'categoryESS'
+    case 'Taşınabilir Güç İstasyonları': return 'categoryMobilePowerStations'
+    case 'Isı Pompası ve HVAC': return 'categoryHeatPumps'
+    case 'Enerji Yönetimi': return 'categoryEnergyManagement'
+    default: return value
   }
-  return keys[value] ?? 'categorySmartEnergyAccessories'
 }
 
 export type ProductCategoryValue = (typeof PRODUCT_CATEGORIES)[number]['value']

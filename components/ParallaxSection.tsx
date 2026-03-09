@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react'
 
-const WHY_REVISION_IMAGE = '/hero.jpg'
+const DEFAULT_BACKGROUND_IMAGE = '/hero.jpg'
 const PARALLAX_SPEED = 0.2
 /** Scale yeterince büyük olmalı ki kaydırma sırasında kenarda boşluk kalmasın */
 const COVER_SCALE = 1.25
@@ -13,7 +13,7 @@ interface ParallaxSectionProps {
   className?: string
 }
 
-export function ParallaxSection({ children, backgroundImage = WHY_REVISION_IMAGE, className = '' }: ParallaxSectionProps) {
+export function ParallaxSection({ children, backgroundImage = DEFAULT_BACKGROUND_IMAGE, className = '' }: ParallaxSectionProps) {
   const sectionRef = useRef<HTMLElement>(null)
   const [translateY, setTranslateY] = useState(0)
   const rafRef = useRef<number>(0)

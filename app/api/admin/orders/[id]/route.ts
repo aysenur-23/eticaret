@@ -91,6 +91,7 @@ export async function GET(
         id: l.id,
         productName: l.productName,
         name: l.productName,
+        price: l.unitPrice,
         quantity: l.quantity,
         unitPrice: l.unitPrice,
         lineTotal: l.lineTotal,
@@ -275,6 +276,7 @@ export async function PATCH(
       const items = updated!.lines.map((l) => ({
         id: l.id,
         name: l.productName,
+        price: l.unitPrice,
         quantity: l.quantity,
         unitPrice: l.unitPrice,
         lineTotal: l.lineTotal,

@@ -98,7 +98,7 @@ function RegisterPageContent() {
           <Card className="classic-card rounded-lg border border-gray-200 overflow-hidden">
             <CardHeader className="space-y-1 text-center pb-4 bg-white">
               <div className="flex justify-center mb-4">
-                <div className="w-14 h-14 bg-red-600 rounded-lg flex items-center justify-center">
+                <div className="w-14 h-14 bg-brand rounded-lg flex items-center justify-center">
                   <UserPlus className="w-7 h-7 text-white" />
                 </div>
               </div>
@@ -165,9 +165,9 @@ function RegisterPageContent() {
               </div>
 
               <label className="flex items-start gap-2 cursor-pointer py-2 touch-manipulation min-h-[44px] items-center">
-                <input type="checkbox" id="terms" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="w-5 h-5 min-w-[20px] min-h-[20px] text-red-600 border-gray-300 rounded focus:ring-red-500 shrink-0" required />
+                <input type="checkbox" id="terms" checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)} className="w-5 h-5 min-w-[20px] min-h-[20px] text-brand border-gray-300 rounded focus:ring-brand shrink-0" required />
                 <span className="text-sm text-gray-600">
-                  <Link href="/terms" className="text-red-600 hover:underline touch-manipulation">Kullanım şartlarını</Link> ve <Link href="/privacy" className="text-red-600 hover:underline touch-manipulation">gizlilik politikasını</Link> okudum ve kabul ediyorum *
+                  <Link href="/terms" className="text-brand hover:underline touch-manipulation">Kullanım şartlarını</Link> ve <Link href="/privacy" className="text-brand hover:underline touch-manipulation">gizlilik politikasını</Link> okudum ve kabul ediyorum *
                 </span>
               </label>
 
@@ -176,7 +176,7 @@ function RegisterPageContent() {
               </Button>
 
               <div className="text-center text-sm text-gray-600 py-2">
-                Zaten hesabınız var mı? <Link href="/login" className="text-red-600 hover:text-red-700 font-semibold py-2 inline-block touch-manipulation">Giriş yapın</Link>
+                Zaten hesabınız var mı? <Link href="/login" className="text-brand hover:text-brand-hover font-semibold py-2 inline-block touch-manipulation">Giriş yapın</Link>
               </div>
             </form>
             </CardContent>

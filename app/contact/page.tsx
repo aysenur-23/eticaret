@@ -111,138 +111,138 @@ export default function ContactPage() {
   return (
     <ClassicPageShell
       breadcrumbs={[{ label: 'İletişim' }]}
-      title="İletişim"
+      title="İletişim | voltekno"
       description="Sorularınız için formu doldurun veya aşağıdaki kanallardan yazın."
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-6 md:gap-8 min-w-0 max-w-full">
         <div className="md:col-span-1 lg:col-span-3 order-1 min-w-0">
           <Card className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Bize Yazın</CardTitle>
-                <CardDescription>
-                  Formu doldurun, en kısa sürede size dönüş yapalım.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isSubmitted ? (
-                  <div className="text-center py-10">
-                    <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1">Mesajınız Gönderildi!</h3>
-                    <p className="text-slate-600 text-sm">En kısa sürede size dönüş yapacağız.</p>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl">Bize Yazın</CardTitle>
+              <CardDescription>
+                Formu doldurun, en kısa sürede size dönüş yapalım.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isSubmitted ? (
+                <div className="text-center py-10">
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-600" />
                   </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-5">
-                    {errors.general && (
-                      <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
-                        {errors.general}
-                      </div>
-                    )}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Ad Soyad *</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, name: '' })) }}
-                          placeholder="Adınız ve soyadınız"
-                          className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.name ? 'border-red-500' : ''}`}
-                        />
-                        {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">E-posta *</Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, email: '' })) }}
-                          placeholder="ornek@email.com"
-                          className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.email ? 'border-red-500' : ''}`}
-                        />
-                        {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                      </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">Mesajınız Gönderildi!</h3>
+                  <p className="text-slate-600 text-sm">En kısa sürede size dönüş yapacağız.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  {errors.general && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                      {errors.general}
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Telefon</Label>
-                        <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="+90 (555) 123 45 67"
-                          className="rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="subject">Konu *</Label>
-                        <Input
-                          id="subject"
-                          name="subject"
-                          value={formData.subject}
-                          onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, subject: '' })) }}
-                          placeholder="Mesaj konusu"
-                          className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.subject ? 'border-red-500' : ''}`}
-                        />
-                        {errors.subject && <p className="text-sm text-destructive">{errors.subject}</p>}
-                      </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Ad Soyad *</Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, name: '' })) }}
+                        placeholder="Adınız ve soyadınız"
+                        className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.name ? 'border-red-500' : ''}`}
+                      />
+                      {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="message">Mesaj *</Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, message: '' })) }}
-                        rows={5}
-                        placeholder="Mesajınızı buraya yazın..."
-                        className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 resize-none ${errors.message ? 'border-red-500' : ''}`}
+                      <Label htmlFor="email">E-posta *</Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, email: '' })) }}
+                        placeholder="ornek@email.com"
+                        className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.email ? 'border-red-500' : ''}`}
                       />
-                      {errors.message && <p className="text-sm text-destructive">{errors.message}</p>}
+                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
-                    <Button
-                      type="submit"
-                      size="lg"
-                      disabled={isSubmitting}
-                      className="w-full rounded-xl min-h-[48px] touch-manipulation bg-slate-800 hover:bg-slate-700 text-white"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                          Gönderiliyor...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-5 h-5 mr-2" />
-                          Mesajı Gönder
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefon</Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="+90 (555) 123 45 67"
+                        className="rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Konu *</Label>
+                      <Input
+                        id="subject"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, subject: '' })) }}
+                        placeholder="Mesaj konusu"
+                        className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 ${errors.subject ? 'border-red-500' : ''}`}
+                      />
+                      {errors.subject && <p className="text-sm text-destructive">{errors.subject}</p>}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Mesaj *</Label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={(e) => { handleChange(e); setErrors((prev) => ({ ...prev, message: '' })) }}
+                      rows={5}
+                      placeholder="Mesajınızı buraya yazın..."
+                      className={`rounded-xl border-slate-200 focus:ring-2 focus:ring-slate-400 focus:border-slate-400 resize-none ${errors.message ? 'border-red-500' : ''}`}
+                    />
+                    {errors.message && <p className="text-sm text-destructive">{errors.message}</p>}
+                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={isSubmitting}
+                    className="w-full rounded-xl min-h-[48px] touch-manipulation bg-brand hover:bg-brand-hover text-white"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Gönderiliyor...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5 mr-2" />
+                        Mesajı Gönder
+                      </>
+                    )}
+                  </Button>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="md:col-span-1 lg:col-span-2 order-2">
           <div className="relative rounded-2xl overflow-hidden border border-slate-200 aspect-[4/3] lg:aspect-auto lg:min-h-[420px] bg-slate-100">
-              <Image
-                src={CONTACT_IMAGE}
-                alt="İletişim - profesyonel destek"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
-            </div>
+            <Image
+              src={CONTACT_IMAGE}
+              alt="İletişim - profesyonel destek"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent" />
           </div>
         </div>
+      </div>
 
       <div className="mt-8 md:mt-10">
         <h2 className="text-lg font-bold text-slate-900 mb-4">İletişim bilgileri</h2>
@@ -253,50 +253,50 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 text-slate-600" />
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">E-posta</h3>
-                <a
-                  href="mailto:info@revision.com"
-                  className="text-slate-800 hover:text-slate-600 text-sm font-medium block py-2 touch-manipulation min-h-[44px] flex items-center"
-                >
-                  info@revision.com
-                </a>
-              </CardContent>
-            </Card>
+              <a
+                href="mailto:info@imora.com"
+                className="text-slate-800 hover:text-slate-600 text-sm font-medium block py-2 touch-manipulation min-h-[44px] flex items-center"
+              >
+                info@imora.com
+              </a>
+            </CardContent>
+          </Card>
           <Card className="bg-white rounded-2xl border border-slate-200 shadow-sm">
             <CardContent className="p-5">
               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
                 <Phone className="w-5 h-5 text-slate-600" />
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Telefon</h3>
-                <a
-                  href="tel:+905343288383"
-                  className="text-slate-800 hover:text-slate-600 text-sm font-medium block py-2 touch-manipulation min-h-[44px] flex items-center"
-                >
-                  0534 328 8383
-                </a>
-              </CardContent>
-            </Card>
+              <a
+                href="tel:+905343288383"
+                className="text-slate-800 hover:text-slate-600 text-sm font-medium block py-2 touch-manipulation min-h-[44px] flex items-center"
+              >
+                0534 328 8383
+              </a>
+            </CardContent>
+          </Card>
           <Card className="bg-white rounded-2xl border border-slate-200 shadow-sm">
             <CardContent className="p-5">
               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
                 <MapPin className="w-5 h-5 text-slate-600" />
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Adres</h3>
-                <p className="text-slate-600 text-sm">Antalya, Türkiye</p>
-              </CardContent>
-            </Card>
+              <p className="text-slate-600 text-sm">Antalya, Türkiye</p>
+            </CardContent>
+          </Card>
           <Card className="bg-white rounded-2xl border border-slate-200 shadow-sm">
             <CardContent className="p-5">
               <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mb-3">
                 <MessageSquare className="w-5 h-5 text-slate-600" />
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Çalışma saatleri</h3>
-                <div className="text-slate-600 text-sm space-y-0.5">
-                  <p>Pzt - Cuma: 09:00 - 18:00</p>
-                  <p>Cumartesi: 10:00 - 16:00</p>
-                  <p>Pazar: Kapalı</p>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="text-slate-600 text-sm space-y-0.5">
+                <p>Pzt - Cuma: 09:00 - 18:00</p>
+                <p>Cumartesi: 10:00 - 16:00</p>
+                <p>Pazar: Kapalı</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </ClassicPageShell>

@@ -32,7 +32,7 @@ export default function QuoteReady({
         <Container style={container}>
           <Section style={header}>
             <Text style={title}>Fiyat Teklifiniz Hazır</Text>
-            <Text style={subtitle}>Batarya Kit</Text>
+            <Text style={subtitle}>IMORA</Text>
           </Section>
 
           <Section style={content}>

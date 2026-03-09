@@ -9,15 +9,15 @@ const faqItems = [
     questions: [
       {
         q: 'Siparişimi nasıl verebilirim?',
-        a: 'Ürün sayfamızdan sepete ekleyip ödeme adımlarını tamamlayarak sipariş verebilirsiniz. B2B siparişler için lütfen iletişime geçiniz.',
+        a: 'Ürün sayfasından sepete ekleyip ödeme adımlarını tamamlayarak sipariş verebilirsiniz. B2B siparişler için lütfen iletişime geçin.',
       },
       {
         q: 'Hangi ödeme yöntemlerini kabul ediyorsunuz?',
-        a: 'Kredi kartı, banka kartı ve havale/EFT ile ödeme alıyoruz. Fatura kesimi her müşteri için yapılır; kurumsal siparişlerde vade seçenekleri sunulabilir.',
+        a: 'Kredi kartı, banka kartı ve havale/EFT ile ödeme alıyoruz. Fatura her müşteri için kesilir; kurumsal siparişlerde vade seçenekleri sunulabilir.',
       },
       {
         q: 'Fatura nasıl düzenleniyor?',
-        a: 'Fatura kesimi her müşteri için yapılmaktadır. Bireysel alımlarda e-arşiv fatura, kurumsal alımlarda e-fatura kesiyoruz. Fatura bilgilerinizi sipariş veya profil sayfasından girebilirsiniz.',
+        a: 'Bireysel alımlarda e-arşiv fatura, kurumsal alımlarda e-fatura kesiyoruz. Fatura bilgilerini sipariş veya profil sayfasından girebilirsiniz.',
       },
     ],
   },
@@ -26,15 +26,15 @@ const faqItems = [
     questions: [
       {
         q: 'Kargo süresi ne kadar?',
-        a: 'Stokta bulunan ürünler için sipariş onayından sonra 1–3 iş günü içinde kargoya verilir. Teslimat süresi bölgeye göre 1–5 iş günü arasında değişir.',
+        a: 'Stoktaki ürünler sipariş onayından sonra 1-3 iş günü içinde kargoya verilir. Teslimat süresi bölgeye göre 1-5 iş günü arasında değişir.',
       },
       {
         q: 'Kargo ücreti ne kadar?',
-        a: '3000 TL ve üzeri siparişlerde kargo ücretsizdir. Altındaki siparişlerde kargo ücreti sepet sayfasında hesaplanır.',
+        a: '3.000 TL ve üzeri siparişlerde kargo ücretsizdir. Altındaki siparişlerde ücret sepet ekranında hesaplanır.',
       },
       {
         q: 'Siparişimi takip edebilir miyim?',
-        a: 'Evet. Sipariş onayı ve kargoya verildiğinde e-posta ile bilgilendirilirsiniz. Kargo takip numarası ile kargo firması üzerinden takip edebilirsiniz.',
+        a: 'Evet. Sipariş onayı ve kargoya teslim bilgileri e-posta ile paylaşılır. Takip numarasıyla kargo firmasından durum izlenebilir.',
       },
     ],
   },
@@ -42,16 +42,16 @@ const faqItems = [
     category: 'Ürünler ve Teknik',
     questions: [
       {
-        q: 'GES (güneş enerjisi santrali) kurulumu yapıyor musunuz?',
-        a: 'Evet. GES kurulumu ve kapasite hesaplama hizmeti sunuyoruz. Sitedeki GES Hesaplama sayfasından aylık tüketiminize göre kabaca kurulu güç tahmini yapabilir, kurulum teklifi için iletişim sayfamızdan bize yazabilirsiniz.',
+        q: 'GES kurulumu yapıyor musunuz?',
+        a: 'Evet. GES kurulumu ve kapasite hesaplama desteği sunuyoruz. GES Hesaplama sayfasından ön tahmin alabilir, detay teklif için bizimle iletişime geçebilirsiniz.',
       },
       {
         q: 'Garanti süresi ne kadar?',
-        a: 'Ürünlere göre değişir; genelde 12–24 ay garanti sunuyoruz. Detaylar ürün sayfasında ve faturada belirtilir.',
+        a: 'Garanti süresi ürün tipine göre değişir; genellikle 12-24 ay aralığındadır. Net süreler ürün sayfası ve faturada belirtilir.',
       },
       {
         q: 'Teknik destek alabilir miyim?',
-        a: 'Evet. Montaj, kullanım ve güvenlik konularında e-posta veya telefon ile teknik destek veriyoruz. İletişim sayfasından bize ulaşabilirsiniz.',
+        a: 'Evet. Montaj, kullanım ve güvenlik konularında e-posta veya telefon üzerinden teknik destek sağlanır.',
       },
     ],
   },
@@ -60,11 +60,11 @@ const faqItems = [
     questions: [
       {
         q: 'İade koşulları nelerdir?',
-        a: 'Tüketici mevzuatına uygun olarak, cayma hakkı süresi içinde (teslimattan itibaren 14 gün) ürünü iade edebilirsiniz. Ürün kullanılmamış ve orijinal ambalajında olmalıdır. Detaylar için İade ve Değişim sayfamıza bakın.',
+        a: 'Tüketici mevzuatına uygun olarak teslimattan itibaren 14 gün içinde cayma hakkınızı kullanabilirsiniz. Ürünün kullanılmamış ve orijinal ambalajında olması gerekir.',
       },
       {
-        q: 'Arızalı ürün ne yapmalıyım?',
-        a: 'Garanti kapsamındaki arızalarda iletişime geçin; ürünü inceleyip gerekirse değişim veya onarım sürecini başlatıyoruz.',
+        q: 'Arızalı üründe ne yapmalıyım?',
+        a: 'Garanti kapsamındaki arızalarda bizimle iletişime geçin. Ürün incelenir, gerekiyorsa değişim veya onarım süreci başlatılır.',
       },
     ],
   },

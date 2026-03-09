@@ -200,28 +200,26 @@ export default function AdminOrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50/80 flex items-center justify-center">
-        <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="w-10 h-10 animate-spin text-brand" />
       </div>
     )
   }
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50/80 py-8">
-        <div className="container mx-auto px-4">
-          <Button asChild variant="ghost">
-            <Link href="/admin/orders">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Siparişlere Dön
-            </Link>
-          </Button>
-          <Card className="mt-6">
-            <CardContent className="py-12 text-center text-gray-600">
-              Sipariş bulunamadı veya yetkiniz yok.
-            </CardContent>
-          </Card>
-        </div>
+      <div className="space-y-6">
+        <Button asChild variant="ghost">
+          <Link href="/admin/orders">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Siparişlere Dön
+          </Link>
+        </Button>
+        <Card>
+          <CardContent className="py-12 text-center text-gray-600">
+            Sipariş bulunamadı veya yetkiniz yok.
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -230,8 +228,8 @@ export default function AdminOrderDetailPage() {
   const pricing = order.pricing || {}
 
   return (
-    <div className="min-h-screen bg-gray-50/80 py-8" id="main-content">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="space-y-6" id="main-content">
+      <div className="max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <Button asChild variant="ghost" size="sm" className="rounded-xl">
             <Link href="/admin/orders" className="inline-flex items-center gap-2">
@@ -364,7 +362,7 @@ export default function AdminOrderDetailPage() {
                 className="mt-1 max-w-xs rounded-lg"
               />
             </div>
-            <Button onClick={handleUpdate} disabled={updating} className="rounded-lg bg-red-600 hover:bg-red-700">
+            <Button onClick={handleUpdate} disabled={updating} className="rounded-lg bg-brand hover:bg-brand-hover">
               {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Güncelle'}
             </Button>
           </CardContent>

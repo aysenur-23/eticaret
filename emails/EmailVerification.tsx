@@ -27,7 +27,7 @@ export function EmailVerification({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>🔋 Batarya Kit</Text>
+            <Text style={logo}>🔋 IMORA</Text>
           </Section>
           
           <Section style={content}>
@@ -38,7 +38,7 @@ export function EmailVerification({
             </Text>
             
             <Text style={text}>
-              Batarya Kit'e hoş geldiniz! Hesabınızı aktifleştirmek için e-posta adresinizi doğrulamanız gerekiyor.
+              IMORA'a hoş geldiniz! Hesabınızı aktifleştirmek için e-posta adresinizi doğrulamanız gerekiyor.
             </Text>
 
             <Section style={buttonContainer}>
@@ -68,7 +68,7 @@ export function EmailVerification({
               Bu e-posta otomatik olarak gönderilmiştir. Lütfen yanıtlamayın.
             </Text>
             <Text style={footer}>
-              © {new Date().getFullYear()} Batarya Kit. Tüm hakları saklıdır.
+              © {new Date().getFullYear()} IMORA. Tüm hakları saklıdır.
             </Text>
           </Section>
         </Container>

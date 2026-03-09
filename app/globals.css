@@ -36,6 +36,25 @@
     background: hsl(var(--ink-muted) / 0.5);
   }
 
+  /* Yatay galeri için ince scrollbar */
+  .scrollbar-thin-h {
+    scrollbar-width: thin;
+  }
+  .scrollbar-thin-h::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scrollbar-thin-h::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+  .scrollbar-thin-h::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  .scrollbar-thin-h::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
   /* Öne çıkan ürünler satırı – kendiliğinden kayma */
   @keyframes featured-scroll {
     0% { transform: translateX(0); }
@@ -47,25 +66,55 @@
   .group\/scroll:hover .animate-featured-scroll {
     animation-play-state: paused;
   }
+
+  /* Ürün detay: alttaki galeri şeridi sola kayan, bitince başa sarar (sonsuz döngü) */
+  @keyframes product-gallery-slide {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-33.333%); }
+  }
+  .animate-product-gallery {
+    animation: product-gallery-slide 45s linear infinite;
+  }
+  .product-gallery-pause:hover .animate-product-gallery {
+    animation-play-state: paused;
+  }
+
+  /* Ana sayfa bölüm girişi – hafif fade-in */
+  @keyframes section-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-section-in {
+    animation: section-in 0.6s ease-out forwards;
+  }
+  .animate-section-in-delay-1 { animation-delay: 0.08s; }
+  .animate-section-in-delay-2 { animation-delay: 0.16s; }
+  .animate-section-in-delay-3 { animation-delay: 0.24s; }
 }
 
 @layer base {
   :root {
-    /* Site renk paleti – uyumlu set */
-    --brand: 0 72% 41%;           /* #b91c1c – ana marka kırmızı */
-    --brand-hover: 0 72% 35%;
-    --brand-light: 0 86% 97%;     /* açık arka plan */
+    /* Site renk paleti – bordo + mavi, e-ticaret uyumlu */
+    --brand: 350 48% 36%;           /* bordo – ana marka rengi */
+    --brand-hover: 350 48% 28%;
+    --brand-light: 350 55% 96%;    /* açık bordo arka plan */
     --brand-foreground: 0 0% 100%;
-    --surface: 210 40% 98%;       /* #f8fafc – sayfa arka planı */
+    --surface: 210 40% 98%;        /* sayfa arka planı */
     --surface-elevated: 0 0% 100%;
-    --ink: 222 47% 11%;           /* #0f172a – ana metin */
-    --ink-muted: 215 16% 47%;     /* #64748b */
-    --border-palette: 214 32% 91%; /* #e2e8f0 */
-    /* Hero: koyu slate gradient, vurgu için beyaz/krem (sade, okunaklı) */
-    --hero-start: 222 44% 10%;
-    --hero-mid: 222 40% 14%;
-    --hero-end: 222 36% 18%;
-    --hero-accent: 40 33% 96%;   /* krem / soft white – başlık vurgusu */
+    --ink: 222 47% 11%;            /* ana metin */
+    --ink-muted: 215 16% 47%;
+    --border-palette: 214 32% 91%;
+    /* Hero: koyu mavi gradient (bordo-mavi uyumu) */
+    --hero-start: 217 50% 12%;
+    --hero-mid: 217 45% 16%;
+    --hero-end: 217 40% 20%;
+    --hero-accent: 40 33% 96%;     /* başlık vurgusu */
 
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
@@ -73,22 +122,22 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 0 72% 41%;
+    --primary: 350 48% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
+    --secondary: 217 30% 96%;      /* hafif mavi ton */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 0 86% 97%;
-    --accent-foreground: 0 72% 41%;
+    --accent: 350 55% 96%;
+    --accent-foreground: 350 48% 36%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 0 72% 41%;
+    --ring: 350 48% 36%;
     --radius: 0.75rem;
-    --chart-1: 0 72% 41%;
-    --chart-2: 173 58% 39%;
+    --chart-1: 350 48% 36%;
+    --chart-2: 217 65% 42%;
     --chart-3: 222 47% 25%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
@@ -128,6 +177,7 @@
   }
   html {
     overflow-x: hidden;
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground antialiased;
@@ -165,13 +215,13 @@
     box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
   }
   
-  /* Pulse ring animation for active step */
+  /* Pulse ring animation for active step – marka rengi (bordo) */
   @keyframes pulse-ring {
     0%, 100% {
-      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+      box-shadow: 0 0 0 0 hsl(350 48% 36% / 0.4);
     }
     50% {
-      box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+      box-shadow: 0 0 0 6px hsl(350 48% 36% / 0);
     }
   }
   
@@ -367,7 +417,7 @@
     @apply text-sm font-semibold uppercase tracking-[0.2em];
   }
   .section-label-dark {
-    color: hsl(0 84% 70%);
+    color: hsl(350 70% 75%);
     @apply text-sm font-semibold uppercase tracking-[0.2em];
   }
 

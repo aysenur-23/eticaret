@@ -1,36 +1,24 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ClassicPageShell } from '@/components/ClassicPageShell'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
-import { Sun, Calculator, Mail, Info, FileCheck, Loader2, CheckCircle, Settings, Zap, Banknote, CircleDollarSign, ChevronDown } from 'lucide-react'
 import {
-  GES_REGIONS,
-  MONTHLY_KWH_MIN,
-  MONTHLY_KWH_MAX,
-  SUN_HOURS_MIN,
-  SUN_HOURS_MAX,
-  PR_MIN,
-  PR_MAX,
-  GES_DEFAULT_PR,
+  Sun, Calculator, ChevronDown, CheckCircle, Zap, Clock, ShieldCheck,
+  Loader2, Info, FileCheck, Settings, Banknote, CircleDollarSign,
+  ChevronRight, Star,
+} from 'lucide-react'
+import {
+  GES_REGIONS, MONTHLY_KWH_MIN, MONTHLY_KWH_MAX,
+  SUN_HOURS_MIN, SUN_HOURS_MAX, PR_MIN, PR_MAX, GES_DEFAULT_PR,
 } from '@/lib/ges-constants'
 import { gesCalculationRanges, type GesCalcRanges } from '@/lib/ges-calc'
 import { TR_CITIES, getDistrictsByCity } from '@/lib/tr-cities'
@@ -38,6 +26,25 @@ import { useAuthStore } from '@/lib/store/useAuthStore'
 import { getAddresses } from '@/lib/firebase/firestore'
 
 const CONTACT_DRAFT_KEY = 'site_contact_draft'
+
+/** Required field marker */
+const Req = () => <span className="text-red-500 font-bold ml-0.5" aria-hidden="true">*</span>
+
+/** Input className with error state */
+function fieldCls(err?: string) {
+  return `flex h-12 w-full rounded-xl border px-4 py-2 text-sm bg-white transition-shadow focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 ${err
+    ? 'border-red-400 focus:ring-red-200 bg-red-50/40'
+    : 'border-slate-200 focus:ring-brand/20'
+    }`
+}
+
+/** Select trigger className with error state */
+function selectCls(err?: string) {
+  return `h-12 w-full rounded-xl border bg-white transition-shadow focus:outline-none focus:ring-2 ${err
+    ? 'border-red-400 focus:ring-red-200 bg-red-50/40'
+    : 'border-slate-200 focus:ring-brand/20'
+    }`
+}
 
 type FormState = {
   fullName: string
@@ -65,45 +72,43 @@ type FormState = {
 }
 
 const initialForm: FormState = {
-  fullName: '',
-  phone: '',
-  email: '',
-  city: '',
-  district: '',
-  propertyType: '',
-  monthlyBillRange: '',
-  monthlyKwh: '',
-  subscriberType: '',
-  threePhase: '',
-  installationAreaType: '',
-  roofType: '',
-  roofAreaRange: '',
-  shading: '',
-  deedStatus: '',
-  usageGoal: [],
-  storagePreference: '',
-  budgetRange: '',
-  attachmentBillUrl: '',
-  attachmentRoofUrl: '',
-  kvkkAccepted: false,
-  callAccepted: false,
+  fullName: '', phone: '', email: '', city: '', district: '',
+  propertyType: '', monthlyBillRange: '', monthlyKwh: '',
+  subscriberType: '', threePhase: '', installationAreaType: '',
+  roofType: '', roofAreaRange: '', shading: '', deedStatus: '',
+  usageGoal: [], storagePreference: '', budgetRange: '',
+  attachmentBillUrl: '', attachmentRoofUrl: '',
+  kvkkAccepted: false, callAccepted: false,
+}
+
+function scrollToFirstError(errors: Record<string, string>) {
+  const firstKey = Object.keys(errors)[0]
+  if (!firstKey) return
+  const el =
+    document.getElementById(`field-${firstKey}`) ||
+    document.getElementById(firstKey)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const focusable = el.querySelector<HTMLElement>('input,select,textarea,button')
+    if (focusable) setTimeout(() => focusable.focus({ preventScroll: true }), 400)
+  }
 }
 
 export default function GesPage() {
   const t = useTranslations('ges')
-  const tFooter = useTranslations('footer')
+
   const { user, isAuthenticated } = useAuthStore()
 
-  // 1. Calculator State
-  const [calcMonthlyKwh, setCalcMonthlyKwh] = useState<string>('')
-  const [regionId, setRegionId] = useState<string>('')
-  const [sunHours, setSunHours] = useState<string>('5')
-  const [performanceRatio, setPerformanceRatio] = useState<string>(String(GES_DEFAULT_PR))
-  const [calcErrors, setCalcErrors] = useState<{ monthlyKwh?: string; sunHours?: string; pr?: string }>({})
+  // Calculator state
+  const [calcMonthlyKwh, setCalcMonthlyKwh] = useState('')
+  const [regionId, setRegionId] = useState('')
+  const [sunHours, setSunHours] = useState('5')
+  const [performanceRatio, setPerformanceRatio] = useState(String(GES_DEFAULT_PR))
+  const [calcErrors, setCalcErrors] = useState<Record<string, string>>({})
   const [calcResult, setCalcResult] = useState<GesCalcRanges | null>(null)
   const [kvkkDialogOpen, setKvkkDialogOpen] = useState(false)
 
-  // 2. Form State
+  // Form state
   const [form, setForm] = useState<FormState>(initialForm)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -112,90 +117,81 @@ export default function GesPage() {
 
   const districts = form.city ? getDistrictsByCity(form.city) : []
 
-  // Effects for Form
   useEffect(() => {
     let mounted = true
     const draft = (() => {
       if (typeof window === 'undefined') return {}
-      try {
-        const raw = localStorage.getItem(CONTACT_DRAFT_KEY)
-        return raw ? (JSON.parse(raw) as Record<string, string>) : {}
-      } catch {
-        return {}
-      }
+      try { return JSON.parse(localStorage.getItem(CONTACT_DRAFT_KEY) || '{}') as Record<string, string> }
+      catch { return {} }
     })()
-
     if (isAuthenticated && user?.id) {
       getAddresses(user.id)
         .then((addresses) => {
           if (!mounted) return
-          const defaultAddr = addresses.find((a) => a.isDefault) ?? addresses[0]
-          setForm((prev) => ({
-            ...prev,
-            fullName: user.name?.trim() || draft.fullName || prev.fullName,
-            phone: user.phone?.trim() || draft.phone || prev.phone,
-            email: user.email?.trim() || draft.email || prev.email,
-            city: defaultAddr?.city?.trim() || draft.city || prev.city,
-            district: defaultAddr?.district?.trim() || prev.district,
+          const addr = addresses.find((a) => a.isDefault) ?? addresses[0]
+          setForm((p) => ({
+            ...p,
+            fullName: user.name?.trim() || draft.fullName || p.fullName,
+            phone: user.phone?.trim() || draft.phone || p.phone,
+            email: user.email?.trim() || draft.email || p.email,
+            city: addr?.city?.trim() || draft.city || p.city,
+            district: addr?.district?.trim() || p.district,
           }))
         })
         .catch(() => {
           if (!mounted) return
-          setForm((prev) => ({
-            ...prev,
-            fullName: user.name?.trim() || draft.fullName || prev.fullName,
-            phone: user.phone?.trim() || draft.phone || prev.phone,
-            email: user.email?.trim() || draft.email || prev.email,
-            city: draft.city || prev.city,
+          setForm((p) => ({
+            ...p,
+            fullName: user.name?.trim() || draft.fullName || p.fullName,
+            phone: user.phone?.trim() || draft.phone || p.phone,
+            email: user.email?.trim() || draft.email || p.email,
+            city: draft.city || p.city,
           }))
         })
     } else {
-      setForm((prev) => ({
-        ...prev,
-        fullName: draft.fullName || prev.fullName,
-        phone: draft.phone || prev.phone,
-        email: draft.email || prev.email,
-        city: draft.city || prev.city,
+      setForm((p) => ({
+        ...p,
+        fullName: draft.fullName || p.fullName,
+        phone: draft.phone || p.phone,
+        email: draft.email || p.email,
+        city: draft.city || p.city,
       }))
     }
-    return () => {
-      mounted = false
-    }
+    return () => { mounted = false }
   }, [isAuthenticated, user?.id, user?.name, user?.phone, user?.email])
 
   useEffect(() => {
     if (form.city && !districts.includes(form.district)) {
-      setForm((prev) => ({ ...prev, district: '' }))
+      setForm((p) => ({ ...p, district: '' }))
     }
   }, [form.city, form.district, districts])
 
-  // Calculator Handlers
-  const applyRegionSunHours = useCallback((hours: number) => {
-    setSunHours(String(hours))
-  }, [])
+  const set = (updates: Partial<FormState>) => {
+    setForm((p) => ({ ...p, ...updates }))
+    setFormErrors((p) => {
+      const next = { ...p }
+      Object.keys(updates).forEach((k) => delete next[k])
+      return next
+    })
+  }
 
   const handleRegionChange = (value: string) => {
     setRegionId(value)
     const region = GES_REGIONS.find((r) => r.id === value)
-    if (region) applyRegionSunHours(region.sunHours)
+    if (region) setSunHours(String(region.sunHours))
   }
 
   const validateCalc = useCallback((): boolean => {
     const kwh = parseFloat(calcMonthlyKwh.replace(',', '.'))
     const hours = parseFloat(sunHours.replace(',', '.'))
     const pr = parseFloat(performanceRatio.replace(',', '.'))
-    const next: { monthlyKwh?: string; sunHours?: string; pr?: string } = {}
-
-    if (!Number.isFinite(kwh) || kwh < MONTHLY_KWH_MIN || kwh > MONTHLY_KWH_MAX) {
+    const next: Record<string, string> = {}
+    if (!Number.isFinite(kwh) || kwh < MONTHLY_KWH_MIN || kwh > MONTHLY_KWH_MAX)
       next.monthlyKwh = t('errorInvalidKwh')
-    }
-    if (!Number.isFinite(hours) || hours < SUN_HOURS_MIN || hours > SUN_HOURS_MAX) {
+    if (!Number.isFinite(hours) || hours < SUN_HOURS_MIN || hours > SUN_HOURS_MAX)
       next.sunHours = t('errorInvalidSunHours')
-    }
-    if (!Number.isFinite(pr) || pr < PR_MIN || pr > PR_MAX) {
+    if (!Number.isFinite(pr) || pr < PR_MIN || pr > PR_MAX)
       next.pr = t('errorInvalidPr')
-    }
-
     setCalcErrors(next)
     return Object.keys(next).length === 0
   }, [calcMonthlyKwh, sunHours, performanceRatio, t])
@@ -204,52 +200,38 @@ export default function GesPage() {
     e.preventDefault()
     setCalcResult(null)
     if (!validateCalc()) return
-
     const kwh = parseFloat(calcMonthlyKwh.replace(',', '.'))
     const hours = parseFloat(sunHours.replace(',', '.'))
     const pr = parseFloat(performanceRatio.replace(',', '.'))
-
-    const ranges = gesCalculationRanges(kwh, hours, pr)
-    setCalcResult(ranges)
-
-    setForm(prev => ({ ...prev, monthlyKwh: String(kwh) }))
-  }
-
-  // Form Handlers
-  const set = (updates: Partial<FormState>) => {
-    setForm((prev) => ({ ...prev, ...updates }))
-    setFormErrors((prev) => {
-      const next = { ...prev }
-      Object.keys(updates).forEach((k) => delete next[k])
-      return next
-    })
+    setCalcResult(gesCalculationRanges(kwh, hours, pr))
+    set({ monthlyKwh: String(kwh) })
   }
 
   const validateForm = (): boolean => {
     const next: Record<string, string> = {}
-    if (!form.fullName.trim() || form.fullName.trim().length < 2) {
+    if (!form.fullName.trim() || form.fullName.trim().length < 2)
       next.fullName = t('quoteForm.errorFullName')
-    }
-    if (!form.phone.trim() || form.phone.replace(/\s/g, '').length < 10) {
+    if (!form.phone.trim() || form.phone.replace(/\s/g, '').length < 10)
       next.phone = t('quoteForm.errorPhone')
-    }
-    if (!form.city.trim()) {
+    if (!form.city.trim())
       next.city = t('quoteForm.errorCity')
-    }
-    if (!form.kvkkAccepted) {
+    if (!form.kvkkAccepted)
       next.kvkkAccepted = t('quoteForm.errorKvkk')
-    }
-    if (!form.callAccepted) {
+    if (!form.callAccepted)
       next.callAccepted = t('quoteForm.errorCall')
-    }
     setFormErrors(next)
+    if (Object.keys(next).length > 0) {
+      scrollToFirstError(next)
+    }
     return Object.keys(next).length === 0
   }
 
-  const uploadDirRef = React.useRef<string | null>(null)
+  const uploadDirRef = useRef<string | null>(null)
   const getUploadDir = () => {
     if (!uploadDirRef.current) {
-      uploadDirRef.current = `ges-attachments/${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`}`
+      uploadDirRef.current = `ges-attachments/${typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`}`
     }
     return uploadDirRef.current
   }
@@ -257,11 +239,11 @@ export default function GesPage() {
   const handleFileUpload = async (field: 'attachmentBillUrl' | 'attachmentRoofUrl', file: File) => {
     const MAX_SIZE_MB = 10
     if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      setFormErrors((prev) => ({ ...prev, [field]: `Dosya en fazla ${MAX_SIZE_MB} MB olabilir.` }))
+      setFormErrors((p) => ({ ...p, [field]: `Dosya en fazla ${MAX_SIZE_MB} MB olabilir.` }))
       return
     }
     setUploading(field)
-    setFormErrors((prev) => ({ ...prev, [field]: undefined }))
+    setFormErrors((p) => { const n = { ...p }; delete n[field]; return n })
     try {
       const { getStorage } = await import('@/lib/firebase/config')
       const storage = getStorage()
@@ -272,12 +254,9 @@ export default function GesPage() {
       await uploadBytes(storageRef, file, { contentType: file.type || 'application/octet-stream' })
       const url = await getDownloadURL(storageRef)
       set({ [field]: url })
-    } catch (err) {
-      console.error('GES file upload error:', err)
-      setFormErrors((prev) => ({ ...prev, [field]: 'Yükleme başarısız. Lütfen tekrar deneyin.' }))
-      const fileName = file.name
-      const fileSize = (file.size / 1024).toFixed(1) + ' KB'
-      set({ [field]: `${fileName} (${fileSize})` })
+    } catch {
+      setFormErrors((p) => ({ ...p, [field]: 'Yükleme başarısız. Lütfen tekrar deneyin.' }))
+      set({ [field]: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
     } finally {
       setUploading(null)
     }
@@ -322,33 +301,22 @@ export default function GesPage() {
       const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
       const { getDb } = await import('@/lib/firebase/config')
       const db = getDb()
-      await addDoc(col(db, 'gesQuotes'), {
-        ...body,
-        createdAt: srvTs(),
-      })
+      await addDoc(col(db, 'gesQuotes'), { ...body, createdAt: srvTs() })
 
       const notifyRes = await fetch('/api/ges-quote/notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!notifyRes.ok) {
-        const data = await notifyRes.json().catch(() => ({}))
-        console.error('GES notify error:', data.error || notifyRes.statusText)
-      }
+      if (!notifyRes.ok) console.error('GES notify error:', notifyRes.statusText)
 
       if (typeof window !== 'undefined') {
         try {
-          localStorage.setItem(
-            CONTACT_DRAFT_KEY,
-            JSON.stringify({
-              fullName: form.fullName.trim(),
-              phone: form.phone.trim(),
-              city: form.city.trim(),
-              email: form.email.trim(),
-            })
-          )
-        } catch { }
+          localStorage.setItem(CONTACT_DRAFT_KEY, JSON.stringify({
+            fullName: form.fullName.trim(), phone: form.phone.trim(),
+            city: form.city.trim(), email: form.email.trim(),
+          }))
+        } catch { /* ignore */ }
       }
       setSuccess(true)
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -360,246 +328,370 @@ export default function GesPage() {
   }
 
   const toggleUsageGoal = (value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      usageGoal: prev.usageGoal.includes(value)
-        ? prev.usageGoal.filter((v) => v !== value)
-        : [...prev.usageGoal, value],
+    setForm((p) => ({
+      ...p,
+      usageGoal: p.usageGoal.includes(value)
+        ? p.usageGoal.filter((v) => v !== value)
+        : [...p.usageGoal, value],
     }))
   }
 
-  return (
-    <ClassicPageShell
-      breadcrumbs={[
-        { label: tFooter('home'), href: '/' },
-        { label: t('title'), href: '/ges' },
-      ]}
-    >
-      <div className="min-h-screen py-12 md:py-16 bg-gradient-to-b from-surface via-surface to-brand-light/20">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto space-y-12">
-            {/* 1. Header */}
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-brand/10 text-brand mb-2">
-                <Sun className="w-7 h-7" />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-black text-ink tracking-tight">
-                {t('title')}
-              </h1>
-              <p className="text-lg text-ink-muted max-w-2xl mx-auto leading-relaxed">
-                {t('description')}
-              </p>
-            </div>
+  // ─── RENDER ────────────────────────────────────────────────────────────────
 
-            {success ? (
-              <Card className="border-0 shadow-xl shadow-brand/10 bg-white overflow-hidden">
-                <CardContent className="py-16 text-center px-8">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-6">
-                    <CheckCircle className="w-10 h-10" />
+  if (success) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col" id="main-content">
+        <div className="flex-1 flex items-center justify-center py-20 px-4">
+          <Card className="max-w-lg w-full shadow-xl border-0">
+            <CardContent className="py-16 text-center px-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mb-6">
+                <CheckCircle className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">{t('quoteForm.successTitle')}</h2>
+              <p className="text-slate-600 mb-8 leading-relaxed">{t('quoteForm.successMessage')}</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button onClick={() => { setSuccess(false); setCalcResult(null); setForm(initialForm) }}
+                  size="lg" className="rounded-xl px-8 bg-orange-500 hover:bg-orange-600">
+                  Yeni Form Doldur
+                </Button>
+                <Button asChild variant="outline" size="lg" className="rounded-xl px-8">
+                  <Link href="/ges/teklif-dogrulama">
+                    <FileCheck className="w-4 h-4 mr-2" />
+                    Teklif Doğrula
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  const howToSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'GES Hesaplama — Güneş Enerji Sistemi Nasıl Hesaplanır?',
+    description: 'Aylık elektrik tüketiminize göre ihtiyacınız olan güneş paneli gücünü, inverter kapasitesini ve yatırım geri dönüş süresini ücretsiz olarak hesaplayın.',
+    tool: [{ '@type': 'HowToTool', name: 'voltekno GES Hesaplama Aracı' }],
+    step: [
+      {
+        '@type': 'HowToStep',
+        position: 1,
+        name: 'Aylık elektrik tüketiminizi girin',
+        text: 'Son fatura veya sayaç okumalarınızdan aylık ortalama kWh tüketiminizi girin.',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 2,
+        name: 'Şehir ve güneşlenme bilgisi seçin',
+        text: 'Bulunduğunuz şehri seçin. Sistem bölgenizin ortalama güneşlenme saatini otomatik hesaplar.',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 3,
+        name: 'Sonuçları inceleyin',
+        text: 'İhtiyacınız olan panel gücü (kWp), yıllık üretim tahmini ve yaklaşık yatırım geri dönüş süresi otomatik hesaplanır.',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 4,
+        name: 'Teklif alın',
+        text: 'Hesaplama sonuçlarına göre voltekno uzmanlarından ücretsiz GES kurulum teklifi alın.',
+      },
+    ],
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50" id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }} />
+
+      {/* ── HERO ─────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden pt-16 pb-28 md:pt-24 md:pb-36"
+        style={{
+          backgroundImage: 'url("/images/ges/solar-prominent.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        {/* Gradient overlay - lightened for better visibility of the premium image */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/40 to-slate-900/80" />
+        {/* Decorative blobs - blue/slate accents */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-brand/10 blur-3xl" />
+          <div className="absolute -bottom-12 -left-24 w-80 h-80 rounded-full bg-slate-400/5 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/5 blur-3xl" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 mb-6 shadow-lg">
+              <Sun className="w-9 h-9 text-white" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 drop-shadow">
+              Güneş Enerjisi Analizi &amp; Ücretsiz Teklif
+            </h1>
+            <p className="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed mb-8">
+              Aylık elektrik tüketiminizi girerek sistem büyüklüğünüzü hesaplayın,
+              kişiselleştirilmiş ücretsiz teklif alın.
+            </p>
+
+            {/* Stat chips */}
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { icon: ShieldCheck, text: 'Ücretsiz Analiz' },
+                { icon: Clock, text: '2 Dakikada Doldur' },
+                { icon: Star, text: '24 Saat İçinde Dönüş' },
+              ].map(({ icon: Icon, text }) => (
+                <div key={text} className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 ring-1 ring-white/10">
+                  <Icon className="w-4 h-4 text-white" />
+                  <span className="text-sm font-semibold text-white">{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── MAIN CARD ─────────────────────── */}
+      <div className="container mx-auto px-4 pb-16 pt-12 relative z-10">
+        <div className="max-w-3xl mx-auto">
+          <Card className="shadow-2xl shadow-slate-900/5 border-0 overflow-hidden rounded-2xl">
+            <CardContent className="p-0">
+
+              {/* ── QUOTE FORM ──────────────────────────────────────── */}
+              <form onSubmit={(e) => handleSubmit(e, false)} className="p-6 md:p-8 space-y-8" noValidate>
+
+                {/* Form header */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand/10 text-brand shrink-0">
+                    <Sun className="w-5 h-5" />
                   </div>
-                  <h3 className="text-2xl font-bold text-ink mb-2">{t('quoteForm.successTitle')}</h3>
-                  <p className="text-lg text-ink-muted mb-8 max-w-md mx-auto">{t('quoteForm.successMessage')}</p>
-                  <Button onClick={() => setSuccess(false)} size="lg" className="rounded-xl px-8">
-                    Yeni bir form doldur
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-0 shadow-xl shadow-black/5 overflow-hidden bg-white/95 backdrop-blur-sm">
-                <CardContent className="p-8 md:p-10">
-                  <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-12">
-                    {/* 1. Temel bilgiler */}
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-3 pb-4 border-b border-palette/80">
-                        <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand text-white font-bold text-sm shadow-lg shadow-brand/25">
-                          1
-                        </span>
-                        <h3 className="font-bold text-xl text-ink tracking-tight">
-                          {t('quoteForm.sectionBasic')}
-                        </h3>
-                      </div>
-                      <div className="grid gap-5 sm:grid-cols-2 [&>div]:min-w-0">
-                        <div className="space-y-2 min-w-0">
-                          <Label htmlFor="fullName" className="text-ink font-medium">{t('quoteForm.fullName')} *</Label>
-                          <Input
-                            id="fullName"
-                            value={form.fullName}
-                            onChange={(e) => set({ fullName: e.target.value })}
-                            placeholder={t('quoteForm.fullNamePlaceholder')}
-                            aria-invalid={!!formErrors.fullName}
-                            className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20 transition-shadow"
-                          />
-                          {formErrors.fullName && (
-                            <p className="text-sm text-destructive">{formErrors.fullName}</p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="phone" className="text-ink font-medium">{t('quoteForm.phone')} *</Label>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            value={form.phone}
-                            onChange={(e) => set({ phone: e.target.value })}
-                            placeholder={t('quoteForm.phonePlaceholder')}
-                            aria-invalid={!!formErrors.phone}
-                            className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20 transition-shadow"
-                          />
-                          {formErrors.phone && (
-                            <p className="text-sm text-destructive">{formErrors.phone}</p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email" className="text-ink font-medium">{t('quoteForm.email')}</Label>
-                          <Input
-                            id="email"
-                            type="email"
-                            value={form.email}
-                            onChange={(e) => set({ email: e.target.value })}
-                            placeholder={t('quoteForm.emailPlaceholder')}
-                            className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20 transition-shadow"
-                          />
-                        </div>
-                        <div className="space-y-2 min-w-0">
-                          <Label className="text-ink font-medium">{t('quoteForm.city')} *</Label>
-                          <Select
-                            value={form.city ?? ''}
-                            onValueChange={(v) => set({ city: v || '', district: '' })}
-                          >
-                            <SelectTrigger id="city" aria-invalid={!!formErrors.city} className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20 transition-shadow">
-                              <SelectValue placeholder={t('quoteForm.cityPlaceholder')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {TR_CITIES.map((c) => (
-                                <SelectItem key={c.name} value={c.name}>
-                                  {c.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {formErrors.city && (
-                            <p className="text-sm text-destructive">{formErrors.city}</p>
-                          )}
-                        </div>
-                        {districts.length > 0 && (
-                          <div className="space-y-2">
-                            <Label>{t('quoteForm.district')}</Label>
-                            <Select
-                              value={form.district ?? ''}
-                              onValueChange={(v) => set({ district: v || '' })}
-                            >
-                              <SelectTrigger id="district" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                                <SelectValue placeholder={t('quoteForm.districtPlaceholder')} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {districts.map((d) => (
-                                  <SelectItem key={d} value={d}>
-                                    {d}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.propertyType')}</Label>
-                          <Select
-                            value={form.propertyType ?? ''}
-                            onValueChange={(v) => set({ propertyType: v || '' })}
-                          >
-                            <SelectTrigger id="propertyType" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="mustakil_ev">{t('quoteForm.propertyTypeMustakil')}</SelectItem>
-                              <SelectItem value="site_villa">{t('quoteForm.propertyTypeSite')}</SelectItem>
-                              <SelectItem value="apartman_cati">{t('quoteForm.propertyTypeApartman')}</SelectItem>
-                              <SelectItem value="dukkan">{t('quoteForm.propertyTypeDukkan')}</SelectItem>
-                              <SelectItem value="atolye">{t('quoteForm.propertyTypeAtolye')}</SelectItem>
-                              <SelectItem value="fabrika">{t('quoteForm.propertyTypeFabrika')}</SelectItem>
-                              <SelectItem value="tarimsal">{t('quoteForm.propertyTypeTarim')}</SelectItem>
-                              <SelectItem value="depo">{t('quoteForm.propertyTypeDepo')}</SelectItem>
-                              <SelectItem value="diger">{t('quoteForm.propertyTypeDiger')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.budgetRange')}</Label>
-                          <Select
-                            value={form.budgetRange ?? ''}
-                            onValueChange={(v) => set({ budgetRange: v || '' })}
-                          >
-                            <SelectTrigger id="budgetRange" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="100k_alti">{t('quoteForm.budget100kAlt')}</SelectItem>
-                              <SelectItem value="100_300k">{t('quoteForm.budget100_300k')}</SelectItem>
-                              <SelectItem value="300_1000k">{t('quoteForm.budget300_1000k')}</SelectItem>
-                              <SelectItem value="1m_ustu">{t('quoteForm.budget1mPlus')}</SelectItem>
-                              <SelectItem value="teklif_istiyorum">{t('quoteForm.budgetTeklif')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-800">Ücretsiz Teklif Al</h2>
+                    <p className="text-sm text-slate-500">
+                      <span className="text-red-500 font-bold">*</span> işaretli alanlar zorunludur
+                    </p>
+                  </div>
+                </div>
+
+                {/* ── SECTION 1: Kişisel Bilgiler ─────────────────── */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold">1</span>
+                    Kişisel Bilgiler
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* fullName */}
+                    <div id="field-fullName" className="space-y-1.5">
+                      <Label htmlFor="fullName" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.fullName')} <Req />
+                      </Label>
+                      <input
+                        id="fullName"
+                        type="text"
+                        value={form.fullName}
+                        onChange={(e) => set({ fullName: e.target.value })}
+                        placeholder={t('quoteForm.fullNamePlaceholder')}
+                        className={fieldCls(formErrors.fullName)}
+                        autoComplete="name"
+                      />
+                      {formErrors.fullName && <p className="text-xs text-red-600">{formErrors.fullName}</p>}
                     </div>
 
-                    {/* 2. Elektrik */}
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-3 pb-4 border-b border-palette/80">
-                        <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand text-white font-bold text-sm shadow-lg shadow-brand/25">
-                          2
-                        </span>
-                        <h3 className="font-bold text-xl text-ink tracking-tight">
-                          {t('quoteForm.sectionElectricity')}
-                        </h3>
+                    {/* phone */}
+                    <div id="field-phone" className="space-y-1.5">
+                      <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.phone')} <Req />
+                      </Label>
+                      <input
+                        id="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={(e) => set({ phone: e.target.value })}
+                        placeholder={t('quoteForm.phonePlaceholder')}
+                        className={fieldCls(formErrors.phone)}
+                        autoComplete="tel"
+                      />
+                      {formErrors.phone && <p className="text-xs text-red-600">{formErrors.phone}</p>}
+                    </div>
+
+                    {/* email */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.email')}
+                      </Label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => set({ email: e.target.value })}
+                        placeholder={t('quoteForm.emailPlaceholder')}
+                        className={fieldCls()}
+                        autoComplete="email"
+                      />
+                    </div>
+
+                    {/* city */}
+                    <div id="field-city" className="space-y-1.5">
+                      <Label htmlFor="city" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.city')} <Req />
+                      </Label>
+                      <Select value={form.city} onValueChange={(v) => set({ city: v || '', district: '' })}>
+                        <SelectTrigger id="city" className={selectCls(formErrors.city)}>
+                          <SelectValue placeholder={t('quoteForm.cityPlaceholder')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TR_CITIES.map((c) => (
+                            <SelectItem key={c.name} value={c.name}>{c.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {formErrors.city && <p className="text-xs text-red-600">{formErrors.city}</p>}
+                    </div>
+
+                    {/* district */}
+                    {districts.length > 0 && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="district" className="text-sm font-medium text-slate-700">
+                          {t('quoteForm.district')}
+                        </Label>
+                        <Select value={form.district} onValueChange={(v) => set({ district: v || '' })}>
+                          <SelectTrigger id="district" className={selectCls()}>
+                            <SelectValue placeholder={t('quoteForm.districtPlaceholder')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {districts.map((d) => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="grid gap-5 sm:grid-cols-2 [&>div]:min-w-0">
-                        <div className="space-y-2 min-w-0">
-                          <Label className="text-ink font-medium">{t('quoteForm.monthlyBillRange')}</Label>
-                          <Select
-                            value={form.monthlyBillRange ?? ''}
-                            onValueChange={(v) => set({ monthlyBillRange: v || '' })}
-                          >
-                            <SelectTrigger id="monthlyBillRange" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0_1000">{t('quoteForm.monthlyBill0_1000')}</SelectItem>
-                              <SelectItem value="1000_3000">{t('quoteForm.monthlyBill1000_3000')}</SelectItem>
-                              <SelectItem value="3000_10000">{t('quoteForm.monthlyBill3000_10000')}</SelectItem>
-                              <SelectItem value="10000_25000">{t('quoteForm.monthlyBill10000_25000')}</SelectItem>
-                              <SelectItem value="25k_plus">{t('quoteForm.monthlyBill25kPlus')}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="monthlyKwh" className="text-ink font-medium">{t('quoteForm.monthlyKwhFree')}</Label>
-                          <input
-                            id="monthlyKwh"
-                            type="text"
-                            inputMode="decimal"
-                            value={calcMonthlyKwh}
-                            onChange={(e) => {
-                              setCalcMonthlyKwh(e.target.value)
-                              set({ monthlyKwh: e.target.value })
-                              if (calcErrors.monthlyKwh) setCalcErrors(prev => ({ ...prev, monthlyKwh: undefined }))
-                            }}
-                            placeholder="Örn. 350"
-                            className="flex h-12 w-full rounded-xl border border-palette bg-surface/50 px-4 py-2 text-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-50"
-                            aria-invalid={!!calcErrors.monthlyKwh}
-                          />
-                          {calcErrors.monthlyKwh && (
-                            <p className="text-sm text-destructive">{calcErrors.monthlyKwh}</p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.subscriberType')}</Label>
-                          <Select
-                            value={form.subscriberType ?? ''}
-                            onValueChange={(v) => set({ subscriberType: v || '' })}
-                          >
-                            <SelectTrigger id="subscriberType" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                    )}
+                  </div>
+                </div>
+
+                {/* ── SECTION 2: Elektrik Tüketiminiz ─────────────── */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wide flex items-center gap-2">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-orange-500 text-white text-xs font-bold">2</span>
+                    {t('quoteForm.sectionElectricity')}
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* monthlyKwh — linked to calculator */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="monthlyKwhForm" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.monthlyKwhFree')}
+                        {calcResult && (
+                          <span className="ml-2 text-xs text-green-600 font-normal">(hesaplamadan alındı)</span>
+                        )}
+                      </Label>
+                      <input
+                        id="monthlyKwhForm"
+                        type="text"
+                        inputMode="decimal"
+                        value={calcMonthlyKwh}
+                        onChange={(e) => {
+                          setCalcMonthlyKwh(e.target.value)
+                          set({ monthlyKwh: e.target.value })
+                          if (calcErrors.monthlyKwh) setCalcErrors((p) => ({ ...p, monthlyKwh: undefined as any }))
+                        }}
+                        placeholder="Örn. 350"
+                        className={fieldCls()}
+                      />
+                    </div>
+
+                    {/* monthlyBillRange */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="monthlyBillRange" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.monthlyBillRange')}
+                      </Label>
+                      <Select value={form.monthlyBillRange} onValueChange={(v) => set({ monthlyBillRange: v || '' })}>
+                        <SelectTrigger id="monthlyBillRange" className={selectCls()}>
+                          <SelectValue placeholder="Aylık fatura aralığı" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0_1000">{t('quoteForm.monthlyBill0_1000')}</SelectItem>
+                          <SelectItem value="1000_3000">{t('quoteForm.monthlyBill1000_3000')}</SelectItem>
+                          <SelectItem value="3000_10000">{t('quoteForm.monthlyBill3000_10000')}</SelectItem>
+                          <SelectItem value="10000_25000">{t('quoteForm.monthlyBill10000_25000')}</SelectItem>
+                          <SelectItem value="25k_plus">{t('quoteForm.monthlyBill25kPlus')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* propertyType */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="propertyType" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.propertyType')}
+                      </Label>
+                      <Select value={form.propertyType} onValueChange={(v) => set({ propertyType: v || '' })}>
+                        <SelectTrigger id="propertyType" className={selectCls()}>
+                          <SelectValue placeholder="Tesis türü" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mustakil_ev">{t('quoteForm.propertyTypeMustakil')}</SelectItem>
+                          <SelectItem value="site_villa">{t('quoteForm.propertyTypeSite')}</SelectItem>
+                          <SelectItem value="apartman_cati">{t('quoteForm.propertyTypeApartman')}</SelectItem>
+                          <SelectItem value="dukkan">{t('quoteForm.propertyTypeDukkan')}</SelectItem>
+                          <SelectItem value="atolye">{t('quoteForm.propertyTypeAtolye')}</SelectItem>
+                          <SelectItem value="fabrika">{t('quoteForm.propertyTypeFabrika')}</SelectItem>
+                          <SelectItem value="tarimsal">{t('quoteForm.propertyTypeTarim')}</SelectItem>
+                          <SelectItem value="depo">{t('quoteForm.propertyTypeDepo')}</SelectItem>
+                          <SelectItem value="diger">{t('quoteForm.propertyTypeDiger')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* budgetRange */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="budgetRange" className="text-sm font-medium text-slate-700">
+                        {t('quoteForm.budgetRange')}
+                      </Label>
+                      <Select value={form.budgetRange} onValueChange={(v) => set({ budgetRange: v || '' })}>
+                        <SelectTrigger id="budgetRange" className={selectCls()}>
+                          <SelectValue placeholder="Bütçe aralığı" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="100k_alti">{t('quoteForm.budget100kAlt')}</SelectItem>
+                          <SelectItem value="100_300k">{t('quoteForm.budget100_300k')}</SelectItem>
+                          <SelectItem value="300_1000k">{t('quoteForm.budget300_1000k')}</SelectItem>
+                          <SelectItem value="1m_ustu">{t('quoteForm.budget1mPlus')}</SelectItem>
+                          <SelectItem value="teklif_istiyorum">{t('quoteForm.budgetTeklif')}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SECTION 3: Ek Bilgiler (collapsible) ─────────── */}
+                <details className="group rounded-xl border border-slate-200 bg-slate-50/50 overflow-hidden">
+                  <summary className="flex items-center justify-between gap-3 px-5 py-4 cursor-pointer list-none hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-400 text-white text-xs font-bold">3</span>
+                      <div>
+                        <span className="font-semibold text-slate-700 text-sm">Ek Detaylar</span>
+                        <span className="text-xs text-slate-400 ml-1.5">(isteğe bağlı — daha doğru teklif için)</span>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180 shrink-0" />
+                  </summary>
+
+                  <div className="p-5 pt-3 space-y-6 border-t border-slate-200">
+
+                    {/* Abone & şebeke */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Abonelik ve Şebeke</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="subscriberType" className="text-sm font-medium text-slate-700">{t('quoteForm.subscriberType')}</Label>
+                          <Select value={form.subscriberType} onValueChange={(v) => set({ subscriberType: v || '' })}>
+                            <SelectTrigger id="subscriberType" className={selectCls()}>
+                              <SelectValue placeholder="Abone türü" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="mesken">{t('quoteForm.subscriberMesken')}</SelectItem>
@@ -609,13 +701,10 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.threePhase')}</Label>
-                          <Select
-                            value={form.threePhase ?? ''}
-                            onValueChange={(v) => set({ threePhase: v || '' })}
-                          >
-                            <SelectTrigger id="threePhase" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="threePhase" className="text-sm font-medium text-slate-700">{t('quoteForm.threePhase')}</Label>
+                          <Select value={form.threePhase} onValueChange={(v) => set({ threePhase: v || '' })}>
+                            <SelectTrigger id="threePhase" className={selectCls()}>
                               <SelectValue placeholder="Seçin" />
                             </SelectTrigger>
                             <SelectContent>
@@ -628,79 +717,15 @@ export default function GesPage() {
                       </div>
                     </div>
 
-                    {/* 3–5. İsteğe bağlı: Kurulum alanı, Sistem tercihleri, Dosyalar */}
-                    <details className="group rounded-2xl border border-palette/80 bg-surface/30 overflow-hidden shadow-sm">
-                      <summary className="flex items-center justify-between gap-3 font-semibold text-ink cursor-pointer list-none px-6 py-4 hover:bg-brand/5 transition-colors [&::-webkit-details-marker]:hidden">
-                        <span className="flex items-center gap-3">
-                          <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-brand/15 text-brand font-bold text-sm">
-                            3
-                          </span>
-                          Ek bilgiler (isteğe bağlı)
-                        </span>
-                        <ChevronDown className="w-5 h-5 text-ink-muted transition-transform group-open:rotate-180" />
-                      </summary>
-                      <div className="space-y-10 px-0 pt-4 pb-6">
-                    {/* Kurulum alanı bilgileri (tek 3 üstte) */}
-                    <div className="space-y-6 px-6">
-                      <h3 className="font-bold text-lg text-ink pb-3 border-b border-palette/80">
-                        {t('quoteForm.sectionArea')}
-                      </h3>
-                      <div className="grid gap-6 sm:grid-cols-2 [&>div]:min-w-0">
-                        <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-0 [&>div]:min-w-0">
-                          <div className="space-y-2">
-                            <Label htmlFor="region" className="text-ink font-medium">{t('regionLabel')}</Label>
-                            <Select value={regionId ?? ''} onValueChange={handleRegionChange}>
-                              <SelectTrigger id="region" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                                <SelectValue placeholder={t('regionPlaceholder')} />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {GES_REGIONS.map((r) => (
-                                  <SelectItem key={r.id} value={r.id}>
-                                    {t(`region.${r.id}`)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="sunHours" className="text-ink font-medium">{t('sunHours')}</Label>
-                            <input
-                              id="sunHours"
-                              type="text"
-                              inputMode="decimal"
-                              value={sunHours}
-                              onChange={(e) => {
-                                setSunHours(e.target.value)
-                                if (calcErrors.sunHours) setCalcErrors(prev => ({ ...prev, sunHours: undefined }))
-                              }}
-                              className="flex h-12 w-full rounded-xl border border-palette bg-surface/50 px-4 py-2 text-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-invalid={!!calcErrors.sunHours}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="performanceRatio" className="text-ink font-medium">Verim (PR)</Label>
-                            <input
-                              id="performanceRatio"
-                              type="text"
-                              inputMode="decimal"
-                              value={performanceRatio}
-                              onChange={(e) => {
-                                setPerformanceRatio(e.target.value)
-                                if (calcErrors.pr) setCalcErrors(prev => ({ ...prev, pr: undefined }))
-                              }}
-                              className="flex h-12 w-full rounded-xl border border-palette bg-surface/50 px-4 py-2 text-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-invalid={!!calcErrors.pr}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.installationAreaType')}</Label>
-                          <Select
-                            value={form.installationAreaType ?? ''}
-                            onValueChange={(v) => set({ installationAreaType: v || '' })}
-                          >
-                            <SelectTrigger id="installationAreaType" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                    {/* Kurulum alanı */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('quoteForm.sectionArea')}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="installationAreaType" className="text-sm font-medium text-slate-700">{t('quoteForm.installationAreaType')}</Label>
+                          <Select value={form.installationAreaType} onValueChange={(v) => set({ installationAreaType: v || '' })}>
+                            <SelectTrigger id="installationAreaType" className={selectCls()}>
+                              <SelectValue placeholder="Alan türü" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="cati">{t('quoteForm.areaCati')}</SelectItem>
@@ -711,14 +736,11 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.roofType')}</Label>
-                          <Select
-                            value={form.roofType ?? ''}
-                            onValueChange={(v) => set({ roofType: v || '' })}
-                          >
-                            <SelectTrigger id="roofType" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="roofType" className="text-sm font-medium text-slate-700">{t('quoteForm.roofType')}</Label>
+                          <Select value={form.roofType} onValueChange={(v) => set({ roofType: v || '' })}>
+                            <SelectTrigger id="roofType" className={selectCls()}>
+                              <SelectValue placeholder="Çatı türü" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="betonarme_duz">{t('quoteForm.roofBetonarme')}</SelectItem>
@@ -729,14 +751,11 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.roofAreaRange')}</Label>
-                          <Select
-                            value={form.roofAreaRange ?? ''}
-                            onValueChange={(v) => set({ roofAreaRange: v || '' })}
-                          >
-                            <SelectTrigger id="roofAreaRange" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="roofAreaRange" className="text-sm font-medium text-slate-700">{t('quoteForm.roofAreaRange')}</Label>
+                          <Select value={form.roofAreaRange} onValueChange={(v) => set({ roofAreaRange: v || '' })}>
+                            <SelectTrigger id="roofAreaRange" className={selectCls()}>
+                              <SelectValue placeholder="Çatı alanı" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="0_50">{t('quoteForm.roofArea0_50')}</SelectItem>
@@ -746,14 +765,11 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.shading')}</Label>
-                          <Select
-                            value={form.shading ?? ''}
-                            onValueChange={(v) => set({ shading: v || '' })}
-                          >
-                            <SelectTrigger id="shading" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="shading" className="text-sm font-medium text-slate-700">{t('quoteForm.shading')}</Label>
+                          <Select value={form.shading} onValueChange={(v) => set({ shading: v || '' })}>
+                            <SelectTrigger id="shading" className={selectCls()}>
+                              <SelectValue placeholder="Gölgelenme durumu" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="hayir">{t('quoteForm.shadingNo')}</SelectItem>
@@ -764,14 +780,11 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-ink font-medium">{t('quoteForm.deedStatus')}</Label>
-                          <Select
-                            value={form.deedStatus ?? ''}
-                            onValueChange={(v) => set({ deedStatus: v || '' })}
-                          >
-                            <SelectTrigger id="deedStatus" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                              <SelectValue placeholder="Seçin" />
+                        <div className="space-y-1.5">
+                          <Label htmlFor="deedStatus" className="text-sm font-medium text-slate-700">{t('quoteForm.deedStatus')}</Label>
+                          <Select value={form.deedStatus} onValueChange={(v) => set({ deedStatus: v || '' })}>
+                            <SelectTrigger id="deedStatus" className={selectCls()}>
+                              <SelectValue placeholder="Mülkiyet" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="kendi">{t('quoteForm.deedOwn')}</SelectItem>
@@ -780,327 +793,186 @@ export default function GesPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* 4. Sistem tercihleri */}
-                    <div className="space-y-6 px-6">
-                      <div className="flex items-center gap-3 pb-3 border-b border-palette/80">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/15 text-brand font-bold text-xs">4</span>
-                        <h3 className="font-bold text-lg text-ink">{t('quoteForm.sectionSystem')}</h3>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="space-y-3">
-                          <Label className="text-sm font-semibold text-ink">{t('quoteForm.usageGoal')}</Label>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {[
-                              { v: 'fatura_sifir', key: 'usageFatura' },
-                              { v: 'satis', key: 'usageSatis' },
-                              { v: 'kismi_tasarruf', key: 'usageKismi' },
-                              { v: 'yedekleme', key: 'usageYedek' },
-                              { v: 'offgrid', key: 'usageOffgrid' },
-                            ].map(({ v, key }) => (
-                              <label key={v} className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border border-palette/80 bg-white/60 hover:border-brand/30 hover:bg-brand/5 hover:shadow-sm transition-all">
-                                <input
-                                  type="checkbox"
-                                  checked={form.usageGoal.includes(v)}
-                                  onChange={() => toggleUsageGoal(v)}
-                                  className="h-5 w-5 rounded border-palette text-brand focus:ring-brand"
-                                />
-                                <span className="text-sm font-medium">{t(`quoteForm.${key}`)}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="grid gap-6 sm:grid-cols-2 [&>div]:min-w-0">
-                          <div className="space-y-2 min-w-0">
-                            <Label className="text-ink font-medium">{t('quoteForm.storagePreference')}</Label>
-                            <Select
-                              value={form.storagePreference ?? ''}
-                              onValueChange={(v) => set({ storagePreference: v || '' })}
-                            >
-                              <SelectTrigger id="storagePreference" className="h-12 w-full rounded-xl border-palette bg-surface/50 focus:ring-2 focus:ring-brand/20">
-                                <SelectValue placeholder="Seçin" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="hayir">{t('quoteForm.storageNo')}</SelectItem>
-                                <SelectItem value="evet_kesinti">{t('quoteForm.storageKesinti')}</SelectItem>
-                                <SelectItem value="evet_enerji_satis">{t('quoteForm.storageEnerji')}</SelectItem>
-                                <SelectItem value="kararsiz">{t('quoteForm.storageUnsure')}</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="storagePreference" className="text-sm font-medium text-slate-700">{t('quoteForm.storagePreference')}</Label>
+                          <Select value={form.storagePreference} onValueChange={(v) => set({ storagePreference: v || '' })}>
+                            <SelectTrigger id="storagePreference" className={selectCls()}>
+                              <SelectValue placeholder="Depolama tercihi" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hayir">{t('quoteForm.storageNo')}</SelectItem>
+                              <SelectItem value="evet_kesinti">{t('quoteForm.storageKesinti')}</SelectItem>
+                              <SelectItem value="evet_enerji_satis">{t('quoteForm.storageEnerji')}</SelectItem>
+                              <SelectItem value="kararsiz">{t('quoteForm.storageUnsure')}</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                     </div>
 
-                    {/* 5. Dosyalar */}
-                    <div className="space-y-6 px-6">
-                      <div className="flex items-center gap-3 pb-3 border-b border-palette/80">
-                        <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand/15 text-brand font-bold text-xs">5</span>
-                        <h3 className="font-bold text-lg text-ink">{t('quoteForm.sectionFiles')}</h3>
-                      </div>
-                      <div className="bg-brand/5 rounded-xl p-4 flex items-start gap-3 border border-brand/10">
-                        <Info className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-ink-muted leading-relaxed">{t('quoteForm.uploadHint')}</p>
-                      </div>
-                      <div className="grid gap-6">
-                        {(
-                          [
-                            { key: 'attachmentBillUrl' as const, label: t('quoteForm.fileBill') },
-                            { key: 'attachmentRoofUrl' as const, label: t('quoteForm.fileRoof') },
-                          ] as const
-                        ).map(({ key, label }) => (
-                          <div key={key} className="p-4 rounded-xl border border-palette bg-surface/50">
-                            <Label className="text-sm font-bold mb-3 block">{label}</Label>
-                            <div className="flex items-center gap-4">
-                              <div className="relative flex-1">
-                                <Label className="sr-only">Dosya seç</Label>
-                                <input
-                                  type="file"
-                                  accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/*"
-                                  className="flex h-12 w-full rounded-xl border border-palette bg-surface/50 px-4 py-2 text-sm transition-shadow focus:outline-none focus:ring-2 focus:ring-brand/20 file:rounded-lg file:border-0 file:bg-brand/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-brand disabled:cursor-not-allowed disabled:opacity-50"
-                                  disabled={!!uploading}
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file) handleFileUpload(key, file)
-                                    e.target.value = ''
-                                  }}
-                                />
-                                {form[key] && (
-                                  <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 text-green-500 bg-white rounded-full" />
-                                )}
-                              </div>
-                              {uploading === key && (
-                                <Loader2 className="h-6 w-6 animate-spin text-brand" />
-                              )}
-                              {form[key] && (
-                                <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1.5 rounded-full border border-green-200">Yüklendi</span>
-                              )}
-                            </div>
-                            {formErrors[key] && (
-                              <p className="text-sm text-destructive mt-2">{formErrors[key]}</p>
-                            )}
-                          </div>
+                    {/* Kullanım amacı */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t('quoteForm.usageGoal')}</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {[
+                          { v: 'fatura_sifir', key: 'usageFatura' },
+                          { v: 'satis', key: 'usageSatis' },
+                          { v: 'kismi_tasarruf', key: 'usageKismi' },
+                          { v: 'yedekleme', key: 'usageYedek' },
+                          { v: 'offgrid', key: 'usageOffgrid' },
+                        ].map(({ v, key }) => (
+                          <label key={v} className="flex items-center gap-3 cursor-pointer p-3 rounded-lg border border-slate-200 bg-white hover:border-orange-300 hover:bg-orange-50/50 transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={form.usageGoal.includes(v)}
+                              onChange={() => toggleUsageGoal(v)}
+                              className="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
+                            />
+                            <span className="text-sm font-medium text-slate-700">{t(`quoteForm.${key}`)}</span>
+                          </label>
                         ))}
                       </div>
                     </div>
 
-                      </div>
-                    </details>
-
-                    {/* 6. Onay ve Hesaplama */}
-                    <div className="space-y-8 pt-8 border-t-2 border-palette/60">
-                      <div className="rounded-2xl bg-surface/50 border border-palette/80 p-5 space-y-4">
-                        <label className="flex items-start gap-4 cursor-pointer group p-3 rounded-xl hover:bg-white/60 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={form.kvkkAccepted}
-                            onChange={(e) => set({ kvkkAccepted: e.target.checked })}
-                            className="mt-0.5 h-5 w-5 rounded-md border-2 border-palette text-brand focus:ring-2 focus:ring-brand/30"
-                            aria-invalid={!!formErrors.kvkkAccepted}
-                          />
-                          <span className="text-sm text-ink group-hover:text-ink/90 transition-colors">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                setKvkkDialogOpen(true)
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {([
+                        { key: 'attachmentBillUrl' as const, label: t('quoteForm.fileBill') },
+                        { key: 'attachmentRoofUrl' as const, label: t('quoteForm.fileRoof') },
+                      ]).map(({ key, label }) => (
+                        <div key={key} className="space-y-1.5">
+                          <Label className="text-sm font-medium text-slate-700">{label}</Label>
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/*"
+                              disabled={!!uploading}
+                              onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) handleFileUpload(key, file)
+                                e.target.value = ''
                               }}
-                              className="underline font-medium text-brand hover:text-brand/80 focus:outline-none focus:ring-2 focus:ring-brand/30 rounded px-0.5 -mx-0.5"
-                            >
-                              {t('quoteForm.kvkkLinkText')}
-                            </button>
-                            {' '}{t('quoteForm.kvkkLabelSuffix')}
-                          </span>
-                        </label>
-                        {formErrors.kvkkAccepted && (
-                          <p className="text-sm text-destructive ml-9">{formErrors.kvkkAccepted}</p>
-                        )}
-                        <Dialog open={kvkkDialogOpen} onOpenChange={setKvkkDialogOpen}>
-                          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="text-xl text-ink pr-8">
-                                KVKK Aydınlatma Metni
-                              </DialogTitle>
-                            </DialogHeader>
-                            <div className="text-sm text-ink space-y-4 pr-2">
-                              <p><strong>1. Veri Sorumlusu</strong></p>
-                              <p>6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) uyarınca, kişisel verileriniz; veri sorumlusu olarak Batarya Kit (şirket unvanı ve iletişim bilgileri) tarafından aşağıda açıklanan kapsamda işlenebilecektir.</p>
-
-                              <p><strong>2. İşlenen Kişisel Veriler ve Amaçları</strong></p>
-                              <p>GES teklif formu aracılığıyla toplanan ad soyad, telefon numarası, e-posta adresi, şehir/ilçe, mülk türü, tahmini bütçe, elektrik tüketim bilgileri ve kurulum alanına ilişkin bilgileriniz; teklif talebinizin değerlendirilmesi, sizinle iletişime geçilmesi, teknik keşif ve fiyat teklifi sunulması amacıyla işlenmektedir. İsteğe bağlı olarak paylaştığınız dosya veya ek bilgiler yalnızca teklif sürecinde kullanılmaktadır.</p>
-
-                              <p><strong>3. Hukuki Sebep</strong></p>
-                              <p>Bu verilerin işlenmesi, KVKK’nın 5. ve 6. maddelerine dayanmaktadır; özellikle açık rızanız, teklif ve sözleşme süreçlerinin yürütülmesi ile meşru menfaatlerimiz çerçevesinde gerçekleştirilmektedir.</p>
-
-                              <p><strong>4. Verilerin Aktarımı</strong></p>
-                              <p>Toplanan verileriniz, yalnızca hukuki zorunluluk veya hizmet sağlayıcılarımız (örn. e-posta/sunucu hizmetleri) ile sınırlı ve gerekli ölçüde paylaşılabilir; yurt dışına aktarım yapılması halinde KVKK’daki usullere uyulacaktır.</p>
-
-                              <p><strong>5. Saklama Süresi</strong></p>
-                              <p>Kişisel verileriniz, teklif ve iletişim süreçlerinin gerektirdiği süre boyunca ve yasal saklama süreleriyle sınırlı olarak saklanacak; bu süreler sonunda silinecek veya anonim hale getirilecektir.</p>
-
-                              <p><strong>6. Haklarınız</strong></p>
-                              <p>KVKK’nın 11. maddesi kapsamında kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse buna ilişkin bilgi talep etme, işlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme, yurt içinde veya yurt dışında aktarıldığı üçüncü kişileri bilme, eksik veya yanlış işlenmişse düzeltilmesini isteme, silinmesini veya yok edilmesini isteme, düzeltme ve silme işlemlerinin üçüncü kişilere bildirilmesini isteme, münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle aleyhinize bir sonucun ortaya çıkmasına itiraz etme ve kanuna aykırı işlenmesi sebebiyle zarara uğramanız hâlinde zararın giderilmesini talep etme haklarına sahipsiniz. Bu haklarınızı kullanmak için veri sorumlusuna yazılı veya elektronik ortamda başvurabilirsiniz.</p>
-
-                              <p className="text-ink-muted pt-2">Son güncelleme: Bu metin, form gönderimi öncesinde okunup kabul edilmesi amacıyla sunulmaktadır.</p>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <label className="flex items-start gap-4 cursor-pointer group p-3 rounded-xl hover:bg-white/60 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={form.callAccepted}
-                            onChange={(e) => set({ callAccepted: e.target.checked })}
-                            className="mt-0.5 h-5 w-5 rounded-md border-2 border-palette text-brand focus:ring-2 focus:ring-brand/30"
-                            aria-invalid={!!formErrors.callAccepted}
-                          />
-                          <span className="text-sm text-ink group-hover:text-ink/90 transition-colors">{t('quoteForm.callLabel')}</span>
-                        </label>
-                        {formErrors.callAccepted && (
-                          <p className="text-sm text-destructive ml-9">{formErrors.callAccepted}</p>
-                        )}
-                      </div>
-
-                      {calcResult && (
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <Card className="bg-white border-0 shadow-lg shadow-black/5 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-brand/10 transition-shadow">
-                              <CardContent className="p-6 flex flex-col items-center text-center">
-                                <div className="w-12 h-12 rounded-xl bg-brand/10 flex items-center justify-center mb-3">
-                                  <Settings className="w-6 h-6 text-brand" />
-                                </div>
-                                <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">{t('roofPotential')}</p>
-                                <p className="text-base font-black text-ink mt-2 tabular-nums">
-                                  {calcResult.kwpMin.toLocaleString('tr-TR')} ~ {calcResult.kwpMax.toLocaleString('tr-TR')} kWp
-                                </p>
-                              </CardContent>
-                            </Card>
-                            <Card className="bg-white border-0 shadow-lg shadow-black/5 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-brand/10 transition-shadow">
-                              <CardContent className="p-6 flex flex-col items-center text-center">
-                                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3">
-                                  <Zap className="w-6 h-6 text-amber-600" />
-                                </div>
-                                <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">{t('energyToProduce')}</p>
-                                <p className="text-base font-black text-ink mt-2 tabular-nums">
-                                  {calcResult.annualKwhMin.toLocaleString('tr-TR')} ~ {calcResult.annualKwhMax.toLocaleString('tr-TR')} kWh
-                                </p>
-                              </CardContent>
-                            </Card>
-                            <Card className="bg-white border-0 shadow-lg shadow-black/5 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-brand/10 transition-shadow">
-                              <CardContent className="p-6 flex flex-col items-center text-center">
-                                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-3">
-                                  <Banknote className="w-6 h-6 text-green-600" />
-                                </div>
-                                <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">{t('annualSavings')}</p>
-                                <p className="text-base font-black text-ink mt-2 tabular-nums">
-                                  {calcResult.savingsMin.toLocaleString('tr-TR')} ~ {calcResult.savingsMax.toLocaleString('tr-TR')} TL
-                                </p>
-                              </CardContent>
-                            </Card>
-                            <Card className="bg-white border-0 shadow-lg shadow-black/5 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-brand/10 transition-shadow">
-                              <CardContent className="p-6 flex flex-col items-center text-center">
-                                <div className="w-12 h-12 rounded-xl bg-slate-200/80 flex items-center justify-center mb-3">
-                                  <CircleDollarSign className="w-6 h-6 text-ink-muted" />
-                                </div>
-                                <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider">{t('installationCost')}</p>
-                                <p className="text-base font-black text-ink mt-2 tabular-nums">
-                                  {calcResult.costMin.toLocaleString('tr-TR')} ~ {calcResult.costMax.toLocaleString('tr-TR')} TL
-                                </p>
-                              </CardContent>
-                            </Card>
+                              className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 file:rounded-lg file:border-0 file:bg-orange-50 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-orange-700 disabled:opacity-50"
+                            />
+                            {uploading === key && (
+                              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-brand" />
+                            )}
+                            {form[key] && !uploading && (
+                              <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-green-500" />
+                            )}
                           </div>
-                          <div className="flex items-start gap-2 text-xs text-ink-muted bg-surface/50 rounded-xl p-3 border border-palette/60">
-                            <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-brand" />
-                            <span>{t('formulaNote')}</span>
-                          </div>
+                          {formErrors[key] && <p className="text-xs text-red-600">{formErrors[key]}</p>}
                         </div>
-                      )}
+                      ))}
+                    </div>
+                  </div>
+                </details>
 
-                      <div className="flex flex-col gap-4">
-                        {!calcResult ? (
-                          <Button
-                            type="button"
-                            onClick={handleCalculate}
-                            size="lg"
-                            className="w-full h-14 text-lg font-bold gap-2 rounded-2xl shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/30 bg-brand hover:bg-brand-hover transition-all"
-                          >
-                            <Calculator className="w-5 h-5" />
-                            {t('calculate')}
-                          </Button>
-                        ) : (
-                          <div className="flex flex-col gap-4">
-                            <div className="flex flex-col sm:flex-row gap-4">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setCalcResult(null)}
-                                size="lg"
-                                className="flex-1 h-14 text-lg font-bold rounded-2xl border-2 border-palette hover:bg-surface/80 hover:border-brand/30"
-                              >
-                                Yeniden Hesapla
-                              </Button>
-                              <Button
-                                type="submit"
-                                size="lg"
-                                disabled={submitting}
-                                className="flex-[2] h-14 text-lg font-bold gap-2 rounded-2xl shadow-lg shadow-brand/25 hover:shadow-xl hover:shadow-brand/30 bg-brand hover:bg-brand-hover transition-all"
-                              >
-                                {submitting ? (
-                                  <Loader2 className="w-6 h-6 animate-spin" />
-                                ) : (
-                                  <Sun className="w-6 h-6" />
-                                )}
-                                {t('quoteForm.submit')}
-                              </Button>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="lg"
-                              disabled={submitting}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                handleSubmit(e as unknown as React.FormEvent, true)
-                              }}
-                              className="w-full h-12 text-base font-semibold rounded-2xl border-2 border-dashed border-palette hover:border-brand/40 hover:bg-brand/5 text-ink hover:text-brand transition-colors"
-                            >
-                              {t('submitWithoutInstallation')}
-                            </Button>
-                          </div>
-                        )}
-                        {formErrors.submit && (
-                          <p className="p-4 bg-destructive/10 text-destructive text-sm rounded-2xl font-semibold border border-destructive/20">
-                            {formErrors.submit}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
+                {/* ── KVKK & ONAYLAR ──────────────────────────────────── */}
+                <div id="field-kvkkAccepted" className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
+                  {/* KVKK */}
+                  <label className={`flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white transition-colors ${formErrors.kvkkAccepted ? 'bg-red-50/50 border border-red-200 rounded-lg' : ''}`}>
+                    <input
+                      type="checkbox"
+                      checked={form.kvkkAccepted}
+                      onChange={(e) => set({ kvkkAccepted: e.target.checked })}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand shrink-0"
+                    />
+                    <span className="text-sm text-slate-700">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setKvkkDialogOpen(true) }}
+                        className="underline font-semibold text-brand hover:text-orange-600 focus:outline-none"
+                      >
+                        {t('quoteForm.kvkkLinkText')}
+                      </button>
+                      {' '}{t('quoteForm.kvkkLabelSuffix')}
+                    </span>
+                  </label>
+                  {formErrors.kvkkAccepted && (
+                    <p className="text-xs text-red-600 ml-7">{formErrors.kvkkAccepted}</p>
+                  )}
 
-            {/* Quick Links */}
-            <div className="flex justify-center">
-              <Link href="/ges/teklif-dogrulama" className="group block">
-                <Card className="border-0 shadow-lg shadow-black/5 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-brand/10 hover:border-brand/20 transition-all bg-white">
-                  <CardContent className="p-6 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-brand/10 text-brand flex items-center justify-center group-hover:bg-brand group-hover:text-white transition-all">
-                      <FileCheck className="w-7 h-7" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-ink">{t('quoteVerify.title')}</h4>
-                      <p className="text-sm text-ink-muted mt-0.5">{t('quoteVerify.description')}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
-          </div>
+                  {/* callAccepted */}
+                  <div id="field-callAccepted">
+                    <label className={`flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white transition-colors ${formErrors.callAccepted ? 'bg-red-50/50 border border-red-200 rounded-lg' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={form.callAccepted}
+                        onChange={(e) => set({ callAccepted: e.target.checked })}
+                        className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand shrink-0"
+                      />
+                      <span className="text-sm text-slate-700">{t('quoteForm.callLabel')}</span>
+                    </label>
+                    {formErrors.callAccepted && (
+                      <p className="text-xs text-red-600 ml-7">{formErrors.callAccepted}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── SUBMIT ─────────────────────────────────────────── */}
+                <div className="space-y-3">
+                  {formErrors.submit && (
+                    <p className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl">
+                      {formErrors.submit}
+                    </p>
+                  )}
+
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={submitting}
+                    className="w-full h-14 text-base font-bold rounded-xl bg-orange-500 hover:bg-orange-600 gap-2 shadow-lg shadow-orange-500/25"
+                  >
+                    {submitting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Sun className="w-5 h-5" />
+                    )}
+                    {t('quoteForm.submit')}
+                  </Button>
+
+                </div>
+
+                {/* Footer link */}
+                <div className="pt-4 border-t border-slate-100 text-center">
+                  <Link
+                    href="/ges/teklif-dogrulama"
+                    className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-brand transition-colors"
+                  >
+                    <FileCheck className="w-4 h-4" />
+                    Başka bir firmadan aldığınız teklifi doğrulatmak ister misiniz?
+                  </Link>
+                </div>
+
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </ClassicPageShell>
+
+      {/* KVKK Dialog */}
+      <Dialog open={kvkkDialogOpen} onOpenChange={setKvkkDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-slate-900 pr-8">KVKK Aydınlatma Metni</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-slate-700 space-y-4 pr-2 leading-relaxed">
+            <p><strong>1. Veri Sorumlusu</strong></p>
+            <p>6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, kişisel verileriniz; veri sorumlusu olarak voltekno tarafından aşağıda açıklanan kapsamda işlenebilecektir.</p>
+            <p><strong>2. İşlenen Kişisel Veriler ve Amaçları</strong></p>
+            <p>GES teklif formu aracılığıyla toplanan ad soyad, telefon numarası, e-posta adresi, şehir/ilçe, mülk türü, tahmini bütçe, elektrik tüketim bilgileri ve kurulum alanına ilişkin bilgileriniz; teklif talebinizin değerlendirilmesi, sizinle iletişime geçilmesi, teknik keşif ve fiyat teklifi sunulması amacıyla işlenmektedir.</p>
+            <p><strong>3. Hukuki Sebep</strong></p>
+            <p>Bu verilerin işlenmesi, KVKK'nın 5. ve 6. maddelerine dayanmaktadır; özellikle açık rızanız, teklif ve sözleşme süreçlerinin yürütülmesi ile meşru menfaatlerimiz çerçevesinde gerçekleştirilmektedir.</p>
+            <p><strong>4. Verilerin Aktarımı</strong></p>
+            <p>Toplanan verileriniz, yalnızca hukuki zorunluluk veya hizmet sağlayıcılarımız ile sınırlı ve gerekli ölçüde paylaşılabilir.</p>
+            <p><strong>5. Saklama Süresi</strong></p>
+            <p>Kişisel verileriniz, teklif ve iletişim süreçlerinin gerektirdiği süre boyunca ve yasal saklama süreleriyle sınırlı olarak saklanacak; bu süreler sonunda silinecek veya anonim hale getirilecektir.</p>
+            <p><strong>6. Haklarınız (KVKK Md. 11)</strong></p>
+            <p>Kişisel verilerinizin işlenip işlenmediğini öğrenme, işlenmişse bilgi talep etme, düzeltilmesini veya silinmesini isteme ve ilgili diğer haklarınızı kullanmak için veri sorumlusuna başvurabilirsiniz.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+    </div>
   )
 }

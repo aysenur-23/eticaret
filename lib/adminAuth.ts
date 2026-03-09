@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
 import { prisma } from '@/lib/prisma'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET ?? ''
 
 /** Admin session cookie (Firebase doğrulama sonrası set edilen JWT) geçerli mi? */
 export function verifyAdminCookie(request: NextRequest): boolean {
@@ -23,7 +23,7 @@ export function verifyAdminToken(request: NextRequest): boolean {
   if (!token) return false
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { userId?: string; role?: string }
-    return decoded.role === 'admin' || decoded.userId != null
+    return decoded.role === 'admin'
   } catch {
     return false
   }

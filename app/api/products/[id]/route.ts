@@ -26,7 +26,6 @@ export async function GET(
     // Fallback: Prisma Product (id veya slug)
     let product = await prisma.product.findUnique({
       where: { id },
-      where: { id: params.id },
       include: {
         category: true,
         variants: {
@@ -43,7 +42,6 @@ export async function GET(
             id: true,
             name: true,
             slug: true,
-            price: true,
           },
         },
         similarProducts: {
@@ -51,7 +49,6 @@ export async function GET(
             id: true,
             name: true,
             slug: true,
-            price: true,
           },
         },
         reviews: {
@@ -86,7 +83,6 @@ export async function GET(
               id: true,
               name: true,
               slug: true,
-              price: true,
             },
           },
           similarProducts: {
@@ -94,7 +90,6 @@ export async function GET(
               id: true,
               name: true,
               slug: true,
-              price: true,
             },
           },
           reviews: {

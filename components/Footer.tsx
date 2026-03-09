@@ -18,8 +18,14 @@ import {
 } from 'lucide-react'
 
 function NewsletterForm() {
+  const [mounted, setMounted] = React.useState(false)
   const [email, setEmail] = React.useState('')
   const [status, setStatus] = React.useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const t = useTranslations('footer')
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,33 +41,40 @@ function NewsletterForm() {
       })
       setStatus('success')
       setEmail('')
+      setTimeout(() => setStatus('idle'), 5000)
     } catch {
       setStatus('error')
     }
   }
 
   if (status === 'success') {
-    return <p className="text-sm text-green-400 py-2">Kaydınız alındı, teşekkürler!</p>
+    return <p className="text-sm text-green-600 py-2">{t('newsletterSuccess')}</p>
   }
 
   return (
     <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="E-posta adresiniz"
-        value={email}
-        onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
-        required
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand transition-colors"
-      />
+      <label htmlFor="newsletter-email" className="sr-only">{t('emailPlaceholder')}</label>
+      {mounted ? (
+        <input
+          id="newsletter-email"
+          type="email"
+          placeholder={t('emailPlaceholder')}
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
+          required
+          className="w-full min-h-[44px] sm:min-h-0 bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+        />
+      ) : (
+        <div className="w-full rounded-xl px-4 py-3 text-sm bg-slate-100 border border-slate-200 min-h-[44px]" aria-hidden />
+      )}
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 rounded-xl transition-colors disabled:opacity-50"
+        className="min-h-[44px] sm:min-h-0 bg-brand hover:bg-brand-hover text-white text-sm font-bold py-3 rounded-xl transition-colors disabled:opacity-50 touch-manipulation"
       >
-        {status === 'loading' ? 'Kaydediliyor...' : 'Kayıt Ol'}
+        {status === 'loading' ? t('newsletterLoading') : t('newsletterSubscribe')}
       </button>
-      {status === 'error' && <p className="text-xs text-red-400">Bir hata oluştu, tekrar deneyin.</p>}
+      {status === 'error' && <p className="text-xs text-red-600">{t('newsletterError')}</p>}
     </form>
   )
 }
@@ -70,142 +83,156 @@ export function Footer() {
   const t = useTranslations('footer')
   const currentYear = new Date().getFullYear()
 
+  const titleClass = 'text-slate-900 font-semibold text-sm uppercase tracking-wider mb-4'
+  const linkClass = 'text-slate-600 text-sm py-2 block hover:text-brand transition-colors'
+
   return (
-    <footer className="bg-gradient-to-b from-[hsl(var(--ink))] to-[hsl(222,47%,5%)] text-[hsl(215,16%,65%)] pb-safe">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-8 py-8 sm:py-10 md:py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10">
-          {/* 1. Şirket / Hakkımızda */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-3 inline-block shadow-sm">
+    <footer className="bg-slate-50 border-t border-slate-200 text-slate-700 pb-safe">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8 lg:gap-10">
+          {/* Logo + Hakkımızda + Sosyal */}
+          <div className="sm:col-span-2 lg:col-span-1 space-y-5">
+            <div className="bg-white rounded-xl p-3 inline-block border border-slate-200 shadow-sm">
               <Logo size="lg" href="/" />
             </div>
-            <div className="space-y-4">
-              <h3 className="text-white font-bold text-lg">{t('about')}</h3>
-              <p className="text-base opacity-80 leading-relaxed text-slate-300">
+            <div>
+              <h3 className={titleClass}>{t('about')}</h3>
+              <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
                 {t('aboutDesc')}
               </p>
             </div>
-            <div className="space-y-4 pt-2">
-              <p className="text-sm font-bold text-white uppercase tracking-wider">Bizi Takip Edin</p>
-              <div className="flex gap-3">
-                {[Facebook, Twitter, Instagram, Linkedin, Youtube].map((Icon, i) => (
-                  <a key={i} href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-brand hover:border-brand hover:text-white transition-all touch-manipulation">
-                    <Icon className="w-5 h-5" />
+            <div>
+              <p className={titleClass}>{t('followUs')}</p>
+              <div className="flex gap-2">
+                {([
+                  { Icon: Facebook, name: 'Facebook' },
+                  { Icon: Twitter, name: 'Twitter / X' },
+                  { Icon: Instagram, name: 'Instagram' },
+                  { Icon: Linkedin, name: 'LinkedIn' },
+                  { Icon: Youtube, name: 'YouTube' },
+                ] as const).map(({ Icon, name }) => (
+                  <a
+                    key={name}
+                    href="#"
+                    aria-label={name}
+                    className="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-brand hover:border-brand hover:text-white transition-colors"
+                  >
+                    <Icon className="w-4 h-4" aria-hidden />
                   </a>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* 2. Hızlı Linkler */}
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold text-lg">{t('quickLinks')}</h3>
-            <ul className="space-y-0">
+          {/* Hızlı Linkler + GES */}
+          <div>
+            <h3 className={titleClass}>{t('quickLinks')}</h3>
+            <ul className="space-y-1">
               {[
                 { href: '/', labelKey: 'home' as const },
                 { href: '/products', labelKey: 'products' as const },
                 { href: '/categories', labelKey: 'categories' as const },
-                { href: '/ges', labelKey: 'ges' as const },
-                { href: '/ges/teklif-dogrulama', labelKey: 'gesQuoteVerify' as const },
                 { href: '/products?sort=newest', labelKey: 'campaigns' as const },
                 { href: '/contact', labelKey: 'b2bContact' as const },
-                { href: '/contact', labelKey: 'contact' as const },
               ].map((item) => (
-                <li key={`${item.href}-${item.labelKey}`}>
-                  <Link href={item.href} className="block py-3 text-base hover:text-brand transition-colors touch-manipulation min-h-[44px] flex items-center">
-                    {t(item.labelKey)}
-                  </Link>
+                <li key={item.labelKey}>
+                  <Link href={item.href} className={linkClass}>{t(item.labelKey)}</Link>
+                </li>
+              ))}
+            </ul>
+            <h3 className={`${titleClass} mt-6`}>{t('gesTeklifSection')}</h3>
+            <ul className="space-y-1">
+              {[
+                { href: '/ges', labelKey: 'ges' as const },
+                { href: '/ges', labelKey: 'teklifAl' as const },
+                { href: '/ges/teklif-dogrulama', labelKey: 'gesQuoteVerify' as const },
+              ].map((item) => (
+                <li key={item.labelKey}>
+                  <Link href={item.href} className={linkClass}>{t(item.labelKey)}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* 3. Müşteri Hizmetleri */}
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold text-lg">{t('customerService')}</h3>
-            <ul className="space-y-0">
+          {/* Müşteri Hizmetleri */}
+          <div>
+            <h3 className={titleClass}>{t('customerService')}</h3>
+            <ul className="space-y-1">
               {[
                 { href: '/contact', labelKey: 'contact' as const },
                 { href: '/faq', labelKey: 'faq' as const },
                 { href: '/shipping', labelKey: 'shipping' as const },
                 { href: '/returns', labelKey: 'returns' as const },
               ].map((item) => (
-                <li key={item.href}>
-                  <Link href={item.href} className="block py-3 text-base hover:text-brand transition-colors touch-manipulation min-h-[44px] flex items-center">
-                    {t(item.labelKey)}
-                  </Link>
+                <li key={item.labelKey}>
+                  <Link href={item.href} className={linkClass}>{t(item.labelKey)}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* 4. İletişim */}
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold text-lg">{t('contact')}</h3>
-            <ul className="space-y-0">
-              <li>
-                <a href="mailto:info@bataryakit.com" className="flex items-center gap-3 py-3 text-base hover:text-brand transition-colors touch-manipulation min-h-[44px]">
-                  <Mail className="w-5 h-5 text-brand flex-shrink-0" />
-                  info@bataryakit.com
-                </a>
-              </li>
-              <li>
-                <a href="tel:+905343288383" className="flex items-center gap-3 py-3 text-base hover:text-brand transition-colors touch-manipulation min-h-[44px]">
-                  <Phone className="w-5 h-5 text-brand flex-shrink-0" />
-                  +90 534 328 83 83
-                </a>
-              </li>
-              <li className="flex items-center gap-3 py-3 min-h-[44px]">
-                <MapPin className="w-5 h-5 text-brand flex-shrink-0" />
-                <span className="text-base">{t('location')}</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* 5. Ödeme & Güven */}
+          {/* İletişim + Bülten + Güven */}
           <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-white font-bold text-lg">Bültene Katılın</h3>
-              <p className="text-sm text-slate-400 leading-relaxed">Yeni ürünler ve kampanyalardan ilk siz haberdar olun.</p>
+            <div>
+              <h3 className={titleClass}>{t('contact')}</h3>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li>
+                  <a href="mailto:info@voltekno.com" className="flex items-center gap-2 hover:text-brand transition-colors break-all">
+                    <Mail className="w-4 h-4 text-brand shrink-0" aria-hidden />
+                    info@voltekno.com
+                  </a>
+                </li>
+                <li>
+                  <a href="tel:+905343288383" className="flex items-center gap-2 hover:text-brand transition-colors">
+                    <Phone className="w-4 h-4 text-brand shrink-0" aria-hidden />
+                    +90 534 328 83 83
+                  </a>
+                </li>
+                <li className="flex items-start gap-2">
+                  <MapPin className="w-4 h-4 text-brand shrink-0 mt-0.5" aria-hidden />
+                  <span>{t('location')}</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className={titleClass}>{t('newsletter')}</h3>
+              <p className="text-xs text-slate-500 mb-3">{t('newsletterDesc')}</p>
               <NewsletterForm />
             </div>
-            <div className="space-y-4">
-              <h3 className="text-white font-semibold text-lg">{t('paymentTrust')}</h3>
-              <div className="flex flex-wrap gap-4 pt-1">
-                <div className="flex items-center gap-2 opacity-80">
-                  <CreditCard className="w-8 h-8 text-slate-300" />
-                  <span className="text-sm">{t('securePayment')}</span>
+            <div>
+              <h3 className={titleClass}>{t('paymentTrust')}</h3>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 text-slate-600 text-sm">
+                  <CreditCard className="w-5 h-5 text-brand shrink-0" aria-hidden />
+                  {t('securePayment')}
                 </div>
-                <div className="flex items-center gap-2 opacity-80">
-                  <ShieldCheck className="w-8 h-8 text-slate-300" />
-                  <span className="text-sm">{t('sslCert')}</span>
+                <div className="flex items-center gap-2 text-slate-600 text-sm">
+                  <ShieldCheck className="w-5 h-5 text-brand shrink-0" aria-hidden />
+                  {t('sslCert')}
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-8 sm:mt-10 md:mt-12 pt-6 sm:pt-8 border-t border-white/10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <p className="text-base opacity-80 leading-snug">
-              © {currentYear} Batarya Kit. {t('copyright')}
-            </p>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-base">
-              <Link href="/privacy" className="py-2 opacity-80 hover:text-brand transition-colors touch-manipulation">
-                {t('privacy')}
-              </Link>
-              <Link href="/terms" className="py-2 opacity-80 hover:text-brand transition-colors touch-manipulation">
-                {t('terms')}
-              </Link>
-              <Link href="/cookies" className="py-2 opacity-80 hover:text-brand transition-colors touch-manipulation">
-                {t('cookies')}
-              </Link>
-            </div>
-          </div>
+        {/* Alt çizgi */}
+        <div className="mt-10 pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
+          <p className="text-sm text-slate-500">
+            © {currentYear} voltekno. {t('copyright')}
+          </p>
+          <nav className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm">
+            <Link href="/privacy" className="text-slate-500 hover:text-brand transition-colors">
+              {t('privacy')}
+            </Link>
+            <Link href="/terms" className="text-slate-500 hover:text-brand transition-colors">
+              {t('terms')}
+            </Link>
+            <Link href="/cookies" className="text-slate-500 hover:text-brand transition-colors">
+              {t('cookies')}
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>
   )
 }
-

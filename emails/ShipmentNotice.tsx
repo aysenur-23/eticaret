@@ -103,7 +103,7 @@ export default function ShipmentNotice({
 
             <Text style={paragraph}>
               Teşekkürler,<br />
-              Batarya Kit Ekibi
+              IMORA Ekibi
             </Text>
           </Section>
         </Container>

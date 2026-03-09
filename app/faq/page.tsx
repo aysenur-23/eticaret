@@ -4,8 +4,16 @@ import { ChevronRight } from 'lucide-react'
 import { FAQContent } from './FAQContent'
 
 export const metadata: Metadata = {
-  title: 'Sık Sorulan Sorular | Batarya Kit',
-  description: 'Batarya paketleri, sipariş, kargo, ödeme ve teknik konularda sık sorulan sorular ve cevaplar.',
+  title: 'Sık Sorulan Sorular — Sipariş, Kargo, Ürün ve Teknik Destek',
+  description: 'voltekno ürünleri, sipariş süreci, ödeme yöntemleri, kargo ve teknik konularda sık sorulan sorular. Güneş paneli, akü, inverter ve EV şarj hakkında merak ettikleriniz.',
+  keywords: ['sık sorulan sorular', 'faq', 'güneş paneli soru', 'akü soru', 'ges soru', 'voltekno destek'],
+  alternates: { canonical: '/faq' },
+  openGraph: {
+    title: 'Sık Sorulan Sorular | voltekno',
+    description: 'Sipariş, kargo, ürün ve teknik konularda sık sorulan sorular.',
+    type: 'website',
+    siteName: 'voltekno',
+  },
 }
 
 export default function FAQPage() {

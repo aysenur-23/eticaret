@@ -14,6 +14,7 @@ const SIDEBAR_EXCLUDE_PREFIXES = [
   '/reset-password',
   '/verify-email',
   '/admin',
+  '/ges',
 ]
 
 function shouldHideSidebar(pathname: string): boolean {
@@ -38,8 +39,8 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           isHome
             ? 'w-full min-w-0 overflow-x-hidden pt-0 pb-4 lg:pb-8'
             : isProducts
-              ? 'w-full min-w-0 overflow-x-hidden'
-              : 'container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] w-full min-w-0 overflow-x-hidden py-4 lg:py-8'
+              ? 'w-full min-w-0 overflow-x-hidden pt-0 mt-0'
+              : 'container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] w-full min-w-0 overflow-x-hidden pt-5 pb-4 lg:pt-7 lg:pb-8'
         }
       >
         {children}
@@ -48,7 +49,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] w-full min-w-0 overflow-x-hidden py-4 lg:py-8">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] w-full min-w-0 overflow-x-hidden pt-5 pb-4 lg:pt-7 lg:pb-8">
       <Suspense fallback={<div className="w-full lg:w-64 xl:w-72 shrink-0" />}>
         <CategorySidebar />
       </Suspense>
@@ -58,3 +59,4 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
     </div>
   )
 }
+

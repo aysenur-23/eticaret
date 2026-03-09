@@ -47,7 +47,7 @@ function SuccessContent() {
           Sipariş detayları e-posta adresinize gönderilecektir.
         </p>
         <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3">
-          <Button asChild className="bg-slate-800 hover:bg-slate-700 text-white rounded-xl min-h-[48px] w-full sm:w-auto touch-manipulation">
+          <Button asChild className="bg-brand hover:bg-brand-hover text-white rounded-xl min-h-[48px] w-full sm:w-auto touch-manipulation">
             <Link href="/profile?tab=orders" className="inline-flex items-center justify-center gap-2">
               <Package className="w-4 h-4" />
               Siparişlerim

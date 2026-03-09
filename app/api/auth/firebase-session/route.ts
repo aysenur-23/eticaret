@@ -9,7 +9,7 @@ import { getAdminAuth, getAdminFirestore, isFirebaseAdminConfigured } from '@/li
 import { prisma } from '@/lib/prisma'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET
 const JWT_EXPIRY = '7d'
 
 /** Firestore users/{uid} profilinden role ve customerNo oku. */
@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
         data: updateData,
       })
       user = await prisma.user.findUnique({ where: { id: uid } }) as typeof user
+    }
+
+    if (!JWT_SECRET) {
+      return NextResponse.json({ error: 'Sunucu yapılandırma hatası.' }, { status: 503 })
     }
 
     const token = jwt.sign(

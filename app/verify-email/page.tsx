@@ -130,9 +130,9 @@ function VerifyEmailContent() {
                   {status === 'success' ? (
                     <CheckCircle className="w-7 h-7 text-green-600" />
                   ) : status === 'error' ? (
-                    <XCircle className="w-7 h-7 text-red-600" />
+                    <XCircle className="w-7 h-7 text-brand" />
                   ) : (
-                    <Mail className="w-7 h-7 text-red-600" />
+                    <Mail className="w-7 h-7 text-brand" />
                   )}
               </div>
             </div>
@@ -150,7 +150,7 @@ function VerifyEmailContent() {
           <CardContent>
             {status === 'loading' && (
               <div className="flex flex-col items-center justify-center py-8">
-                <Loader2 className="w-8 h-8 text-red-600 animate-spin mb-4" />
+                <Loader2 className="w-8 h-8 text-brand animate-spin mb-4" />
                 <p className="text-gray-600">Doğrulanıyor...</p>
               </div>
             )}
@@ -257,7 +257,7 @@ function VerifyEmailContent() {
                 </Button>
 
                 <div className="text-center text-sm text-gray-600">
-                  <Link href="/login" className="text-red-600 hover:text-red-700 font-semibold">
+                  <Link href="/login" className="text-brand hover:text-brand-hover font-semibold">
                     Giriş sayfasına dön
                   </Link>
                 </div>
@@ -276,7 +276,7 @@ export default function VerifyEmailPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50/80 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-red-600 border-t-transparent mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-brand border-t-transparent mx-auto mb-4"></div>
           <p className="text-gray-600">Yükleniyor…</p>
         </div>
       </div>

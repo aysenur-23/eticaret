@@ -15,8 +15,8 @@ export interface PageMetadata {
 }
 
 export function generateMetadata(meta: PageMetadata): Metadata {
-  const siteName = 'Batarya Kit'
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://bataryakit.com'
+  const siteName = 'voltekno'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
   const fullTitle = meta.title.includes(siteName) ? meta.title : `${meta.title} | ${siteName}`
   const imageUrl = meta.image || `${baseUrl}/og-image.jpg`
   const pageUrl = meta.url || baseUrl
@@ -38,7 +38,7 @@ export function generateMetadata(meta: PageMetadata): Metadata {
           alt: meta.title,
         },
       ],
-      type: meta.type || 'website',
+      type: meta.type === 'article' ? 'article' : 'website',
       locale: 'tr_TR',
     },
     twitter: {

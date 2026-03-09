@@ -154,7 +154,7 @@ export default function AdminGesTekliflerPage() {
         <TabsContent value="requests" className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+              <Loader2 className="w-10 h-10 animate-spin text-brand" />
             </div>
           ) : (
             <Card className="border-slate-200/80 bg-white shadow-sm">
@@ -209,9 +209,11 @@ export default function AdminGesTekliflerPage() {
                                 {row.phone}
                               </a>
                             </td>
-                            <td className="py-3 px-4 text-sm text-slate-700 flex items-center gap-1">
-                              <MapPin className="w-4 h-4 text-slate-400" />
-                              {row.city}
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-1 text-sm text-slate-700">
+                                <MapPin className="w-4 h-4 text-slate-400" />
+                                {row.city}
+                              </div>
                             </td>
                             <td className="py-3 px-4 text-sm text-slate-600">
                               {row.installationType ? INSTALLATION_TYPE_LABELS[row.installationType] ?? row.installationType : '—'}
@@ -247,7 +249,7 @@ export default function AdminGesTekliflerPage() {
         <TabsContent value="verifications" className="space-y-4">
           {loadingVerifications ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+              <Loader2 className="w-10 h-10 animate-spin text-brand" />
             </div>
           ) : (
             <Card className="border-slate-200/80 bg-white shadow-sm">

@@ -67,7 +67,7 @@ export function FixedCategoryMenu() {
       {/* Robotzade: TÜM KATEGORİLER bandı – hamburger sol, metin, dropdown sağ; header ile bağlantılı (tüm ürünler) */}
       <Link
         href="/products"
-        className="flex items-center gap-2 h-12 px-4 shrink-0 bg-red-600 hover:bg-red-700 text-white border-b border-red-700 transition-colors"
+        className="flex items-center gap-2 h-12 px-4 shrink-0 bg-brand hover:bg-brand-hover text-white border-b border-brand transition-colors"
         aria-label="Tüm ürünler"
       >
         <Menu className="w-5 h-5 shrink-0" aria-hidden />
@@ -126,7 +126,7 @@ export function FixedCategoryMenu() {
                         href={href}
                         className={`block px-4 py-2.5 text-sm font-medium transition-colors ${
                           isActive
-                            ? 'bg-red-50 text-red-700'
+                            ? 'bg-brand-light text-brand'
                             : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                         }`}
                       >
@@ -137,7 +137,7 @@ export function FixedCategoryMenu() {
                   <div className="border-t border-slate-200 mt-1 pt-1">
                     <Link
                       href={`/category/${group.id}`}
-                      className="block px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50"
+                      className="block px-4 py-2.5 text-sm font-semibold text-brand hover:bg-brand-light"
                     >
                       Tümü →
                     </Link>

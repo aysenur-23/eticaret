@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@bataryakit.com'
+    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
     const email = typeof body.email === 'string' ? body.email.trim() || undefined : undefined
     const district = typeof body.district === 'string' ? body.district.trim() || undefined : undefined
     const monthlyKwh = typeof body.monthlyKwh === 'number' && Number.isFinite(body.monthlyKwh) ? body.monthlyKwh : (typeof body.monthlyKwh === 'string' ? parseFloat(body.monthlyKwh) : undefined)

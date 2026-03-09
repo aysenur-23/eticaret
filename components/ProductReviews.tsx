@@ -1,0 +1,288 @@
+'use client'
+
+import React, { useState, useEffect, useCallback } from 'react'
+import { Star, Loader2, MessageSquare, User, Send } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { useAuthStore } from '@/lib/store/useAuthStore'
+
+type Review = {
+  id: string
+  userId: string
+  userName: string
+  rating: number
+  title: string
+  comment: string
+  createdAt: string
+}
+
+function StarRow({
+  rating,
+  size = 'sm',
+}: {
+  rating: number
+  size?: 'sm' | 'lg'
+}) {
+  const cls = size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <Star
+          key={s}
+          className={`${cls} ${s <= Math.round(rating) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
+        />
+      ))}
+    </div>
+  )
+}
+
+export function ProductReviews({ productId }: { productId: string }) {
+  const { user, isAuthenticated } = useAuthStore()
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+  const [rating, setRating] = useState(5)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [title, setTitle] = useState('')
+  const [comment, setComment] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+
+  const loadReviews = useCallback(async () => {
+    try {
+      const { collection, getDocs, query, where, orderBy } = await import('firebase/firestore')
+      const { getDb } = await import('@/lib/firebase/config')
+      const db = getDb()
+      const q = query(
+        collection(db, 'productReviews'),
+        where('productId', '==', productId),
+        where('status', '==', 'approved'),
+        orderBy('createdAt', 'desc')
+      )
+      const snap = await getDocs(q)
+      const rows: Review[] = snap.docs.map((d) => {
+        const data = d.data()
+        const ts = data.createdAt as { seconds: number } | null
+        return {
+          id: d.id,
+          userId: data.userId || '',
+          userName: data.userName || 'Anonim',
+          rating: data.rating || 5,
+          title: data.title || '',
+          comment: data.comment || '',
+          createdAt: ts?.seconds ? new Date(ts.seconds * 1000).toISOString() : '',
+        }
+      })
+      setReviews(rows)
+    } catch {
+      // silent
+    } finally {
+      setLoading(false)
+    }
+  }, [productId])
+
+  useEffect(() => {
+    loadReviews()
+  }, [loadReviews])
+
+  const avgRating =
+    reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0
+
+  const ratingCounts = [5, 4, 3, 2, 1].map((s) => ({
+    star: s,
+    count: reviews.filter((r) => Math.round(r.rating) === s).length,
+  }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!comment.trim()) {
+      setError('Lütfen bir yorum yazın.')
+      return
+    }
+    setSubmitting(true)
+    setError('')
+    try {
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore')
+      const { getDb } = await import('@/lib/firebase/config')
+      const db = getDb()
+      await addDoc(collection(db, 'productReviews'), {
+        productId,
+        userId: user?.id || '',
+        userName: user?.name || 'Kullanıcı',
+        rating,
+        title: title.trim() || null,
+        comment: comment.trim(),
+        status: 'approved',
+        createdAt: serverTimestamp(),
+      })
+      setSubmitted(true)
+      setComment('')
+      setTitle('')
+      setRating(5)
+      setLoading(true)
+      await loadReviews()
+    } catch {
+      setError('Yorum gönderilemedi. Lütfen tekrar deneyin.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="mt-10 pt-8 border-t border-slate-200">
+      <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
+        Değerlendirmeler
+        {reviews.length > 0 && (
+          <span className="text-sm font-normal text-slate-500">({reviews.length})</span>
+        )}
+      </h2>
+
+      {/* Özet */}
+      {reviews.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-6 mb-8 bg-slate-50 rounded-2xl border border-slate-200 p-5">
+          <div className="flex items-center gap-4">
+            <span className="text-5xl font-bold text-slate-900">{avgRating.toFixed(1)}</span>
+            <div>
+              <StarRow rating={avgRating} size="lg" />
+              <p className="text-sm text-slate-500 mt-1">{reviews.length} değerlendirme</p>
+            </div>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            {ratingCounts.map(({ star, count }) => (
+              <div key={star} className="flex items-center gap-2">
+                <span className="text-xs text-slate-500 w-4 text-right">{star}</span>
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-400 rounded-full transition-all"
+                    style={{ width: reviews.length ? `${(count / reviews.length) * 100}%` : '0%' }}
+                  />
+                </div>
+                <span className="text-xs text-slate-400 w-4">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Liste */}
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <Loader2 className="w-7 h-7 animate-spin text-slate-400" />
+        </div>
+      ) : reviews.length === 0 ? (
+        <div className="text-center py-10 text-slate-400">
+          <MessageSquare className="w-10 h-10 mx-auto mb-2 text-slate-200" />
+          <p className="text-sm">Henüz değerlendirme yok. İlk değerlendirmeyi siz yapın!</p>
+        </div>
+      ) : (
+        <div className="space-y-3 mb-8">
+          {reviews.map((r) => (
+            <div key={r.id} className="bg-white rounded-xl border border-slate-200 p-4">
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-brand" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{r.userName}</p>
+                    <p className="text-xs text-slate-400">
+                      {r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : ''}
+                    </p>
+                  </div>
+                </div>
+                <StarRow rating={r.rating} />
+              </div>
+              {r.title && (
+                <p className="text-sm font-semibold text-slate-800 mb-1">{r.title}</p>
+              )}
+              <p className="text-sm text-slate-600 leading-relaxed">{r.comment}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Form */}
+      {isAuthenticated ? (
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5">
+          {submitted ? (
+            <div className="text-center py-2">
+              <p className="text-sm font-semibold text-green-700">✓ Değerlendirmeniz alındı, teşekkürler!</p>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="text-xs text-brand hover:underline mt-1"
+              >
+                Tekrar değerlendir
+              </button>
+            </div>
+          ) : (
+            <>
+              <h3 className="font-semibold text-slate-900 mb-4 text-sm">Değerlendirme Yaz</h3>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {/* Yıldız seçici */}
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onMouseEnter={() => setHoverRating(s)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => setRating(s)}
+                      className="transition-transform hover:scale-110 focus:outline-none"
+                    >
+                      <Star
+                        className={`w-8 h-8 transition-colors ${
+                          s <= (hoverRating || rating)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-slate-200 hover:text-amber-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  <span className="ml-2 text-sm text-slate-500">
+                    {['', 'Berbat', 'Kötü', 'Orta', 'İyi', 'Mükemmel'][hoverRating || rating]}
+                  </span>
+                </div>
+                <Input
+                  placeholder="Başlık (opsiyonel)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="rounded-xl border-slate-200 text-sm"
+                />
+                <Textarea
+                  placeholder="Ürün hakkında deneyiminizi paylaşın..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={3}
+                  className="rounded-xl border-slate-200 text-sm resize-none"
+                  required
+                />
+                {error && <p className="text-xs text-red-500">{error}</p>}
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  size="sm"
+                  className="rounded-xl"
+                >
+                  <Send className="w-3.5 h-3.5 mr-1.5" />
+                  {submitting ? 'Gönderiliyor...' : 'Değerlendirmeyi Gönder'}
+                </Button>
+              </form>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 text-center">
+          <p className="text-sm text-slate-600">
+            Değerlendirme yazmak için{' '}
+            <a href="/login" className="text-brand font-semibold hover:underline">
+              giriş yapın
+            </a>
+            .
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

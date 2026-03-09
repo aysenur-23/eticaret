@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { checkAdmin } from '@/lib/adminAuth'
 
@@ -66,7 +67,7 @@ export async function PATCH(
       data.scope = scope
     }
     if (categoryName !== undefined) data.categoryName = categoryName
-    if (productIds !== undefined) data.productIds = Array.isArray(productIds) ? productIds : null
+    if (productIds !== undefined) data.productIds = Array.isArray(productIds) ? productIds : Prisma.JsonNull
     if (type !== undefined) {
       if (!['PERCENT', 'FIXED'].includes(type)) {
         return NextResponse.json({ error: 'Geçersiz type' }, { status: 400 })

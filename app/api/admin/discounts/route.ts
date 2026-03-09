@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { checkAdmin } from '@/lib/adminAuth'
 
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
         name: String(name),
         scope: String(scope),
         categoryName: scope === 'CATEGORY' ? (categoryName ?? null) : null,
-        productIds: scope === 'PRODUCT' && Array.isArray(productIds) ? productIds : null,
+        productIds: scope === 'PRODUCT' && Array.isArray(productIds) ? productIds : Prisma.JsonNull,
         type: String(type),
         value: Number(value),
         startDate: startDate ? new Date(startDate) : null,

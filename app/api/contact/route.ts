@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmailSMTP } from '@/lib/email-smtp'
 import { isRateLimited } from '@/lib/rate-limit'
+import { getAdminFirestore } from '@/lib/firebaseAdminServer'
+import { FieldValue } from 'firebase-admin/firestore'
 import React from 'react'
 
 // Simple email template for contact form
@@ -44,7 +46,7 @@ function ContactFormEmail({ name, email, phone, subject, message }: {
       }
     }, [
       React.createElement('p', { key: 'intro', style: { marginBottom: '20px' } }, 
-        'Batarya Kit web sitesinden yeni bir iletişim formu mesajı alındı:'
+        'IMORA web sitesinden yeni bir iletişim formu mesajı alındı:'
       ),
       React.createElement('div', { key: 'details', style: { marginBottom: '20px' } }, [
         React.createElement('p', { key: 'name' }, [
@@ -102,7 +104,7 @@ function ContactFormEmail({ name, email, phone, subject, message }: {
         }
       }, [
         React.createElement('p', { key: 'note', style: { margin: 0 } }, 
-          'Bu mesaj Batarya Kit web sitesi iletişim formundan gönderilmiştir.'
+          'Bu mesaj IMORA web sitesi iletişim formundan gönderilmiştir.'
         )
       ])
     ])
@@ -138,7 +140,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin email from environment or use default
-    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@bataryakit.com'
+    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
 
     // Send email to admin
     const emailResult = await sendEmailSMTP(
@@ -156,6 +158,25 @@ export async function POST(request: NextRequest) {
     if (!emailResult.success) {
       console.error('Email gönderme hatası:', emailResult.error)
       // Don't fail the request if email fails, just log it
+    }
+
+    // Firestore'a kaydet (admin panelinde görüntülenebilmesi için)
+    try {
+      const db = getAdminFirestore()
+      if (db) {
+        await db.collection('contactMessages').add({
+          name,
+          email,
+          phone: phone || null,
+          subject,
+          message,
+          emailSent: emailResult.success,
+          createdAt: FieldValue.serverTimestamp(),
+        })
+      }
+    } catch (fsErr) {
+      console.error('Firestore contact save error:', fsErr)
+      // Non-critical: don't fail the request
     }
 
     return NextResponse.json({

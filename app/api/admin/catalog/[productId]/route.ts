@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { checkAdmin } from '@/lib/adminAuth'
 import { getMergedProductById } from '@/lib/catalog-merge'
@@ -72,17 +73,17 @@ export async function PATCH(
     if (fullDescription !== undefined) data.fullDescription = fullDescription
     if (price !== undefined) data.price = Number(price)
     if (image !== undefined) data.image = image
-    if (images !== undefined) data.images = Array.isArray(images) ? images : null
+    if (images !== undefined) data.images = Array.isArray(images) ? images : Prisma.JsonNull
     if (category !== undefined) data.category = category
     if (stock !== undefined) data.stock = Math.max(0, Math.floor(Number(stock)))
     if (featured !== undefined) data.featured = Boolean(featured)
     if (specifications !== undefined) data.specifications =
-      specifications != null && typeof specifications === 'object' ? specifications : null
-    if (features !== undefined) data.features = Array.isArray(features) ? features : null
-    if (variants !== undefined) data.variants = Array.isArray(variants) ? variants : null
+      specifications != null && typeof specifications === 'object' ? specifications : Prisma.JsonNull
+    if (features !== undefined) data.features = Array.isArray(features) ? features : Prisma.JsonNull
+    if (variants !== undefined) data.variants = Array.isArray(variants) ? variants : Prisma.JsonNull
     if (brand !== undefined) data.brand = brand
     if (sku !== undefined) data.sku = sku
-    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : null
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : Prisma.JsonNull
     if (slogan !== undefined) data.slogan = slogan
     if (warranty !== undefined) data.warranty = warranty
 

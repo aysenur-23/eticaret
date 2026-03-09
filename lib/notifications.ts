@@ -28,15 +28,8 @@ export async function sendOrderConfirmation(data: NotificationData): Promise<boo
       })
     )
     
-    if (result.success) {
-      console.log(`Order confirmation sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send order confirmation:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending order confirmation:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -44,7 +37,7 @@ export async function sendOrderConfirmation(data: NotificationData): Promise<boo
 // Send new order notification to admin
 export async function sendAdminNewOrderNotification(data: NotificationData): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@bataryakit.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -55,15 +48,8 @@ export async function sendAdminNewOrderNotification(data: NotificationData): Pro
       })
     )
     
-    if (result.success) {
-      console.log(`New order notification sent to admin`)
-      return true
-    } else {
-      console.error('Failed to send admin notification:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending admin notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -83,15 +69,8 @@ export async function sendShipmentNotice(data: NotificationData, trackingNumber:
       })
     )
     
-    if (result.success) {
-      console.log(`Shipment notice sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send shipment notice:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending shipment notice:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -123,10 +102,7 @@ export async function sendOrderStatusUpdate(data: NotificationData, newStatus: s
     }
 
     const statusInfo = statusMessages[newStatus as keyof typeof statusMessages]
-    if (!statusInfo) {
-      console.warn(`Unknown status: ${newStatus}`)
-      return false
-    }
+    if (!statusInfo) return false
 
     const result = await sendEmail(
       data.customer.email,
@@ -139,20 +115,13 @@ export async function sendOrderStatusUpdate(data: NotificationData, newStatus: s
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>Yeni Durum:</strong> ${newStatus}</p>
           <p>Detaylı bilgi için admin panelimizi ziyaret edebilirsiniz.</p>
-          <p>İyi günler,<br>Batarya Kit Ekibi</p>
+          <p>İyi günler,<br>IMORA Ekibi</p>
         </div>
       `
     )
     
-    if (result.success) {
-      console.log(`Order status update sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send order status update:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending order status update:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -171,20 +140,13 @@ export async function sendPaymentConfirmation(data: NotificationData): Promise<b
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>Ödeme Tutarı:</strong> ${data.pricing?.total || 0} ₺</p>
           <p>Siparişiniz işleme alınacaktır.</p>
-          <p>İyi günler,<br>Batarya Kit Ekibi</p>
+          <p>İyi günler,<br>IMORA Ekibi</p>
         </div>
       `
     )
     
-    if (result.success) {
-      console.log(`Payment confirmation sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send payment confirmation:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending payment confirmation:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -203,20 +165,13 @@ export async function sendPaymentFailureNotification(data: NotificationData): Pr
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p>Lütfen ödeme bilgilerinizi kontrol ederek tekrar deneyiniz.</p>
           <p>Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.</p>
-          <p>İyi günler,<br>Batarya Kit Ekibi</p>
+          <p>İyi günler,<br>IMORA Ekibi</p>
         </div>
       `
     )
     
-    if (result.success) {
-      console.log(`Payment failure notification sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send payment failure notification:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending payment failure notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -235,20 +190,13 @@ export async function sendRefundNotification(data: NotificationData, refundAmoun
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>İade Tutarı:</strong> ${refundAmount} ₺</p>
           <p>İade tutarı 3-5 iş günü içinde hesabınıza yansıyacaktır.</p>
-          <p>İyi günler,<br>Batarya Kit Ekibi</p>
+          <p>İyi günler,<br>IMORA Ekibi</p>
         </div>
       `
     )
     
-    if (result.success) {
-      console.log(`Refund notification sent to ${data.customer.email}`)
-      return true
-    } else {
-      console.error('Failed to send refund notification:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending refund notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -256,7 +204,7 @@ export async function sendRefundNotification(data: NotificationData, refundAmoun
 // Send low stock notification to admin
 export async function sendLowStockNotification(productName: string, currentStock: number, minStock: number): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@bataryakit.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -275,15 +223,8 @@ export async function sendLowStockNotification(productName: string, currentStock
       `
     )
     
-    if (result.success) {
-      console.log(`Low stock notification sent to admin`)
-      return true
-    } else {
-      console.error('Failed to send low stock notification:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending low stock notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -291,7 +232,7 @@ export async function sendLowStockNotification(productName: string, currentStock
 // Send system error notification to admin
 export async function sendSystemErrorNotification(error: string, context: string): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@bataryakit.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -310,15 +251,8 @@ export async function sendSystemErrorNotification(error: string, context: string
       `
     )
     
-    if (result.success) {
-      console.log(`System error notification sent to admin`)
-      return true
-    } else {
-      console.error('Failed to send system error notification:', result.error)
-      return false
-    }
-  } catch (error) {
-    console.error('Error sending system error notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -349,7 +283,7 @@ export interface RFQNotificationData {
 
 export async function sendRFQAdminNotification(data: RFQNotificationData): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@bataryakit.com'
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
     const result = await sendEmail(
       adminEmail,
       `Yeni Teklif Talebi - ${data.companyName}`,
@@ -367,14 +301,8 @@ export async function sendRFQAdminNotification(data: RFQNotificationData): Promi
         createdAt: new Date(data.createdAt).toLocaleString('tr-TR'),
       })
     )
-    if (result.success) {
-      console.log('RFQ admin notification sent to', adminEmail)
-      return true
-    }
-    console.error('Failed to send RFQ admin notification:', result.error)
-    return false
-  } catch (error) {
-    console.error('Error sending RFQ admin notification:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -383,7 +311,7 @@ export async function sendRFQCustomerConfirmation(data: RFQNotificationData): Pr
   try {
     const result = await sendEmail(
       data.contactEmail,
-      'Teklif Talebiniz Alındı - Batarya Kit',
+      'Teklif Talebiniz Alındı - IMORA',
       RFQCustomerConfirmation({
         contactName: data.contactName,
         companyName: data.companyName,
@@ -391,14 +319,8 @@ export async function sendRFQCustomerConfirmation(data: RFQNotificationData): Pr
         itemCount: data.items.length,
       })
     )
-    if (result.success) {
-      console.log('RFQ customer confirmation sent to', data.contactEmail)
-      return true
-    }
-    console.error('Failed to send RFQ customer confirmation:', result.error)
-    return false
-  } catch (error) {
-    console.error('Error sending RFQ customer confirmation:', error)
+    return result.success
+  } catch {
     return false
   }
 }
@@ -414,11 +336,11 @@ export async function sendQuoteReadyToCustomer(data: {
   try {
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://bataryakit.com')
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://imora.com')
     const tekliflerimUrl = `${String(baseUrl).replace(/\/$/, '')}/tekliflerim`
     const result = await sendEmail(
       data.contactEmail,
-      'Fiyat Teklifiniz Hazır - Batarya Kit',
+      'Fiyat Teklifiniz Hazır - IMORA',
       QuoteReady({
         contactName: data.contactName,
         companyName: data.companyName,
@@ -427,14 +349,8 @@ export async function sendQuoteReadyToCustomer(data: {
         tekliflerimUrl,
       })
     )
-    if (result.success) {
-      console.log('Quote ready email sent to', data.contactEmail)
-      return true
-    }
-    console.error('Failed to send quote ready email:', result.error)
-    return false
-  } catch (error) {
-    console.error('Error sending quote ready email:', error)
+    return result.success
+  } catch {
     return false
   }
 }

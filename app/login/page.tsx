@@ -49,7 +49,7 @@ function LoginForm() {
           <Card className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-md mx-auto w-full">
             <CardHeader className="space-y-1 text-center pb-4 bg-white">
               <div className="flex justify-center mb-4">
-                <div className="w-14 h-14 bg-slate-800 rounded-xl flex items-center justify-center">
+                <div className="w-14 h-14 bg-brand rounded-xl flex items-center justify-center">
                   <LogIn className="w-7 h-7 text-white" />
                 </div>
               </div>
@@ -89,15 +89,15 @@ function LoginForm() {
                   <input type="checkbox" id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 border-slate-300 rounded focus:ring-slate-400 shrink-0" />
                   <Label htmlFor="remember" className="text-base text-slate-600 cursor-pointer font-normal">Beni hatırla</Label>
                 </label>
-                <Link href="/forgot-password" className="text-base text-slate-800 hover:text-slate-600 font-medium py-2 touch-manipulation min-h-[44px] flex items-center">Şifremi unuttum</Link>
+                <Link href="/forgot-password" className="text-base text-slate-800 hover:text-brand font-medium py-2 touch-manipulation min-h-[44px] flex items-center">Şifremi unuttum</Link>
               </div>
 
-              <Button type="submit" className="w-full rounded-xl min-h-[48px] touch-manipulation text-base font-semibold bg-slate-800 hover:bg-slate-700 text-white" disabled={loading} size="lg">
+              <Button type="submit" className="w-full rounded-xl min-h-[48px] touch-manipulation text-base font-semibold bg-brand hover:bg-brand-hover text-white" disabled={loading} size="lg">
                 {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Giriş yapılıyor...</> : 'Giriş Yap'}
               </Button>
 
               <div className="text-center text-base text-slate-600 py-2 leading-relaxed">
-                Hesabınız yok mu? <Link href="/register" className="text-slate-800 hover:underline font-semibold py-2 inline-block touch-manipulation">Kayıt olun</Link>
+                Hesabınız yok mu? <Link href="/register" className="text-brand hover:underline font-semibold py-2 inline-block touch-manipulation">Kayıt olun</Link>
               </div>
             </form>
             </CardContent>

@@ -279,7 +279,7 @@ export default function AdminIndirimlerPage() {
                           size="icon"
                           onClick={() => handleDelete(d.id)}
                           disabled={deletingId === d.id}
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="h-8 w-8 text-brand hover:text-brand-hover hover:bg-brand-light"
                         >
                           {deletingId === d.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                         </Button>

@@ -1,7 +1,6 @@
 'use client'
 
-import React, { Suspense } from 'react'
-import { CategorySidebar } from '@/components/CategorySidebar'
+import React from 'react'
 
 interface ProductPageShellProps {
     children: React.ReactNode
@@ -11,7 +10,7 @@ interface ProductPageShellProps {
 }
 
 /**
- * Ürün sayfaları için ortak shell: hero, breadcrumbs ve iki sütunlu (sidebar + içerik) yapı.
+ * Ürün sayfaları için ortak shell: hero, breadcrumbs ve içerik alanı.
  */
 export function ProductPageShell({
     children,
@@ -20,7 +19,7 @@ export function ProductPageShell({
     showSidebar = true,
 }: ProductPageShellProps) {
     return (
-        <div className="min-h-screen min-h-[100dvh] bg-slate-50 flex flex-col w-full max-w-full min-w-0 overflow-x-hidden">
+        <div className="min-h-screen min-h-[100dvh] bg-slate-50 flex flex-col w-full max-w-full min-w-0 overflow-x-hidden pt-0 mt-0">
             {hero && (
                 <section className="w-full shrink-0 min-w-0">
                     {hero}
@@ -28,23 +27,16 @@ export function ProductPageShell({
             )}
 
             {breadcrumbs && (
-                <section className="bg-white border-b border-slate-200 sticky top-14 md:top-16 z-10 py-2.5 shadow-sm shrink-0 px-safe">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] min-w-0">
+                <section className="bg-white border-b border-slate-200 sticky top-0 z-20 min-h-[44px] flex items-center pt-3 pb-3 md:pt-4 md:pb-4 shadow-sm shrink-0 px-safe mt-0">
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] min-w-0 w-full">
                         {breadcrumbs}
                     </div>
                 </section>
             )}
 
-            <div className="flex-1 w-full max-w-full min-w-0 overflow-x-hidden pb-safe">
-                <div className={`flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 md:py-6 min-w-0`}>
-                    {showSidebar && (
-                        <div className="w-full lg:w-60 xl:w-64 shrink-0 overflow-visible">
-                            <Suspense fallback={<div className="w-full lg:w-60 xl:w-64 shrink-0 bg-white/50 animate-pulse rounded-xl h-[400px]" />}>
-                                <CategorySidebar />
-                            </Suspense>
-                        </div>
-                    )}
-                    <main className="flex-1 min-w-0 max-w-full overflow-x-hidden">
+            <div className="flex-1 w-full max-w-full min-w-0 overflow-x-hidden pb-safe relative z-0">
+                <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6 lg:gap-6 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 md:pt-8 pb-16 sm:pb-20 md:pb-24 min-w-0 bg-slate-50">
+                    <main className="flex-1 min-w-0 max-w-full overflow-x-hidden w-full">
                         {children}
                     </main>
                 </div>

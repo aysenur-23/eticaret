@@ -38,7 +38,7 @@ export class StripeAdapter implements PaymentAdapter {
                 unit_amount: amountCents,
                 product_data: {
                   name: `Sipariş ${input.metadata?.orderNo || input.orderId}`,
-                  description: 'Batarya Kit sipariş ödemesi',
+                  description: 'IMORA sipariş ödemesi',
                 },
               },
               quantity: 1,
@@ -78,7 +78,6 @@ export class StripeAdapter implements PaymentAdapter {
         requiresRedirect: false,
       }
     } catch (error) {
-      console.error('Stripe payment init error:', error)
       throw new Error(`Stripe payment initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -132,7 +131,6 @@ export class StripeAdapter implements PaymentAdapter {
 
       throw new Error(`Unhandled event type: ${event.type}`)
     } catch (error) {
-      console.error('Stripe webhook verification error:', error)
       throw new Error(`Webhook verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -145,7 +143,7 @@ export class StripeAdapter implements PaymentAdapter {
       let status: 'PAID' | 'FAILED' | 'PENDING' = 'PENDING'
       if (paymentIntent.status === 'succeeded') {
         status = 'PAID'
-      } else if (paymentIntent.status === 'canceled' || paymentIntent.status === 'payment_failed') {
+      } else if (paymentIntent.status === 'canceled') {
         status = 'FAILED'
       }
 
@@ -157,7 +155,6 @@ export class StripeAdapter implements PaymentAdapter {
         currency: paymentIntent.currency.toUpperCase(),
       }
     } catch (error) {
-      console.error('Stripe get payment status error:', error)
       throw new Error(`Failed to get payment status: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
@@ -174,8 +171,7 @@ export class StripeAdapter implements PaymentAdapter {
         success: refund.status === 'succeeded',
         refundRef: refund.id,
       }
-    } catch (error) {
-      console.error('Stripe refund error:', error)
+    } catch {
       return { success: false }
     }
   }

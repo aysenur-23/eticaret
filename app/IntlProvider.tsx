@@ -20,7 +20,21 @@ export default async function IntlProvider({
 }: {
   children: React.ReactNode
 }) {
-  let locale = DEFAULT_LOCALE
+  // Detect admin routes: middleware forwards x-pathname header to server components
+  // In static export mode (STATIC_EXPORT=true), headers() is not available — skip admin check
+  let isAdmin = false
+  if (process.env.STATIC_EXPORT !== 'true') {
+    try {
+      const { headers } = await import('next/headers')
+      const headersList = await headers()
+      const pathname = headersList.get('x-pathname') || ''
+      isAdmin = pathname.startsWith('/admin')
+    } catch {
+      // headers() unavailable (static export or edge runtime) — default to full layout
+    }
+  }
+
+  let locale: string = DEFAULT_LOCALE
   let messages = DEFAULT_MESSAGES
   try {
     locale = (await getLocale()) || DEFAULT_LOCALE
@@ -28,6 +42,22 @@ export default async function IntlProvider({
   } catch (e) {
     console.error('IntlProvider getLocale/getMessages error:', e)
   }
+
+  // Admin panel: no site Header/Footer, just provide i18n + UI primitives
+  if (isAdmin) {
+    return (
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <HtmlLangSync />
+        <SuppressConsoleWarnings />
+        <TooltipProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </TooltipProvider>
+      </NextIntlClientProvider>
+    )
+  }
+
   const skipToContent = locale === 'en' ? 'Skip to content' : 'İçeriğe atla'
 
   return (
@@ -45,10 +75,10 @@ export default async function IntlProvider({
             >
               {skipToContent}
             </a>
-            <Suspense fallback={<div className="h-14 md:h-16 bg-white border-b border-slate-200 shrink-0" />}>
+            <Suspense fallback={<div className="h-14 md:min-h-[8rem] bg-white border-b border-slate-200 shrink-0" aria-hidden />}>
               <Header />
             </Suspense>
-            <main className="flex-1 min-h-0 pb-safe min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto" id="main-content">
+            <main className="flex-1 min-h-0 pb-safe min-w-0 w-full max-w-full overflow-x-hidden overflow-y-auto pt-0 mt-0 [&>*]:mt-0 [&>*]:pt-0" id="main-content">
               <Suspense fallback={null}>
                 <SidebarLayout>{children}</SidebarLayout>
               </Suspense>

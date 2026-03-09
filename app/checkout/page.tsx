@@ -40,7 +40,7 @@ export default function CheckoutPage() {
     district: '',
     postalCode: '',
     country: 'Türkiye',
-    billingType: 'individual' as const,
+    billingType: 'individual' as 'individual' | 'company',
     idNumber: '',
     companyName: '',
     taxId: '',
@@ -154,13 +154,6 @@ export default function CheckoutPage() {
         ? cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity }))
         : []
 
-      if (paymentMethod === 'card') {
-        setCheckoutErrors(prev => ({ ...prev, payment: 'Kredi kartı ile ödeme şu an aktif değil. Lütfen "Banka Havalesi / EFT" seçeneğini kullanın.' }))
-        scrollToTop()
-        return
-      }
-
-      // Havale / EFT: Firestore'a sipariş yaz (API yok — statik hosting)
       // Sipariş numarası timestamp bazlı üretilir
       const now = new Date()
       const orderNo = `ORD-${now.getFullYear().toString().slice(2)}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`
@@ -170,11 +163,48 @@ export default function CheckoutPage() {
         customer,
         items,
         pricing: { subtotal, tax, shipping, total },
-        paymentMethod: 'bank_transfer',
+        paymentMethod: paymentMethod === 'card' ? 'stripe' : 'bank_transfer',
         status: 'pending',
-        paymentStatus: 'pending',
+        paymentStatus: paymentMethod === 'card' ? 'pending_stripe' : 'pending',
       }
 
+      if (paymentMethod === 'card') {
+        // Stripe: önce Firestore'a sipariş yaz, sonra Stripe oturumu başlat
+        if (user?.id) {
+          const profile = await getUserProfile(user.id)
+          if (profile && !profile.customerNo) {
+            await setUserProfile(user.id, { customerNo: `CUS-${Date.now().toString().slice(-5)}` })
+          }
+          await createOrder(user.id, orderPayload)
+        } else {
+          const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
+          const { getDb } = await import('@/lib/firebase/config')
+          const db = getDb()
+          await addDoc(col(db, 'guestOrders'), { ...orderPayload, createdAt: srvTs() })
+        }
+
+        const res = await fetch('/api/stripe/create-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderNo,
+            total,
+            customerEmail: formData.email,
+            customerName: formData.name,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok || !data.url) {
+          setCheckoutErrors(prev => ({ ...prev, payment: data.error || 'Stripe bağlantısı kurulamadı. Lütfen tekrar deneyin.' }))
+          scrollToTop()
+          return
+        }
+        if (isFromCart) clearCart()
+        window.location.href = data.url
+        return
+      }
+
+      // Havale / EFT: Firestore'a sipariş yaz (API yok — statik hosting)
       if (user?.id) {
         // Giriş yapılmış: Firestore users/{uid}/orders
         const profile = await getUserProfile(user.id)

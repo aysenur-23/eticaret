@@ -39,10 +39,10 @@ export async function sendEmail(
   }
 
   const startTime = Date.now()
-  
+
   try {
     const payload: Parameters<typeof resend.emails.send>[0] = {
-      from: 'Batarya Kit <noreply@bataryakit.com>',
+      from: 'voltekno <noreply@voltekno.com>',
       to: [to],
       subject,
       ...(typeof content === 'string' ? { html: content } : { react: content }),
@@ -67,9 +67,9 @@ export async function sendEmail(
   } catch (error) {
     const duration = Date.now() - startTime
     console.error(`Email send error (${duration}ms):`, error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to send email' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send email'
     }
   }
 }

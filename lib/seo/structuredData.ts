@@ -41,9 +41,9 @@ export function generateProductStructuredData(
     image: product.image || [],
     brand: product.brand
       ? {
-          '@type': 'Brand',
-          name: product.brand,
-        }
+        '@type': 'Brand',
+        name: product.brand,
+      }
       : undefined,
     mpn: product.mpn,
     sku: product.sku,
@@ -56,10 +56,10 @@ export function generateProductStructuredData(
     },
     aggregateRating: product.aggregateRating
       ? {
-          '@type': 'AggregateRating',
-          ratingValue: product.aggregateRating.ratingValue,
-          reviewCount: product.aggregateRating.reviewCount,
-        }
+        '@type': 'AggregateRating',
+        ratingValue: product.aggregateRating.ratingValue,
+        reviewCount: product.aggregateRating.reviewCount,
+      }
       : undefined,
   }
 }
@@ -89,9 +89,9 @@ export function generateOrganizationStructuredData(): object {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'Batarya Kit',
-    url: 'https://bataryakit.com',
-    logo: 'https://bataryakit.com/logo.png',
+    name: 'voltekno',
+    url: 'https://voltekno.com',
+    logo: 'https://voltekno.com/logo.png',
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer service',
@@ -107,17 +107,16 @@ export function generateWebSiteStructuredData(): object {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Batarya Kit',
-    url: 'https://bataryakit.com',
+    name: 'voltekno',
+    url: 'https://voltekno.com',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: 'https://bataryakit.com/urunler?q={search_term_string}',
+        urlTemplate: 'https://voltekno.com/urunler?q={search_term_string}',
       },
       'query-input': 'required name=search_term_string',
     },
   }
 }
-
 

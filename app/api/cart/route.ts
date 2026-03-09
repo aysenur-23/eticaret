@@ -14,8 +14,8 @@ function getUserIdFromToken(request: NextRequest): string | null {
   if (!token) return null
   
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any
-    return decoded.userId
+    const decoded = jwt.verify(token, process.env.JWT_SECRET ?? '') as { userId?: string }
+    return decoded.userId ?? null
   } catch {
     return null
   }

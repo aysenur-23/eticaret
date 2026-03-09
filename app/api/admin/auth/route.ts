@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken'
 import { getAdminAuth } from '@/lib/firebaseAdminServer'
 import { getAdminFirestore, isFirebaseAdminConfigured } from '@/lib/firebaseAdminServer'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 gün
 
 export async function POST(request: NextRequest) {
@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Bu hesabın admin yetkisi yok.' },
         { status: 403 }
       )
+    }
+
+    if (!JWT_SECRET) {
+      return NextResponse.json({ success: false, error: 'Sunucu yapılandırma hatası.' }, { status: 503 })
     }
 
     const sessionToken = jwt.sign(

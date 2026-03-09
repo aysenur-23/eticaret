@@ -56,7 +56,7 @@ export function isRateLimited(
  */
 export function cleanupRateLimitStore(): void {
   const now = Date.now()
-  for (const [key, value] of store.entries()) {
+  store.forEach((value, key) => {
     if (now >= value.resetAt) store.delete(key)
-  }
+  })
 }
