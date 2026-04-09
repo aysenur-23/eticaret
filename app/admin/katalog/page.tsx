@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,7 @@ const allCategoryValues = ['Diğer', ...CATEGORY_GROUPS.flatMap((g) => g.categor
 
 export default function AdminKatalogPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [products, setProducts] = useState<CatalogProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -82,6 +83,14 @@ export default function AdminKatalogPage() {
   useEffect(() => {
     loadCatalog()
   }, [router])
+
+  // ?id=xxx ile gelince otomatik olarak o ürünün edit dialogunu aç
+  useEffect(() => {
+    const idParam = searchParams?.get('id')
+    if (!idParam || loading || products.length === 0) return
+    const product = products.find((p) => p.id === idParam)
+    if (product) openEdit(product)
+  }, [searchParams, loading, products])
 
   const filteredProducts = products.filter(
     (p) =>

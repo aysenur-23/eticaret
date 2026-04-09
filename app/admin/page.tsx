@@ -18,10 +18,24 @@ import {
   Loader2,
   ClipboardList,
   ArrowRight,
-  PackageCheck,
   Layers,
+  Tag,
+  AlertTriangle,
+  TrendingUp,
+  Calendar,
 } from 'lucide-react'
 import { fmtTRY } from '@/lib/format'
+
+type SiteStats = {
+  totalProducts: number
+  outOfStockProducts: number
+  activeCoupons: number
+  todayOrders: number
+  pendingOrders: number
+  totalOrders: number
+  todayRevenue: number
+  monthRevenue: number
+}
 
 type OrderRow = {
   id: string
@@ -61,9 +75,18 @@ export default function AdminPage() {
   const router = useRouter()
   const [orders, setOrders] = useState<OrderRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [siteStats, setSiteStats] = useState<SiteStats | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  // Stats API
+  useEffect(() => {
+    fetch('/api/admin/stats', { credentials: 'include' })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => d && setSiteStats(d))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     (async () => {
@@ -120,9 +143,9 @@ export default function AdminPage() {
   })
 
   const stats = {
-    totalOrders: orders.length,
+    totalOrders: siteStats?.totalOrders ?? orders.length,
     totalRevenue: orders.reduce((sum, o) => sum + (o.total || 0), 0),
-    pendingOrders: orders.filter((o) => o.status === 'pending' || o.status === 'PENDING').length,
+    pendingOrders: siteStats?.pendingOrders ?? orders.filter((o) => o.status === 'pending' || o.status === 'PENDING').length,
     paidOrders: orders.filter((o) => o.paymentStatus === 'paid' || o.paymentStatus === 'PAID').length,
   }
 
@@ -222,46 +245,84 @@ export default function AdminPage() {
             </CardContent>
           </Card>
 
-          {/* Özet kartları */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Özet kartları — 4 kart sipariş, 4 kart katalog */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Card className="border-slate-200/80 bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600">Toplam Sipariş</CardTitle>
-                <ShoppingCart className="h-5 w-5 text-slate-400" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Toplam Sipariş</CardTitle>
+                <ShoppingCart className="h-4 w-4 text-brand/60" />
               </CardHeader>
-              <CardContent>
+              <CardContent className="px-4 pb-4">
                 <div className="text-2xl font-bold text-slate-900">{stats.totalOrders}</div>
-                <p className="text-xs text-slate-500 mt-1">Tüm zamanlar</p>
+                <p className="text-xs text-slate-400 mt-0.5">Tüm zamanlar</p>
               </CardContent>
             </Card>
             <Card className="border-slate-200/80 bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600">Toplam Gelir</CardTitle>
-                <DollarSign className="h-5 w-5 text-slate-400" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Bu Ay Gelir</CardTitle>
+                <TrendingUp className="h-4 w-4 text-emerald-500/70" />
               </CardHeader>
-              <CardContent>
-                <div className="text-xl font-bold text-slate-900">{fmtTRY(stats.totalRevenue)}</div>
-                <p className="text-xs text-slate-500 mt-1">KDV dahil</p>
+              <CardContent className="px-4 pb-4">
+                <div className="text-lg font-bold text-slate-900">{fmtTRY(siteStats?.monthRevenue ?? stats.totalRevenue)}</div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Bugün: {fmtTRY(siteStats?.todayRevenue ?? 0)}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className={`border-slate-200/80 bg-white shadow-sm ${stats.pendingOrders > 0 ? 'border-amber-200 bg-amber-50/30' : ''}`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Bekleyen</CardTitle>
+                <Clock className={`h-4 w-4 ${stats.pendingOrders > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className={`text-2xl font-bold ${stats.pendingOrders > 0 ? 'text-amber-600' : 'text-slate-900'}`}>{stats.pendingOrders}</div>
+                <p className="text-xs text-slate-400 mt-0.5">Onay bekliyor</p>
               </CardContent>
             </Card>
             <Card className="border-slate-200/80 bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600">Bekleyen</CardTitle>
-                <Clock className="h-5 w-5 text-amber-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Bugünkü Sipariş</CardTitle>
+                <Calendar className="h-4 w-4 text-slate-300" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.pendingOrders}</div>
-                <p className="text-xs text-slate-500 mt-1">Onay bekliyor</p>
+              <CardContent className="px-4 pb-4">
+                <div className="text-2xl font-bold text-slate-900">{siteStats?.todayOrders ?? 0}</div>
+                <p className="text-xs text-slate-400 mt-0.5">Son 24 saat</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Katalog metrikleri */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <Card className="border-slate-200/80 bg-white shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Toplam Ürün</CardTitle>
+                <Package className="h-4 w-4 text-brand/60" />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className="text-2xl font-bold text-slate-900">{siteStats?.totalProducts ?? '—'}</div>
+                <Link href="/admin/products" className="text-xs text-brand hover:underline mt-0.5 inline-block">Ürünleri Gör →</Link>
+              </CardContent>
+            </Card>
+            <Card className={`border-slate-200/80 shadow-sm ${(siteStats?.outOfStockProducts ?? 0) > 0 ? 'bg-red-50/40 border-red-200' : 'bg-white'}`}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Stoksuz Ürün</CardTitle>
+                <AlertTriangle className={`h-4 w-4 ${(siteStats?.outOfStockProducts ?? 0) > 0 ? 'text-red-400' : 'text-slate-300'}`} />
+              </CardHeader>
+              <CardContent className="px-4 pb-4">
+                <div className={`text-2xl font-bold ${(siteStats?.outOfStockProducts ?? 0) > 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                  {siteStats?.outOfStockProducts ?? '—'}
+                </div>
+                <Link href="/admin/products?stock=outofstock" className="text-xs text-red-500 hover:underline mt-0.5 inline-block">Stok Güncelle →</Link>
               </CardContent>
             </Card>
             <Card className="border-slate-200/80 bg-white shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-slate-600">Ödenen</CardTitle>
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-4 px-4">
+                <CardTitle className="text-xs font-medium text-slate-500">Aktif Kupon</CardTitle>
+                <Tag className="h-4 w-4 text-slate-300" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-slate-900">{stats.paidOrders}</div>
-                <p className="text-xs text-slate-500 mt-1">Ödeme tamamlandı</p>
+              <CardContent className="px-4 pb-4">
+                <div className="text-2xl font-bold text-slate-900">{siteStats?.activeCoupons ?? '—'}</div>
+                <Link href="/admin/indirimler" className="text-xs text-brand hover:underline mt-0.5 inline-block">Kuponları Yönet →</Link>
               </CardContent>
             </Card>
           </div>

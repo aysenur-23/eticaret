@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Lock, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Lock, Loader2, AlertCircle, Zap } from 'lucide-react'
 
 export default function AdminAuthPage() {
   const router = useRouter()
@@ -50,34 +50,34 @@ export default function AdminAuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/80 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
-          <Link href="/" className="inline-flex items-center gap-2 text-ink-muted hover:text-ink">
-            <ArrowLeft className="w-4 h-4" />
-            Siteye Dön
-          </Link>
-        </Button>
-        <Card className="border border-palette shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5" />
-              Admin Paneli
-            </CardTitle>
-            <CardDescription>
-              Panele girmek için admin şifresini girin.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="flex items-center gap-2 rounded-lg bg-red-50 text-red-700 px-3 py-2 text-sm">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  {error}
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="admin-password">Şifre</Label>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+      {/* Arka plan desen */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(30,58,110,0.4),transparent_60%)] pointer-events-none" />
+
+      <div className="relative w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#f4a11a] shadow-lg shadow-amber-500/20 mb-4">
+            <Zap className="w-7 h-7 text-white" strokeWidth={2.5} />
+          </div>
+          <h1 className="text-xl font-bold text-white">Voltekno Admin</h1>
+          <p className="text-sm text-white/40 mt-1">Yönetim paneline giriş yapın</p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-7 backdrop-blur-sm shadow-2xl">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 px-3 py-2.5 text-sm">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-password" className="text-white/60 text-xs font-semibold uppercase tracking-wider">
+                Şifre
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
                 <Input
                   id="admin-password"
                   type="password"
@@ -85,25 +85,36 @@ export default function AdminAuthPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="rounded-lg"
+                  className="pl-10 bg-white/8 border-white/15 text-white placeholder:text-white/25 focus:border-[#f4a11a] focus:ring-[#f4a11a]/20 rounded-xl h-11"
                   required
                   disabled={loading}
                   autoFocus
                 />
               </div>
-              <Button type="submit" className="w-full rounded-lg gap-2" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Doğrulanıyor...
-                  </>
-                ) : (
-                  'Giriş Yap'
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            </div>
+            <Button
+              type="submit"
+              className="w-full h-11 rounded-xl bg-[#f4a11a] hover:bg-[#e09510] text-white font-semibold gap-2 shadow-lg shadow-amber-500/20 transition-all"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Doğrulanıyor...
+                </>
+              ) : (
+                'Giriş Yap'
+              )}
+            </Button>
+          </form>
+        </div>
+
+        <div className="mt-5 text-center">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-white/30 hover:text-white/60 transition-colors">
+            <ArrowLeft className="w-3 h-3" />
+            Siteye Dön
+          </Link>
+        </div>
       </div>
     </div>
   )
