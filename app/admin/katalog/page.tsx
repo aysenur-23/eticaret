@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,7 +43,7 @@ type CatalogProduct = {
 
 const allCategoryValues = ['Diğer', ...CATEGORY_GROUPS.flatMap((g) => g.categoryValues)]
 
-export default function AdminKatalogPage() {
+function AdminKatalogContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [products, setProducts] = useState<CatalogProduct[]>([])
@@ -437,5 +437,17 @@ export default function AdminKatalogPage() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+export default function AdminKatalogPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <AdminKatalogContent />
+    </Suspense>
   )
 }

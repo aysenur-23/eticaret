@@ -150,7 +150,7 @@ export default function AdminUrunlerPage() {
     <div className="space-y-6 pb-safe" id="main-content">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Stok Yönetimi</h1>
+          <h1 className="text-xl font-bold text-slate-900">Stok Yönetimi</h1>
           <p className="text-slate-600 mt-1">Site ürünlerinin stok adetlerini güncelleyin</p>
         </div>
         <Link href="/admin/products">
