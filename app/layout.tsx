@@ -20,6 +20,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', type: 'image/png' },
+    ],
+    shortcut: ['/favicon.png'],
+  },
   title: {
     default: 'voltekno | Güneş Paneli, Akü, İnverter, EV Şarj ve Enerji Sistemleri',
     template: '%s | voltekno',

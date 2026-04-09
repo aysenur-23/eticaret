@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="45%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="sunGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#fb7185" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="field" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="980" cy="150" r="92" fill="url(#sunGlow)"/>
+  <path d="M0 560C160 480 320 450 470 490C650 535 760 520 920 460C1025 422 1115 416 1200 440V900H0Z" fill="#c7d2fe" fill-opacity=".42"/>
+  <path d="M0 620C170 560 340 545 520 590C710 640 920 612 1200 552V900H0Z" fill="url(#field)"/>
+
+  <rect x="170" y="380" width="410" height="255" rx="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="8"/>
+  <polygon points="145,400 375,235 605,400" fill="#334155"/>
+  <rect x="345" y="500" width="92" height="135" rx="10" fill="#64748b"/>
+  <rect x="230" y="458" width="86" height="70" rx="10" fill="#dbeafe"/>
+  <rect x="438" y="458" width="86" height="70" rx="10" fill="#dbeafe"/>
+
+  <g transform="translate(675 470)">
+    <rect width="340" height="138" rx="14" fill="url(#panel)"/>
+    <path d="M0 35H340M0 69H340M0 103H340M42 0V138M84 0V138M126 0V138M168 0V138M210 0V138M252 0V138M294 0V138" stroke="#38bdf8" stroke-opacity=".42" stroke-width="3"/>
+    <rect x="138" y="52" width="64" height="34" rx="7" fill="#e2e8f0" fill-opacity=".12" stroke="#7dd3fc" stroke-opacity=".35"/>
+  </g>
+
+  <g transform="translate(700 615)">
+    <rect x="0" y="0" width="72" height="72" rx="14" fill="#0f172a"/>
+    <rect x="11" y="12" width="50" height="18" rx="5" fill="#22c55e" fill-opacity=".85"/>
+    <rect x="11" y="38" width="22" height="22" rx="4" fill="#e2e8f0" fill-opacity=".18"/>
+    <rect x="39" y="38" width="22" height="22" rx="4" fill="#e2e8f0" fill-opacity=".18"/>
+  </g>
+
+  <text x="72" y="112" font-size="56" font-family="Arial, sans-serif" font-weight="700" fill="#0f172a">Bag Evi Enerji Paketi</text>
+  <text x="72" y="164" font-size="28" font-family="Arial, sans-serif" fill="#334155">Off-grid ev, panel, inverter ve batarya kombinasyonu</text>
+</svg>

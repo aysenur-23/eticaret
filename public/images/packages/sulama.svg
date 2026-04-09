@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ecfccb"/>
+      <stop offset="48%" stop-color="#bfdbfe"/>
+      <stop offset="100%" stop-color="#d9f99d"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#1f2937"/>
+    </linearGradient>
+    <linearGradient id="pipe" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="1005" cy="145" r="82" fill="#fde68a"/>
+  <rect x="0" y="655" width="1200" height="245" fill="#84cc16" fill-opacity=".32"/>
+  <path d="M0 700C170 662 325 650 470 690C615 730 760 736 900 700C1020 670 1110 670 1200 688V900H0Z" fill="#65a30d" fill-opacity=".42"/>
+
+  <g transform="translate(145 430)">
+    <rect width="320" height="134" rx="16" fill="url(#panel)"/>
+    <path d="M0 34H320M0 68H320M0 102H320M40 0V134M80 0V134M120 0V134M160 0V134M200 0V134M240 0V134M280 0V134" stroke="#38bdf8" stroke-opacity=".44" stroke-width="3"/>
+  </g>
+
+  <g transform="translate(535 425)">
+    <rect width="96" height="170" rx="18" fill="#334155"/>
+    <rect x="18" y="22" width="60" height="44" rx="8" fill="#e2e8f0" fill-opacity=".18"/>
+    <circle cx="48" cy="108" r="21" fill="#22c55e" fill-opacity=".55"/>
+  </g>
+
+  <path d="M631 510H820C890 510 938 525 980 560C1016 589 1057 628 1112 664" stroke="url(#pipe)" stroke-width="24" fill="none" stroke-linecap="round"/>
+  <circle cx="1112" cy="664" r="16" fill="#0f172a"/>
+  <circle cx="1088" cy="699" r="9" fill="#38bdf8"/>
+  <circle cx="1128" cy="716" r="7" fill="#38bdf8"/>
+  <circle cx="1160" cy="746" r="6" fill="#38bdf8"/>
+  <circle cx="1052" cy="736" r="8" fill="#38bdf8"/>
+
+  <text x="72" y="112" font-size="56" font-family="Arial, sans-serif" font-weight="700" fill="#0f172a">Sulama Enerji Paketi</text>
+  <text x="72" y="164" font-size="28" font-family="Arial, sans-serif" fill="#334155">Tarla pompasi, sulama inverteri ve gun icinde verimli besleme</text>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="50%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#f5f3ff"/>
+    </linearGradient>
+    <linearGradient id="pool" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="1000" cy="145" r="84" fill="#fde68a"/>
+  <rect x="0" y="675" width="1200" height="225" fill="#a7f3d0"/>
+  <rect x="785" y="610" width="265" height="110" rx="26" fill="url(#pool)" opacity=".95"/>
+
+  <rect x="160" y="325" width="620" height="320" rx="22" fill="#f8fafc" stroke="#cbd5e1" stroke-width="8"/>
+  <polygon points="130,365 470,165 810,365" fill="#1e293b"/>
+  <rect x="425" y="500" width="94" height="145" rx="10" fill="#475569"/>
+  <rect x="250" y="418" width="118" height="88" rx="14" fill="#e0f2fe"/>
+  <rect x="570" y="418" width="118" height="88" rx="14" fill="#e0f2fe"/>
+
+  <g transform="translate(305 248)">
+    <rect width="330" height="92" rx="16" fill="url(#panel)"/>
+    <path d="M0 31H330M0 61H330M36 0V92M72 0V92M108 0V92M144 0V92M180 0V92M216 0V92M252 0V92M288 0V92" stroke="#60a5fa" stroke-opacity=".42" stroke-width="3"/>
+  </g>
+
+  <g transform="translate(850 418)">
+    <rect width="162" height="145" rx="20" fill="#0f172a"/>
+    <rect x="22" y="22" width="118" height="26" rx="7" fill="#38bdf8" fill-opacity=".85"/>
+    <rect x="22" y="65" width="36" height="36" rx="6" fill="#e2e8f0" fill-opacity=".16"/>
+    <rect x="68" y="65" width="36" height="36" rx="6" fill="#e2e8f0" fill-opacity=".16"/>
+    <rect x="114" y="65" width="26" height="36" rx="6" fill="#22c55e" fill-opacity=".4"/>
+  </g>
+
+  <text x="72" y="112" font-size="56" font-family="Arial, sans-serif" font-weight="700" fill="#0f172a">Villa Enerji Paketi</text>
+  <text x="72" y="164" font-size="28" font-family="Arial, sans-serif" fill="#334155">Yuksek tuketim, hibrit depolama ve akilli enerji yonetimi</text>
+</svg>

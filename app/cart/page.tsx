@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +23,7 @@ import { useTranslations } from 'next-intl'
 import { getCategoryKey } from '@/lib/categories'
 
 export default function CartPage() {
+  const router = useRouter()
   const t = useTranslations('cart')
   const tHome = useTranslations('home')
   const tHeader = useTranslations('header')
@@ -36,15 +38,43 @@ export default function CartPage() {
   const [contractsAccepted, setContractsAccepted] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [termsAccepted, setTermsAccepted] = useState(false)
+  const [contractErrors, setContractErrors] = useState<{ contracts: boolean; privacy: boolean; kvkk: boolean }>({
+    contracts: false,
+    privacy: false,
+    kvkk: false,
+  })
   const [showModal, setShowModal] = useState<string | null>(null)
+  const [pageReady, setPageReady] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageReady(true), 250)
+    return () => clearTimeout(timer)
+  }, [])
   
   const subtotal = getTotalPrice()
   const tax = subtotal * 0.20 // %20 KDV
   const shipping = subtotal > 3000 ? 0 : 50 // 3000 TL üzeri ücretsiz kargo
   const discount = couponDiscount
   const total = subtotal + tax + shipping - discount
+  const hasContractErrors = contractErrors.contracts || contractErrors.privacy || contractErrors.kvkk
 
-  if (!_hasHydrated) {
+  const handleCheckoutClick = () => {
+    const nextErrors = {
+      contracts: !contractsAccepted,
+      privacy: !privacyAccepted,
+      kvkk: !termsAccepted,
+    }
+
+    setContractErrors(nextErrors)
+
+    if (nextErrors.contracts || nextErrors.privacy || nextErrors.kvkk) {
+      return
+    }
+
+    router.push('/checkout')
+  }
+
+  if (!pageReady && !_hasHydrated) {
     return (
       <ClassicPageShell breadcrumbs={[{ label: t('title') }]} title={t('title')} description="">
         <div className="max-w-lg mx-auto text-center py-12">
@@ -283,7 +313,7 @@ export default function CartPage() {
                         if (!couponCode.trim()) return
                         setCouponError('')
                         try {
-                          // Firestore'dan kupon doğrulama (statik hosting — API yok)
+                          // Firestore'dan kupon doğrulama (statik hosting - API yok)
                           const { collection: col, query, where, getDocs } = await import('firebase/firestore')
                           const { getDb } = await import('@/lib/firebase/config')
                           const db = getDb()
@@ -338,94 +368,107 @@ export default function CartPage() {
                   <Alert className="mb-4">
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      Hızlı ödeme için{' '}
+                      {'H\u0131zl\u0131 \u00f6deme i\u00e7in'}{' '}
                       <Link href="/login" className="text-brand hover:underline font-semibold">
-                        giriş yapın
+                        {'giri\u015f yap\u0131n'}
                       </Link>
                       {' '}veya{' '}
                       <Link href="/register" className="text-brand hover:underline font-semibold">
-                        kayıt olun
+                        {'kay\u0131t olun'}
                       </Link>
-                      . Hesap olmadan da <Link href="/checkout" className="text-brand hover:underline font-semibold">Ödemeye Geç</Link> ile sipariş verebilirsiniz.
+                      {'. Hesap olmadan da '}<Link href="/checkout" className="text-brand hover:underline font-semibold">{'\u00d6demeye Ge\u00e7'}</Link>{' ile sipari\u015f verebilirsiniz.'}
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {/* Sözleşme ve Şartlar */}
-                <div className="pt-4 border-t space-y-3">
+                {/* Sozlesme ve Sartlar */}
+                <div className={`pt-4 border-t space-y-3 rounded-2xl transition-colors ${hasContractErrors ? 'border-red-200 bg-red-50/70 p-4' : ''}`}>
                   <h4 className="text-sm font-semibold text-ink flex items-center gap-2">
                     <Shield className="w-4 h-4 text-slate-600" />
-                    Sözleşme ve Şartlar
+                    {'S\u00f6zle\u015fme ve \u015eartlar'}
                   </h4>
                   
-                  <label className="flex items-start gap-2 cursor-pointer py-2 touch-manipulation min-h-[44px] items-center">
+                  <label className={`flex items-start gap-2 cursor-pointer py-2 px-2 touch-manipulation min-h-[44px] items-center rounded-xl transition-colors ${contractErrors.contracts ? 'border border-red-200 bg-white' : ''}`}>
                     <input
                       type="checkbox"
                       checked={contractsAccepted}
-                      onChange={(e) => setContractsAccepted(e.target.checked)}
-                      className="w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 border-slate-300 rounded focus:ring-2 focus:ring-slate-400 shrink-0"
+                      onChange={(e) => {
+                        setContractsAccepted(e.target.checked)
+                        setContractErrors((prev) => ({ ...prev, contracts: false }))
+                      }}
+                      className={`w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 rounded focus:ring-2 focus:ring-slate-400 shrink-0 ${contractErrors.contracts ? 'border-red-400' : 'border-slate-300'}`}
                     />
                     <span className="text-xs text-ink">
-                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('sales'); }} className="font-medium text-slate-800 hover:underline text-left">"Uzaktan Satış Sözleşmesi"</button>nı okudum ve kabul ediyorum.
+                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('sales'); }} className="font-medium text-slate-800 hover:underline text-left">{'"Uzaktan Sat\u0131\u015f S\u00f6zle\u015fmesi"'}</button>{"'ni okudum ve kabul ediyorum."}
                     </span>
                   </label>
 
-                  <label className="flex items-start gap-2 cursor-pointer py-2 touch-manipulation min-h-[44px] items-center">
+                  <label className={`flex items-start gap-2 cursor-pointer py-2 px-2 touch-manipulation min-h-[44px] items-center rounded-xl transition-colors ${contractErrors.privacy ? 'border border-red-200 bg-white' : ''}`}>
                     <input
                       type="checkbox"
                       checked={privacyAccepted}
-                      onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                      className="w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 border-slate-300 rounded focus:ring-2 focus:ring-slate-400 shrink-0"
+                      onChange={(e) => {
+                        setPrivacyAccepted(e.target.checked)
+                        setContractErrors((prev) => ({ ...prev, privacy: false }))
+                      }}
+                      className={`w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 rounded focus:ring-2 focus:ring-slate-400 shrink-0 ${contractErrors.privacy ? 'border-red-400' : 'border-slate-300'}`}
                     />
                     <span className="text-xs text-ink">
-                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('privacy'); }} className="font-medium text-slate-800 hover:underline text-left">"Gizlilik Sözleşmesi"</button>ni okudum ve kabul ediyorum.
+                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('privacy'); }} className="font-medium text-slate-800 hover:underline text-left">{'"Gizlilik S\u00f6zle\u015fmesi"'}</button>{"'ni okudum ve kabul ediyorum."}
                     </span>
                   </label>
 
-                  <label className="flex items-start gap-2 cursor-pointer py-2 touch-manipulation min-h-[44px] items-center">
+                  <label className={`flex items-start gap-2 cursor-pointer py-2 px-2 touch-manipulation min-h-[44px] items-center rounded-xl transition-colors ${contractErrors.kvkk ? 'border border-red-200 bg-white' : ''}`}>
                     <input
                       type="checkbox"
                       checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                      className="w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 border-slate-300 rounded focus:ring-2 focus:ring-slate-400 shrink-0"
+                      onChange={(e) => {
+                        setTermsAccepted(e.target.checked)
+                        setContractErrors((prev) => ({ ...prev, kvkk: false }))
+                      }}
+                      className={`w-5 h-5 min-w-[20px] min-h-[20px] text-slate-800 rounded focus:ring-2 focus:ring-slate-400 shrink-0 ${contractErrors.kvkk ? 'border-red-400' : 'border-slate-300'}`}
                     />
                     <span className="text-xs text-ink">
-                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('kvkk'); }} className="font-medium text-slate-800 hover:underline text-left">"KVKK Aydınlatma Metni"</button>ni okudum ve kabul ediyorum.
+                      <button type="button" onClick={(e) => { e.preventDefault(); setShowModal('kvkk'); }} className="font-medium text-slate-800 hover:underline text-left">{'"KVKK Ayd\u0131nlatma Metni"'}</button>{"'ni okudum ve kabul ediyorum."}
                     </span>
                   </label>
+
+                  {hasContractErrors && (
+                    <p className="text-xs font-medium text-red-600">
+                      {'\u00d6demeye ge\u00e7mek i\u00e7in t\u00fcm s\u00f6zle\u015fme ve ayd\u0131nlatma onaylar\u0131n\u0131 i\u015faretlemelisiniz.'}
+                    </p>
+                  )}
                 </div>
 
                 <Button 
-                  asChild 
                   size="lg" 
                   className="w-full rounded-xl min-h-[48px] touch-manipulation bg-brand hover:bg-brand-hover text-white"
-                  disabled={!contractsAccepted || !privacyAccepted || !termsAccepted}
+                  onClick={handleCheckoutClick}
                 >
-                  <Link href="/checkout" className="flex items-center justify-center gap-2">
+                  <span className="flex items-center justify-center gap-2">
                     <CreditCard className="w-5 h-5" />
-                    Ödemeye Geç
-                  </Link>
+                    {'Sat\u0131n Al'}
+                  </span>
                 </Button>
-
                 <div className="text-xs text-slate-500 text-center space-y-1">
                   <div className="flex items-center justify-center gap-1">
                     <Package className="w-3 h-3" />
-                    <span>Güvenli Ödeme</span>
+                    <span>{'G\u00fcvenli \u00d6deme'}</span>
                   </div>
-                  <div>7/24 Müşteri Desteği</div>
+                  <div>{'7/24 M\u00fc\u015fteri Deste\u011fi'}</div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Sözleşme Modalı */}
+        {/* Sozlesme Modali */}
         {showModal && (
-          <div 
+          <div
             className="fixed z-50 inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={() => setShowModal(null)}
           >
-            <div 
+            <div
               className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
@@ -435,7 +478,7 @@ export default function CartPage() {
                   {showModal === 'privacy' && 'Gizlilik Sözleşmesi'}
                   {showModal === 'kvkk' && 'KVKK Aydınlatma Metni'}
                 </h3>
-                <button 
+                <button
                   className="p-3 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-muted rounded-lg transition-colors touch-manipulation"
                   onClick={() => setShowModal(null)}
                   aria-label="Kapat"
@@ -447,304 +490,61 @@ export default function CartPage() {
                 <div className="prose prose-sm max-w-none text-ink whitespace-pre-line leading-relaxed">
                   {showModal === 'sales' && `UZAKTAN SATIŞ SÖZLEŞMESİ
 
-1. TARAFLAR
+1. Taraflar
+Bu sözleşme, sipariş veren müşteri ile satıcı arasında elektronik ortamda kurulmuştur.
 
-Bu Uzaktan Satış Sözleşmesi ("Sözleşme"), aşağıdaki taraflar arasında aşağıdaki şartlarla akdedilmiştir:
+2. Konu
+Sözleşmenin konusu, internet sitesi üzerinden verilen siparişin satış, ödeme, teslimat ve iade şartlarının belirlenmesidir.
 
-SATICI:
-IMORA
-Web Sitesi: www.imora.com
-E-posta: info@imora.com
+3. Sipariş ve Ödeme
+Sipariş, müşteri tarafından onaylandığında yürürlüğe girer. Ürün bedeli ve varsa kargo ücreti ödeme adımında açıkça gösterilir.
 
-ALICI:
-Bu siteden alışveriş yapan gerçek veya tüzel kişi müşteri.
+4. Teslimat
+Siparişler, stok ve operasyon durumuna göre hazırlanır ve müşterinin teslimat adresine gönderilir. Teslimat sırasında hasarlı paket tespit edilirse kargo görevlisine tutanak tutturulmalıdır.
 
-2. KONU
+5. Cayma Hakkı
+Tüketici, yasal istisnalar dışında ürünü teslim aldığı tarihten itibaren 14 gün içinde cayma hakkını kullanabilir.
 
-Bu sözleşmenin konusu, Alıcı'nın satıcı web sitesi üzerinden elektronik ortamda sipariş verdiği, satıcının kataloğında yer alan ve satışa sunulan ürünlerin satışı ve teslimi ile ilgili olarak 6502 sayılı Tüketicinin Korunması Hakkında Kanun ve Uzaktan Satış Yönetmeliği hükümleri gereğince tarafların hak ve yükümlülüklerinin belirlenmesidir.
-
-3. SİPARİŞ VE KABUL
-
-3.1. Sitede yer alan ürünlerin fiyatları ve özellikleri önceden bildirilmeksizin değiştirilebilir. Ancak sipariş verilen ürünün fiyatı, sipariş anında geçerli olan fiyattır.
-
-3.2. Sipariş, Alıcı tarafından elektronik ortamda sipariş formu doldurularak verilir. Siparişin onaylanması, Satıcı tarafından Alıcı'ya gönderilecek e-posta ile gerçekleşir.
-
-3.3. Sipariş onayından sonra, Alıcı'ya sipariş detayları e-posta ile gönderilir.
-
-4. FİYAT VE ÖDEME
-
-4.1. Ürün fiyatları, KDV dahil olarak gösterilir. Kargo ücreti, 3000 TL ve üzeri siparişlerde ücretsizdir. 3000 TL altı siparişlerde kargo ücreti Alıcı'ya aittir.
-
-4.2. Ödeme, sipariş sırasında belirtilen ödeme yöntemleri ile yapılır. Ödeme onayından sonra sipariş işleme alınır.
-
-5. TESLİMAT
-
-5.1. Ürünler, Alıcı'nın sipariş formunda belirttiği adrese teslim edilir. Teslimat süresi, stok durumuna göre değişiklik gösterebilir.
-
-5.2. Teslimat sırasında Alıcı veya temsilcisi ürünü kontrol etmekle yükümlüdür. Hasarlı veya eksik ürün tesliminde, kargo firmasına tutanak tutturulmalıdır.
-
-6. CAYMA HAKKI
-
-6.1. Alıcı, 6502 sayılı Kanun'un 15. maddesi gereğince, teslim tarihinden itibaren 14 gün içinde hiçbir gerekçe göstermeksizin ve cezai şart ödemeksizin sözleşmeden cayma hakkına sahiptir.
-
-6.2. Cayma hakkının kullanılması için, Alıcı'nın Satıcı'ya yazılı bildirimde bulunması veya ürünü iade etmesi gerekir.
-
-6.3. İade edilecek ürünler, kullanılmamış, orijinal ambalajında ve faturası ile birlikte olmalıdır.
-
-7. GARANTİ VE YETKİLİ SERVİS
-
-7.1. Ürünler, üretici firmanın garanti şartlarına tabidir. Garanti süresi ve kapsamı, ürün kategorisine göre değişiklik gösterebilir.
-
-7.2. Garanti kapsamındaki arızalar için, ürün yetkili servise gönderilmelidir.
-
-8. SORUMLULUK SINIRLAMASI
-
-8.1. Satıcı, ürünlerin kullanımından kaynaklanan doğrudan veya dolaylı zararlardan sorumlu tutulamaz.
-
-8.2. Satıcı, ürünlerin yanlış kullanımından kaynaklanan zararlardan sorumlu değildir.
-
-9. KİŞİSEL VERİLERİN KORUNMASI
-
-9.1. Alıcı'nın kişisel verileri, 6698 sayılı KVKK Kanunu'na uygun olarak işlenir ve korunur.
-
-9.2. Kişisel veriler, sadece sipariş işlemleri için kullanılır ve üçüncü kişilerle paylaşılmaz.
-
-10. UYUŞMAZLIKLARIN ÇÖZÜMÜ
-
-10.1. Bu sözleşmeden doğan uyuşmazlıklar, Türkiye Cumhuriyeti yasalarına tabidir.
-
-10.2. Uyuşmazlıkların çözümünde öncelikle müzakere yolu tercih edilir. Anlaşmazlık durumunda, tüketici hakem heyetleri ve tüketici mahkemeleri yetkilidir.
-
-11. YÜRÜRLÜK
-
-Bu sözleşme, Alıcı'nın sipariş vermesi ve Satıcı'nın siparişi onaylaması ile yürürlüğe girer.
+6. Genel Hükümler
+Müşteri, sipariş vermeden önce ön bilgilendirme metnini, mesafeli satış sözleşmesini ve ödeme koşullarını okuyup kabul ettiğini beyan eder.
 
 Sözleşme Tarihi: ${new Date().toLocaleDateString('tr-TR')}
 Satıcı: IMORA`}
-                  {showModal === 'privacy' && `GİZLİLİK POLİTİKASI
+                  {showModal === 'privacy' && `GİZLİLİK SÖZLEŞMESİ
 
-1. GENEL BİLGİLER
+1. Toplanan Veriler
+Sipariş sürecinde ad, soyad, e-posta, telefon, teslimat ve fatura bilgileri alınır.
 
-Bu Gizlilik Politikası, IMORA ("Biz", "Bizim", "Site") olarak, www.imora.com web sitesini ziyaret eden ve hizmetlerimizi kullanan kullanıcıların ("Kullanıcı", "Siz") kişisel bilgilerinin nasıl toplandığını, kullanıldığını, korunduğunu ve paylaşıldığını açıklar.
+2. Kullanım Amacı
+Bu bilgiler siparişin hazırlanması, teslim edilmesi, faturalandırılması, müşteri desteği sağlanması ve yasal yükümlülüklerin yerine getirilmesi için kullanılır.
 
-2. TOPLANAN BİLGİLER
+3. Veri Paylaşımı
+Bilgileriniz yalnızca ödeme, kargo ve yasal süreçlerde ihtiyaç duyulan hizmet sağlayıcılarla sınırlı olarak paylaşılır.
 
-2.1. Kişisel Bilgiler:
-- Ad, soyad
-- E-posta adresi
-- Telefon numarası
-- Fatura ve teslimat adresi
-- Ödeme bilgileri (güvenli ödeme sistemleri üzerinden)
+4. Güvenlik
+Kişisel verileriniz teknik ve idari güvenlik tedbirleri ile korunur. Yetkisiz erişime karşı gerekli önlemler uygulanır.
 
-2.2. Otomatik Toplanan Bilgiler:
-- IP adresi
-- Tarayıcı türü ve versiyonu
-- İşletim sistemi
-- Ziyaret edilen sayfalar ve süre
-- Referans URL
-
-3. BİLGİLERİN KULLANIMI
-
-Toplanan bilgiler aşağıdaki amaçlarla kullanılır:
-- Sipariş işlemlerinin gerçekleştirilmesi
-- Müşteri hizmetleri sağlanması
-- Ürün ve hizmetlerin iyileştirilmesi
-- Yasal yükümlülüklerin yerine getirilmesi
-- Pazarlama faaliyetleri (izin verilmesi halinde)
-
-4. BİLGİLERİN PAYLAŞIMI
-
-4.1. Kişisel bilgileriniz, aşağıdaki durumlar dışında üçüncü kişilerle paylaşılmaz:
-- Yasal zorunluluklar
-- Kargo ve ödeme işlemleri için gerekli servis sağlayıcılar
-- İzin verilmesi halinde pazarlama ortakları
-
-4.2. Tüm üçüncü taraf servis sağlayıcılar, verilerinizi korumakla yükümlüdür.
-
-5. ÇEREZLER (COOKIES)
-
-5.1. Sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır.
-
-5.2. Çerez türleri:
-- Zorunlu çerezler: Site işlevselliği için gerekli
-- Analitik çerezler: Site kullanım istatistikleri
-- Pazarlama çerezleri: Kişiselleştirilmiş reklamlar
-
-5.3. Çerez tercihlerinizi tarayıcı ayarlarından yönetebilirsiniz.
-
-6. VERİ GÜVENLİĞİ
-
-6.1. Kişisel bilgileriniz, SSL şifreleme teknolojisi ile korunur.
-
-6.2. Ödeme bilgileri, PCI-DSS uyumlu güvenli ödeme sistemleri üzerinden işlenir.
-
-6.3. Verileriniz, güvenli sunucularda saklanır ve yetkisiz erişime karşı korunur.
-
-7. KULLANICI HAKLARI
-
-KVKK Kanunu kapsamında aşağıdaki haklara sahipsiniz:
-- Kişisel verilerinizin işlenip işlenmediğini öğrenme
-- İşlenen kişisel verileriniz hakkında bilgi talep etme
-- Kişisel verilerinizin düzeltilmesini isteme
-- Kişisel verilerinizin silinmesini isteme
-- İşlenen verilerin muhafazasını talep etme
-- İşlenen verilerin aktarılmasını isteme
-- İşleme itiraz etme
-
-8. VERİ SAKLAMA SÜRESİ
-
-Kişisel verileriniz, yasal saklama süreleri ve işleme amaçları doğrultusunda saklanır. Bu süreler sona erdiğinde, verileriniz güvenli bir şekilde silinir veya anonimleştirilir.
-
-9. ÜÇÜNCÜ TARAF BAĞLANTILAR
-
-Sitemizde, üçüncü taraf web sitelerine bağlantılar bulunabilir. Bu sitelerin gizlilik politikalarından biz sorumlu değiliz.
-
-10. ÇOCUKLARIN GİZLİLİĞİ
-
-Hizmetlerimiz 18 yaş altındaki kişilere yönelik değildir. 18 yaş altındaki kişilerden bilerek kişisel bilgi toplamıyoruz.
-
-11. DEĞİŞİKLİKLER
-
-Bu Gizlilik Politikası, yasal değişiklikler veya işletme gereksinimleri doğrultusunda güncellenebilir. Önemli değişiklikler, sitede duyurulur.
-
-12. İLETİŞİM
-
-Gizlilik politikamız hakkında sorularınız için:
-E-posta: info@imora.com
-Web: www.imora.com
+5. Haklarınız
+KVKK kapsamında verilerinize erişme, düzeltme, silme ve işlenmesine itiraz etme hakkına sahipsiniz.
 
 Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
                   {showModal === 'kvkk' && `KVKK AYDINLATMA METNİ
 
-6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") uyarınca, kişisel verilerinizin işlenmesi hakkında sizleri bilgilendirmek isteriz.
+6698 sayılı Kişisel Verilerin Korunması Kanunu kapsamında, sipariş ve müşteri ilişkileri süreçlerinde paylaştığınız kişisel veriler veri sorumlusu tarafından işlenmektedir.
 
-1. VERİ SORUMLUSU
+İşlenen veriler:
+- Kimlik ve iletişim bilgileri
+- Teslimat ve fatura bilgileri
+- Sipariş ve ödeme bilgileri
 
-IMORA
-Web Sitesi: www.imora.com
-E-posta: info@imora.com
-
-2. İŞLENEN KİŞİSEL VERİLER
-
-2.1. Kimlik Bilgileri:
-- Ad, soyad
-- T.C. Kimlik No (fatura için gerekli olması halinde)
-
-2.2. İletişim Bilgileri:
-- E-posta adresi
-- Telefon numarası
-- Adres bilgileri
-
-2.3. Müşteri İşlem Bilgileri:
-- Sipariş geçmişi
-- Ürün tercihleri
-- İletişim geçmişi
-
-2.4. İşlem Güvenliği Bilgileri:
-- IP adresi
-- Çerez bilgileri
-- Tarayıcı bilgileri
-
-2.5. Pazarlama Bilgileri:
-- E-posta abonelik durumu
-- Tercih ve beğeniler
-
-3. KİŞİSEL VERİLERİN İŞLENME AMAÇLARI
-
-Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:
-- Sipariş işlemlerinin gerçekleştirilmesi
-- Ürün ve hizmetlerin sunulması
-- Müşteri ilişkileri yönetimi
-- Fatura ve muhasebe işlemleri
+İşleme amaçları:
+- Siparişin alınması ve tamamlanması
+- Fatura düzenlenmesi
+- Teslimat operasyonunun yürütülmesi
+- Müşteri destek süreçlerinin yürütülmesi
 - Yasal yükümlülüklerin yerine getirilmesi
-- Pazarlama ve tanıtım faaliyetleri (izin verilmesi halinde)
-- İstatistiksel analizler
-- Site güvenliğinin sağlanması
 
-4. KİŞİSEL VERİLERİN İŞLENME HUKUKİ SEBEPLERİ
-
-Kişisel verileriniz, KVKK'nın 5. ve 6. maddelerinde belirtilen aşağıdaki hukuki sebeplere dayanarak işlenmektedir:
-- Açık rıza
-- Sözleşmenin kurulması veya ifası
-- Yasal yükümlülüklerin yerine getirilmesi
-- Meşru menfaatler
-
-5. KİŞİSEL VERİLERİN AKTARILMASI
-
-Kişisel verileriniz, aşağıdaki durumlarda üçüncü kişilere aktarılabilir:
-
-5.1. Kargo Firmaları:
-Siparişlerinizin teslimi için kargo firmalarına adres bilgileriniz aktarılır.
-
-5.2. Ödeme İşlemcisi:
-Ödeme işlemlerinin gerçekleştirilmesi için güvenli ödeme sistemlerine ödeme bilgileriniz aktarılır.
-
-5.3. Yasal Zorunluluklar:
-Yasal yükümlülüklerin yerine getirilmesi için ilgili kamu kurum ve kuruluşlarına bilgileriniz aktarılabilir.
-
-5.4. Hizmet Sağlayıcılar:
-Web sitesi hosting, e-posta servisleri gibi teknik hizmet sağlayıcılarına sınırlı bilgiler aktarılabilir.
-
-6. KİŞİSEL VERİLERİNİZİN SAKLAMA SÜRESİ
-
-Kişisel verileriniz, işleme amaçlarının gerektirdiği süre boyunca ve yasal saklama sürelerine uygun olarak saklanır:
-- Sipariş bilgileri: 10 yıl (Vergi Usul Kanunu)
-- Müşteri iletişim kayıtları: 3 yıl
-- Pazarlama izinleri: İptal edilene kadar
-
-7. KVKK KAPSAMINDAKİ HAKLARINIZ
-
-KVKK'nın 11. maddesi uyarınca aşağıdaki haklara sahipsiniz:
-
-7.1. Bilgi Talep Etme:
-Kişisel verilerinizin işlenip işlenmediğini öğrenme hakkı.
-
-7.2. Erişim Hakkı:
-İşlenen kişisel verileriniz hakkında bilgi talep etme hakkı.
-
-7.3. Düzeltme Hakkı:
-Yanlış veya eksik işlenen verilerinizin düzeltilmesini isteme hakkı.
-
-7.4. Silme Hakkı:
-Kişisel verilerinizin silinmesini isteme hakkı.
-
-7.5. İtiraz Hakkı:
-Kişisel verilerinizin işlenmesine itiraz etme hakkı.
-
-7.6. Veri Taşınabilirliği:
-Kişisel verilerinizin başka bir veri sorumlusuna aktarılmasını isteme hakkı.
-
-8. HAKLARINIZI KULLANMA YÖNTEMİ
-
-Haklarınızı kullanmak için:
-- E-posta: info@imora.com
-- Web: www.imora.com/iletisim
-
-Başvurularınız, KVKK'nın 13. maddesi uyarınca en geç 30 gün içinde sonuçlandırılır.
-
-9. VERİ GÜVENLİĞİ
-
-Kişisel verileriniz:
-- Güvenli sunucularda saklanır
-- SSL şifreleme ile korunur
-- Yetkisiz erişime karşı korunur
-- Düzenli olarak yedeklenir
-
-10. ÇEREZLER
-
-Sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerez politikamız hakkında detaylı bilgi için: www.imora.com/cookies
-
-11. DEĞİŞİKLİKLER
-
-Bu aydınlatma metni, yasal değişiklikler doğrultusunda güncellenebilir. Güncel versiyon sitede yayınlanır.
-
-12. İLETİŞİM
-
-KVKK kapsamındaki haklarınız ve kişisel verileriniz hakkında sorularınız için:
-E-posta: info@imora.com
-Adres: [Şirket Adresi]
-
-Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
+Haklarınız için bizimle iletişime geçebilirsiniz: info@imora.com`}
                 </div>
               </div>
               <div className="p-4 border-t border-slate-200 bg-slate-50 pb-safe">
@@ -761,4 +561,5 @@ Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
     </ClassicPageShell>
   )
 }
+
 

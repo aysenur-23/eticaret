@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/store/useCartStore'
@@ -16,7 +16,34 @@ import { CheckCircle, Package, Truck, CreditCard, ArrowLeft, AlertCircle, Phone,
 import { fmtPrice } from '@/lib/format'
 import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
 import { useExchangeRates } from '@/lib/useExchangeRates'
-import { getAddresses, getUserProfile, setUserProfile, createOrder } from '@/lib/firebase/firestore'
+import { getAddresses } from '@/lib/firebase/firestore'
+
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, '')
+}
+
+function formatPhoneNumber(value: string) {
+  const digits = onlyDigits(value).slice(0, 10)
+  const parts = [
+    digits.slice(0, 3),
+    digits.slice(3, 6),
+    digits.slice(6, 8),
+    digits.slice(8, 10),
+  ].filter(Boolean)
+  return parts.join(' ')
+}
+
+function readPersistedCartItems() {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem('cart-storage')
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed?.state?.items) ? parsed.state.items : []
+  } catch {
+    return []
+  }
+}
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -27,7 +54,7 @@ export default function CheckoutPage() {
   const cartTotal = useCartStore((state) => state.getTotalPrice())
   const clearCart = useCartStore((state) => state.clearCart)
   const cartHydrated = useCartStore((state) => state._hasHydrated)
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, token } = useAuthStore()
   
   const isFromCart = cartItems.length > 0
 
@@ -56,6 +83,10 @@ export default function CheckoutPage() {
   const [checkoutErrors, setCheckoutErrors] = useState<Record<string, string>>({})
   const [paymentMethod, setPaymentMethod] = useState<'havale' | 'card'>('havale')
   const [isTestOrderLoading, setIsTestOrderLoading] = useState(false)
+  const orderItems = useMemo(
+    () => cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+    [cartItems]
+  )
 
   // Load saved addresses from Firestore when user is authenticated
   React.useEffect(() => {
@@ -81,6 +112,23 @@ export default function CheckoutPage() {
         .catch((err) => console.error('Error loading addresses:', err))
     }
   }, [isAuthenticated, user?.id])
+  React.useEffect(() => {
+    if (cartHydrated) return
+
+    try {
+      useCartStore.persist?.rehydrate?.()
+    } catch {}
+
+    const timer = window.setTimeout(() => {
+      const persistedItems = readPersistedCartItems()
+      useCartStore.setState({
+        items: persistedItems,
+        _hasHydrated: true,
+      })
+    }, 900)
+
+    return () => window.clearTimeout(timer)
+  }, [cartHydrated])
 
   const subtotal = cartTotal
   
@@ -95,8 +143,58 @@ export default function CheckoutPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    let nextValue = value
+    if (name === 'phone') nextValue = formatPhoneNumber(value)
+    if (name === 'idNumber') nextValue = onlyDigits(value).slice(0, 11)
+    if (name === 'taxId') nextValue = onlyDigits(value).slice(0, 10)
+    if (name === 'postalCode') nextValue = onlyDigits(value).slice(0, 5)
+    setFormData(prev => ({ ...prev, [name]: nextValue }))
     if (checkoutErrors[name]) setCheckoutErrors(prev => ({ ...prev, [name]: '' }))
+  }
+
+  const createOrderWithApi = async (options: {
+    paymentMethod: 'bank_transfer' | 'pending'
+    paymentProvider?: 'stripe'
+  }) => {
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        customer: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          addressLine: formData.addressLine,
+          city: formData.city,
+          district: formData.district,
+          postalCode: formData.postalCode,
+          country: formData.country || 'Türkiye',
+          billingType: formData.billingType,
+          address: formData.addressLine,
+          billingName: formData.billingType === 'company' ? formData.companyName : formData.name,
+          taxId: formData.taxId,
+          taxOffice: formData.taxOffice,
+        },
+        items: orderItems,
+        pricing: { subtotal, tax, shipping, total },
+        paymentMethod: options.paymentMethod,
+        ...(options.paymentProvider ? { paymentProvider: options.paymentProvider } : {}),
+      }),
+    })
+
+    const data = await response.json().catch(() => null)
+    if (!response.ok || !data?.success) {
+      throw new Error(data?.error || 'Sipariş oluşturulamadı.')
+    }
+
+    return data as {
+      success: true
+      orderId: string
+      payment?: { redirectUrl?: string; clientSecret?: string; requiresRedirect: boolean }
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,110 +233,34 @@ export default function CheckoutPage() {
     }
 
     try {
-      const customer = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        addressLine: formData.addressLine,
-        city: formData.city,
-        district: formData.district,
-        postalCode: formData.postalCode,
-        country: formData.country || 'Türkiye',
-        billingType: formData.billingType,
-        address: formData.addressLine,
-        billingName: formData.billingType === 'company' ? formData.companyName : formData.name,
-        taxId: formData.taxId,
-        taxOffice: formData.taxOffice,
-      }
-      const items = isFromCart
-        ? cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity }))
-        : []
-
-      // Sipariş numarası timestamp bazlı üretilir
-      const now = new Date()
-      const orderNo = `ORD-${now.getFullYear().toString().slice(2)}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`
-
-      const orderPayload = {
-        orderId: orderNo,
-        customer,
-        items,
-        pricing: { subtotal, tax, shipping, total },
-        paymentMethod: paymentMethod === 'card' ? 'stripe' : 'bank_transfer',
-        status: 'pending',
-        paymentStatus: paymentMethod === 'card' ? 'pending_stripe' : 'pending',
-      }
-
       if (paymentMethod === 'card') {
-        // Stripe: önce Firestore'a sipariş yaz, sonra Stripe oturumu başlat
-        if (user?.id) {
-          const profile = await getUserProfile(user.id)
-          if (profile && !profile.customerNo) {
-            await setUserProfile(user.id, { customerNo: `CUS-${Date.now().toString().slice(-5)}` })
-          }
-          await createOrder(user.id, orderPayload)
-        } else {
-          const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
-          const { getDb } = await import('@/lib/firebase/config')
-          const db = getDb()
-          await addDoc(col(db, 'guestOrders'), { ...orderPayload, createdAt: srvTs() })
-        }
-
-        const res = await fetch('/api/stripe/create-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            orderNo,
-            total,
-            customerEmail: formData.email,
-            customerName: formData.name,
-          }),
+        const data = await createOrderWithApi({
+          paymentMethod: 'pending',
+          paymentProvider: 'stripe',
         })
-        const data = await res.json()
-        if (!res.ok || !data.url) {
-          setCheckoutErrors(prev => ({ ...prev, payment: data.error || 'Stripe bağlantısı kurulamadı. Lütfen tekrar deneyin.' }))
+        if (!data.payment?.redirectUrl) {
+          setCheckoutErrors(prev => ({ ...prev, payment: 'Stripe bağlantısı kurulamadı. Lütfen tekrar deneyin.' }))
           scrollToTop()
           return
         }
         if (isFromCart) clearCart()
-        window.location.href = data.url
+        window.location.href = data.payment.redirectUrl
         return
       }
 
-      // Havale / EFT: Firestore'a sipariş yaz (API yok — statik hosting)
-      if (user?.id) {
-        // Giriş yapılmış: Firestore users/{uid}/orders
-        const profile = await getUserProfile(user.id)
-        if (profile && !profile.customerNo) {
-          // Müşteri no: timestamp bazlı ata
-          const custNo = `CUS-${Date.now().toString().slice(-5)}`
-          await setUserProfile(user.id, { customerNo: custNo })
-        }
-        await createOrder(user.id, orderPayload)
-        if (isFromCart) clearCart()
-        router.push(`/checkout/success?order_id=${orderNo}&payment=bank_transfer`)
-        return
-      }
-
-      // Misafir: Firestore guestOrders koleksiyonuna yaz
-      const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      await addDoc(col(db, 'guestOrders'), {
-        ...orderPayload,
-        createdAt: srvTs(),
-      })
+      const data = await createOrderWithApi({ paymentMethod: 'bank_transfer' })
       if (isFromCart) clearCart()
       if (formData.createAccount) {
         const params = new URLSearchParams({
           email: formData.email || '',
           name: formData.name || '',
           from_order: '1',
-          redirect: `/checkout/success?order_id=${orderNo}&payment=bank_transfer`,
+          redirect: `/checkout/success?order_id=${data.orderId}&payment=bank_transfer`,
         })
         if (formData.phone) params.set('phone', formData.phone)
         router.push(`/register?${params.toString()}`)
       } else {
-        router.push(`/checkout/success?order_id=${orderNo}&payment=bank_transfer`)
+        router.push(`/checkout/success?order_id=${data.orderId}&payment=bank_transfer`)
       }
     } catch (error) {
       console.error('Order creation error:', error)
@@ -278,47 +300,9 @@ export default function CheckoutPage() {
     setCheckoutErrors({})
     setIsTestOrderLoading(true)
     try {
-      const customer = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        addressLine: formData.addressLine,
-        city: formData.city,
-        district: formData.district,
-        postalCode: formData.postalCode,
-        country: formData.country || 'Türkiye',
-        billingType: formData.billingType,
-        address: formData.addressLine,
-        billingName: formData.billingType === 'company' ? formData.companyName : formData.name,
-        taxId: formData.taxId,
-        taxOffice: formData.taxOffice,
-      }
-      const items = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity }))
-
-      const now = new Date()
-      const orderNo = `ORD-${now.getFullYear().toString().slice(2)}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`
-
-      const orderPayload = {
-        orderId: orderNo,
-        customer,
-        items,
-        pricing: { subtotal, tax, shipping, total },
-        paymentMethod: 'pending',
-        status: 'pending',
-        paymentStatus: 'pending',
-      }
-
-      if (user?.id) {
-        await createOrder(user.id, orderPayload)
-      } else {
-        const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
-        const { getDb } = await import('@/lib/firebase/config')
-        const db = getDb()
-        await addDoc(col(db, 'guestOrders'), { ...orderPayload, createdAt: srvTs() })
-      }
-
+      const data = await createOrderWithApi({ paymentMethod: 'pending' })
       if (isFromCart) clearCart()
-      const successUrl = `/checkout/success?order_id=${orderNo}&payment=test`
+      const successUrl = `/checkout/success?order_id=${data.orderId}&payment=test`
       if (!user?.id && formData.createAccount) {
         const params = new URLSearchParams({
           email: formData.email || '',
@@ -501,6 +485,7 @@ export default function CheckoutPage() {
                       <Input
                         id="name"
                         name="name"
+                        autoComplete="name"
                         value={formData.name}
                         onChange={handleInputChange}
                         className={`rounded-xl ${checkoutErrors.name ? 'border-destructive' : ''}`}
@@ -513,6 +498,7 @@ export default function CheckoutPage() {
                         id="email"
                         name="email"
                         type="email"
+                        autoComplete="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         className={`rounded-xl ${checkoutErrors.email ? 'border-destructive' : ''}`}
@@ -524,6 +510,9 @@ export default function CheckoutPage() {
                       <Input
                         id="phone"
                         name="phone"
+                        inputMode="numeric"
+                        autoComplete="tel"
+                        placeholder="5xx xxx xx xx"
                         value={formData.phone}
                         onChange={handleInputChange}
                         className={`rounded-xl ${checkoutErrors.phone ? 'border-destructive' : ''}`}
@@ -557,6 +546,8 @@ export default function CheckoutPage() {
                       <Input
                         id="postalCode"
                         name="postalCode"
+                        inputMode="numeric"
+                        placeholder="34000"
                         value={formData.postalCode}
                         onChange={handleInputChange}
                         className="rounded-xl"
@@ -565,12 +556,13 @@ export default function CheckoutPage() {
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="addressLine">Adres *</Label>
-                    <Textarea
-                      id="addressLine"
-                      name="addressLine"
-                      value={formData.addressLine}
-                      onChange={handleInputChange}
-                      rows={3}
+                      <Textarea
+                        id="addressLine"
+                        name="addressLine"
+                        autoComplete="street-address"
+                        value={formData.addressLine}
+                        onChange={handleInputChange}
+                        rows={3}
                       className={`rounded-xl ${checkoutErrors.addressLine ? 'border-destructive' : ''}`}
                     />
                     {checkoutErrors.addressLine && <p className="text-sm text-destructive">{checkoutErrors.addressLine}</p>}
@@ -614,6 +606,7 @@ export default function CheckoutPage() {
                               autoComplete="new-password"
                               className="rounded-xl"
                             />
+                            {checkoutErrors.password && <p className="text-sm text-destructive mt-1">{checkoutErrors.password}</p>}
                           </div>
                           <div>
                             <Label htmlFor="confirmPassword">Şifre Tekrar *</Label>
@@ -628,6 +621,7 @@ export default function CheckoutPage() {
                               autoComplete="new-password"
                               className="rounded-xl"
                             />
+                            {checkoutErrors.confirmPassword && <p className="text-sm text-destructive mt-1">{checkoutErrors.confirmPassword}</p>}
                           </div>
                         </div>
                       )}
@@ -695,7 +689,7 @@ export default function CheckoutPage() {
 
                   <Button type="submit" size="lg" className="w-full rounded-full bg-brand hover:bg-brand-hover font-semibold shadow-lg min-h-[48px] touch-manipulation">
                     <CreditCard className="w-5 h-5 mr-2" />
-                    {paymentMethod === 'card' ? 'Ödemeye git' : 'Siparişi Onayla'}
+                    {'Ödemeye Geç'}
                   </Button>
 
                   <Button
@@ -725,3 +719,5 @@ export default function CheckoutPage() {
     </div>
   )
 }
+
+

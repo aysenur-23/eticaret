@@ -55,7 +55,7 @@ export function FixedCategoryMenu() {
 
   return (
     <aside
-      className="hidden md:block fixed left-0 z-30 flex flex-col bg-white border-r border-slate-200"
+      className="hidden md:block fixed left-0 z-30 flex flex-col bg-white border-r border-slate-200 pt-1"
       style={{
         width: SIDEBAR_WIDTH,
         top: `${HEADER_OFFSET_REM}rem`,
@@ -67,7 +67,7 @@ export function FixedCategoryMenu() {
       {/* Robotzade: TÜM KATEGORİLER bandı – hamburger sol, metin, dropdown sağ; header ile bağlantılı (tüm ürünler) */}
       <Link
         href="/products"
-        className="flex items-center gap-2 h-12 px-4 shrink-0 bg-brand hover:bg-brand-hover text-white border-b border-brand transition-colors"
+        className="mt-1 flex items-center gap-2 h-12 px-4 shrink-0 bg-brand hover:bg-brand-hover text-white border-b border-brand transition-colors"
         aria-label="Tüm ürünler"
       >
         <Menu className="w-5 h-5 shrink-0" aria-hidden />

@@ -12,7 +12,7 @@ import { fmtTRY } from '@/lib/format'
 
 type OrderRow = {
   id: string
-  source: 'firestore'
+  source: 'prisma' | 'firestore'
   orderId: string
   customerName?: string
   customerEmail?: string
@@ -27,78 +27,84 @@ const STATUS_LABELS: Record<string, string> = {
   pending: 'Beklemede',
   PENDING: 'Beklemede',
   confirmed: 'Onaylandı',
+  CONFIRMED: 'Onaylandı',
   processing: 'İşleniyor',
+  PROCESSING: 'İşleniyor',
   shipped: 'Kargoda',
+  SHIPPED: 'Kargoda',
   delivered: 'Teslim Edildi',
+  DELIVERED: 'Teslim Edildi',
   cancelled: 'İptal',
+  CANCELLED: 'İptal',
   PAID: 'Ödendi',
   paid: 'Ödendi',
   failed: 'Başarısız',
+  FAILED: 'Başarısız',
   refunded: 'İade',
+  REFUNDED: 'İade',
 }
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800 border-0',
   PENDING: 'bg-amber-100 text-amber-800 border-0',
   confirmed: 'bg-blue-100 text-blue-800 border-0',
+  CONFIRMED: 'bg-blue-100 text-blue-800 border-0',
   processing: 'bg-indigo-100 text-indigo-800 border-0',
+  PROCESSING: 'bg-indigo-100 text-indigo-800 border-0',
   shipped: 'bg-purple-100 text-purple-800 border-0',
+  SHIPPED: 'bg-purple-100 text-purple-800 border-0',
   delivered: 'bg-green-100 text-green-800 border-0',
+  DELIVERED: 'bg-green-100 text-green-800 border-0',
   cancelled: 'bg-red-100 text-red-800 border-0',
+  CANCELLED: 'bg-red-100 text-red-800 border-0',
   PAID: 'bg-green-100 text-green-800 border-0',
   paid: 'bg-green-100 text-green-800 border-0',
   failed: 'bg-red-100 text-red-800 border-0',
+  FAILED: 'bg-red-100 text-red-800 border-0',
   refunded: 'bg-slate-100 text-slate-700 border-0',
+  REFUNDED: 'bg-slate-100 text-slate-700 border-0',
 }
 
 const FILTER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
 
-async function loadOrdersFromFirestore(): Promise<OrderRow[]> {
-  const { collection: col, getDocs } = await import('firebase/firestore')
-  const { getDb } = await import('@/lib/firebase/config')
-  const db = getDb()
+async function loadOrdersFromAPI(): Promise<OrderRow[]> {
+  const res = await fetch('/api/admin/orders', { credentials: 'include' })
+  if (!res.ok) throw new Error('API hatası')
+  const data: { prisma: any[]; firestore: any[] } = await res.json()
+
   const rows: OrderRow[] = []
 
-  const guestSnap = await getDocs(col(db, 'guestOrders'))
-  guestSnap.docs.forEach((d) => {
-    const o = d.data()
+  // Prisma siparişleri
+  for (const o of data.prisma ?? []) {
+    rows.push({
+      id: o.id,
+      source: 'prisma',
+      orderId: o.orderNo || o.id,
+      customerName: o.shippingName || o.user?.name,
+      customerEmail: o.user?.email || o.shippingEmail,
+      total: o.total ?? 0,
+      status: o.status ?? 'PENDING',
+      paymentStatus: o.paymentStatus,
+      createdAt: o.createdAt ?? '',
+      userId: o.userId ?? null,
+    })
+  }
+
+  // Firestore siparişleri
+  for (const o of data.firestore ?? []) {
     const customer = o.customer || {}
     const pricing = o.pricing || {}
-    const createdAt = o.createdAt as { seconds: number } | null
     rows.push({
-      id: d.id,
+      id: o.id,
       source: 'firestore',
-      orderId: o.orderId || d.id,
+      orderId: o.orderId || o.id,
       customerName: customer.name,
       customerEmail: customer.email,
       total: pricing.total ?? 0,
       status: o.status ?? 'pending',
       paymentStatus: o.paymentStatus,
-      createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : '',
-      userId: null,
-    })
-  })
-
-  const usersSnap = await getDocs(col(db, 'users'))
-  for (const userDoc of usersSnap.docs) {
-    const ordersSnap = await getDocs(col(db, 'users', userDoc.id, 'orders'))
-    ordersSnap.docs.forEach((d) => {
-      const o = d.data()
-      const customer = o.customer || {}
-      const pricing = o.pricing || {}
-      const createdAt = o.createdAt as { seconds: number } | null
-      rows.push({
-        id: d.id,
-        source: 'firestore',
-        orderId: o.orderId || d.id,
-        customerName: customer.name,
-        customerEmail: customer.email,
-        total: pricing.total ?? 0,
-        status: o.status ?? 'pending',
-        paymentStatus: o.paymentStatus,
-        createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : '',
-        userId: userDoc.id,
-      })
+      createdAt: o.createdAt ?? '',
+      userId: o.userId ?? null,
     })
   }
 
@@ -119,7 +125,7 @@ export default function AdminOrdersPage() {
     if (!silent) setLoading(true)
     else setRefreshing(true)
     try {
-      const rows = await loadOrdersFromFirestore()
+      const rows = await loadOrdersFromAPI()
       setOrders(rows)
     } catch (err) {
       console.error('Admin orders load error:', err)
@@ -131,26 +137,22 @@ export default function AdminOrdersPage() {
   }
 
   useEffect(() => {
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      return
-    }
     fetchOrders()
   }, [router])
 
   const handleStatusChange = async (row: OrderRow, newStatus: string) => {
     setUpdatingId(row.id)
     try {
-      const { doc, updateDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      if (row.userId) {
-        await updateDoc(doc(db, 'users', row.userId, 'orders', row.id), { status: newStatus })
-      } else {
-        await updateDoc(doc(db, 'guestOrders', row.id), { status: newStatus })
-      }
+      const url = row.source === 'firestore' && row.userId
+        ? `/api/admin/orders/${row.id}?source=firestore&userId=${row.userId}`
+        : `/api/admin/orders/${row.id}?source=${row.source}`
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Güncelleme hatası')
       setOrders((prev) =>
         prev.map((o) =>
           o.id === row.id && o.source === row.source ? { ...o, status: newStatus } : o

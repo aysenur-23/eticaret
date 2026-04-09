@@ -64,12 +64,6 @@ export default function AdminIletisimPage() {
   }
 
   useEffect(() => {
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      return
-    }
     fetchMessages()
   }, [router])
 

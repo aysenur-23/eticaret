@@ -80,17 +80,25 @@ function ProductsPageContent() {
   const [selectedSpecs, setSelectedSpecs] = useState<SpecFilters>({})
   const [sortBy, setSortBy] = useState<SortOption>('newest')
   const [currentPage, setCurrentPage] = useState(1)
+  const [allProducts, setAllProducts] = useState(mockProducts)
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => { if (Array.isArray(data) && data.length > 0) setAllProducts(data) })
+      .catch(() => {})
+  }, [])
 
   const brands = useMemo(
     () =>
-      Array.from(new Set(mockProducts.map((p) => p.brand).filter(Boolean))).sort((a, b) =>
+      Array.from(new Set(allProducts.map((p) => p.brand).filter(Boolean))).sort((a, b) =>
         (a || '').localeCompare(b || '', 'tr')
       ) as string[],
-    []
+    [allProducts]
   )
   const availableSubCategorySet = useMemo(
-    () => new Set(mockProducts.map((p) => p.category)),
-    []
+    () => new Set(allProducts.map((p) => p.category)),
+    [allProducts]
   )
 
   const buildProductsUrl = (opts: { category?: string | null; q?: string; brand?: string | null }) => {
@@ -129,7 +137,7 @@ function ProductsPageContent() {
   }, [searchParams])
 
   const categoryAndSearchFiltered = useMemo(() => {
-    return mockProducts.filter((product) => {
+    return allProducts.filter((product) => {
       const matchesSearch = productMatchesQuery(product, searchQuery.trim())
 
       let matchesCategory: boolean
@@ -144,7 +152,7 @@ function ProductsPageContent() {
 
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, selectedCategory])
+  }, [searchQuery, selectedCategory, allProducts])
 
   const dynamicMinPrice = useMemo(() => {
     if (categoryAndSearchFiltered.length === 0) return 0

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="45%" stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#bfdbfe"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="980" cy="148" r="88" fill="#fcd34d"/>
+  <path d="M0 650C120 620 240 600 360 614C520 632 630 692 760 692C915 692 1020 620 1200 565V900H0Z" fill="#a3e635" fill-opacity=".35"/>
+  <path d="M0 708C152 662 282 650 415 678C575 713 680 768 835 756C974 745 1065 700 1200 652V900H0Z" fill="#65a30d" fill-opacity=".45"/>
+
+  <g transform="translate(168 460)">
+    <rect width="520" height="170" rx="26" fill="#f8fafc" stroke="#64748b" stroke-width="8"/>
+    <path d="M520 82H580L612 126H520Z" fill="#e2e8f0"/>
+    <rect x="72" y="38" width="120" height="82" rx="14" fill="#dbeafe"/>
+    <rect x="212" y="38" width="130" height="82" rx="14" fill="#dbeafe"/>
+    <circle cx="128" cy="182" r="36" fill="#1f2937"/>
+    <circle cx="430" cy="182" r="36" fill="#1f2937"/>
+  </g>
+
+  <g transform="translate(730 408)">
+    <rect width="260" height="128" rx="14" transform="rotate(-12 0 0)" fill="url(#panel)"/>
+    <path d="M12 40H246M18 72H252M26 104H258M58 10V122M96 0V130M136 -8V138M176 -16V146M214 -24V154" stroke="#67e8f9" stroke-opacity=".45" stroke-width="3" transform="rotate(-12 0 0)"/>
+  </g>
+
+  <g transform="translate(804 585)">
+    <rect width="150" height="120" rx="20" fill="#0f172a"/>
+    <rect x="22" y="20" width="106" height="24" rx="7" fill="#f59e0b" fill-opacity=".85"/>
+    <rect x="22" y="58" width="44" height="38" rx="8" fill="#e2e8f0" fill-opacity=".16"/>
+    <rect x="74" y="58" width="54" height="38" rx="8" fill="#22c55e" fill-opacity=".32"/>
+  </g>
+
+  <text x="72" y="112" font-size="56" font-family="Arial, sans-serif" font-weight="700" fill="#0f172a">Karavan Enerji Paketi</text>
+  <text x="72" y="164" font-size="28" font-family="Arial, sans-serif" fill="#334155">Mobil yasam icin panel, power station ve hafif depolama</text>
+</svg>

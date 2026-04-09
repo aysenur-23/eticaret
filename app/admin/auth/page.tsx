@@ -7,14 +7,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Lock, Mail, Loader2, AlertCircle } from 'lucide-react'
-import { getAuth } from '@/lib/firebase/config'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { isFirebaseConfigured } from '@/lib/firebase/config'
+import { ArrowLeft, Lock, Loader2, AlertCircle } from 'lucide-react'
 
 export default function AdminAuthPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,49 +20,30 @@ export default function AdminAuthPage() {
     setError('')
     setLoading(true)
     try {
-      if (!isFirebaseConfigured) {
-        setError('Firebase yapılandırılmamış.')
-        setLoading(false)
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+        credentials: 'include',
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.success) {
+        setError(data.error || 'Giriş başarısız.')
         return
       }
-      const auth = getAuth()
-      const cred = await signInWithEmailAndPassword(auth, email, password)
-      // Firestore'dan admin rolünü kontrol et (statik hosting — API yok)
-      const { doc, getDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      const userDoc = await getDoc(doc(db, 'users', cred.user.uid))
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
-        const idToken = await cred.user.getIdToken()
-        // Backend'e token gönderip admin_session cookie set ettir (middleware bu cookie ile erişime izin verir)
-        const res = await fetch('/api/admin/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken }),
-          credentials: 'include',
-        })
-        const data = await res.json().catch(() => ({}))
-        if (!res.ok || !data.success) {
-          setError(data.error || 'Oturum açılamadı. Tekrar deneyin.')
-          setLoading(false)
-          return
-        }
-        localStorage.setItem('admin_uid', cred.user.uid)
-        localStorage.setItem('admin_token', idToken)
-        router.push('/admin')
-        router.refresh()
-        return
+      // Firebase custom token ile sessiz giriş (Firestore okuma izni için)
+      if (data.firebaseCustomToken) {
+        try {
+          const { getAuth } = await import('@/lib/firebase/config')
+          const { signInWithCustomToken } = await import('firebase/auth')
+          const auth = getAuth()
+          await signInWithCustomToken(auth, data.firebaseCustomToken)
+        } catch {}
       }
-      setError('Bu hesabın admin yetkisi yok.')
+      router.push('/admin')
+      router.refresh()
     } catch (err: any) {
-      const code = err?.code || ''
-      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-        setError('E-posta veya şifre hatalı.')
-      } else if (code === 'auth/invalid-email') {
-        setError('Geçersiz e-posta.')
-      } else {
-        setError(err?.message || 'Giriş başarısız.')
-      }
+      setError('Bağlantı hatası. Tekrar deneyin.')
     } finally {
       setLoading(false)
     }
@@ -88,7 +65,7 @@ export default function AdminAuthPage() {
               Admin Paneli
             </CardTitle>
             <CardDescription>
-              Panele girmek için Firebase hesabınızla giriş yapın. Sadece admin yetkisi olan hesaplar erişebilir.
+              Panele girmek için admin şifresini girin.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -99,23 +76,6 @@ export default function AdminAuthPage() {
                   {error}
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="admin-email">E-posta</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 z-10 pointer-events-none shrink-0" />
-                  <Input
-                    id="admin-email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="admin@ornek.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 rounded-lg min-w-0"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="admin-password">Şifre</Label>
                 <Input
@@ -128,6 +88,7 @@ export default function AdminAuthPage() {
                   className="rounded-lg"
                   required
                   disabled={loading}
+                  autoFocus
                 />
               </div>
               <Button type="submit" className="w-full rounded-lg gap-2" disabled={loading}>
@@ -137,13 +98,10 @@ export default function AdminAuthPage() {
                     Doğrulanıyor...
                   </>
                 ) : (
-                  'Admin Girişi'
+                  'Giriş Yap'
                 )}
               </Button>
             </form>
-            <p className="mt-4 text-sm text-ink-muted">
-              Admin yetkisi için sistem yöneticinize başvurun. Hesabınız Firestore&apos;da <code className="text-xs bg-gray-100 px-1 rounded">role: &quot;admin&quot;</code> olarak ayarlanmalıdır.
-            </p>
           </CardContent>
         </Card>
       </div>

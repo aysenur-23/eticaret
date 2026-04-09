@@ -91,19 +91,36 @@ export default function ProductDetailClient({ initialProduct, productId: product
   const [contactSubmitting, setContactSubmitting] = useState(false)
   const [contactSent, setContactSent] = useState(false)
   const [contactFormOpen, setContactFormOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
     if (!productId) return
-    const data = mockProductsMap[productId] ?? null
-    setProduct(data)
-    const initialVariant =
-      data?.defaultVariantKey && data.variants?.length
-        ? data.variants.find((v) => v.key === data.defaultVariantKey) ?? data.variants[0]
-        : data?.variants?.[0] ?? null
-    setSelectedVariant(initialVariant)
-    const st = typeof data?.stock === 'number' ? data.stock : 0
-    setQuantity(st > 0 ? 1 : 0)
-    setLoading(false)
+    setLoading(true)
+    fetch(`/api/products/${productId}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((fetched) => {
+        const data = fetched ?? mockProductsMap[productId] ?? null
+        setProduct(data)
+        const initialVariant =
+          data?.defaultVariantKey && data.variants?.length
+            ? data.variants.find((v: { key: string }) => v.key === data.defaultVariantKey) ?? data.variants[0]
+            : data?.variants?.[0] ?? null
+        setSelectedVariant(initialVariant)
+        const st = typeof data?.stock === 'number' ? data.stock : 0
+        setQuantity(st > 0 ? 1 : 0)
+      })
+      .catch(() => {
+        const data = mockProductsMap[productId] ?? null
+        setProduct(data)
+        const initialVariant =
+          data?.defaultVariantKey && data.variants?.length
+            ? data.variants.find((v) => v.key === data.defaultVariantKey) ?? data.variants[0]
+            : data?.variants?.[0] ?? null
+        setSelectedVariant(initialVariant)
+        const st = typeof data?.stock === 'number' ? data.stock : 0
+        setQuantity(st > 0 ? 1 : 0)
+      })
+      .finally(() => setLoading(false))
   }, [productId])
 
   /** Varyant seçiliyse ve üründe imagesByVariant varsa o varyantın görselleri; yoksa product.images */
@@ -118,7 +135,6 @@ export default function ProductDetailClient({ initialProduct, productId: product
     }
     return (product.images ?? [product.image]).filter(Boolean) as string[]
   }, [product, effectiveVariant])
-  const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
     setSelectedIndex(0)

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
@@ -12,21 +13,28 @@ interface LogoProps {
 }
 
 export function Logo({ size = 'md', className, href, asDiv = false }: LogoProps) {
-  const textSizeClasses = {
-    sm: 'text-xl',
-    md: 'text-2xl',
-    lg: 'text-3xl',
-    xl: 'text-4xl',
+  const frameSizeClasses = {
+    sm: 'h-11 w-[184px]',
+    md: 'h-12 w-[204px]',
+    lg: 'h-16 w-[252px]',
+    xl: 'h-[54px] w-[226px]',
   }
 
   const logoElement = (
     <span
       className={cn(
-        'font-black tracking-tight text-brand select-none',
-        textSizeClasses[size]
+        'relative block',
+        frameSizeClasses[size]
       )}
     >
-      voltekno
+      <Image
+        src="/voltekno-logo-transparent.png"
+        alt="Voltekno Enerji Sistemleri"
+        fill
+        priority={size === 'lg' || size === 'xl'}
+        sizes="(max-width: 768px) 184px, (max-width: 1280px) 252px, 368px"
+        className="object-contain object-left"
+      />
     </span>
   )
 
@@ -41,7 +49,7 @@ export function Logo({ size = 'md', className, href, asDiv = false }: LogoProps)
   return (
     <Link
       href={href || '/'}
-      className={cn('flex items-center cursor-pointer hover:opacity-80 transition-opacity', className)}
+      className={cn('flex items-center cursor-pointer hover:opacity-90 transition-opacity', className)}
     >
       {logoElement}
     </Link>

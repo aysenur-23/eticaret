@@ -67,50 +67,11 @@ export default function AdminKatalogPage() {
 
   const loadCatalog = async () => {
     setLoading(true)
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      return
-    }
     try {
-      const { collection: col, getDocs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      const snap = await getDocs(col(db, 'catalog'))
-      const rows: CatalogProduct[] = snap.docs.map((d) => {
-        const data = d.data()
-        return {
-          id: d.id,
-          name: data.name || '',
-          category: data.category || 'Diğer',
-          price: data.price || 0,
-          stock: data.stock ?? 0,
-          featured: data.featured ?? false,
-          description: data.description,
-          fullDescription: data.fullDescription,
-          image: data.image,
-          sku: data.sku,
-          brand: data.brand,
-        }
-      })
-      // Eğer Firestore'da katalog yoksa mock products'tan doldur
-      if (rows.length === 0) {
-        const { mockProducts } = await import('@/lib/products-mock')
-        const mockRows: CatalogProduct[] = mockProducts.map((p: any) => ({
-          id: p.id || p.slug,
-          name: p.name,
-          category: p.category || 'Diğer',
-          price: p.price || 0,
-          stock: p.stock ?? 0,
-          featured: p.isFeatured || false,
-          description: p.description,
-          image: p.image,
-        }))
-        setProducts(mockRows)
-      } else {
-        setProducts(rows)
-      }
+      const res = await fetch('/api/admin/catalog', { credentials: 'include' })
+      if (!res.ok) throw new Error('API hatası')
+      const data: CatalogProduct[] = await res.json()
+      setProducts(data)
     } catch {
       setProducts([])
     } finally {
@@ -167,9 +128,6 @@ export default function AdminKatalogPage() {
     e.preventDefault()
     setSaving(true)
     try {
-      const { doc, setDoc, addDoc, collection: col, serverTimestamp: srvTs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
       const body = {
         name: form.name.trim(),
         price: Number(form.price) || 0,
@@ -181,12 +139,23 @@ export default function AdminKatalogPage() {
         featured: form.featured,
         sku: form.sku.trim() || null,
         brand: form.brand.trim() || null,
-        updatedAt: srvTs(),
       }
       if (editingId) {
-        await setDoc(doc(db, 'catalog', editingId), body, { merge: true })
+        const res = await fetch(`/api/admin/catalog/${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        })
+        if (!res.ok) throw new Error('Güncelleme hatası')
       } else {
-        await addDoc(col(db, 'catalog'), { ...body, createdAt: srvTs() })
+        const res = await fetch('/api/admin/catalog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        })
+        if (!res.ok) throw new Error('Oluşturma hatası')
       }
       setDialogOpen(false)
       loadCatalog()
@@ -199,10 +168,11 @@ export default function AdminKatalogPage() {
     if (!confirm('Bu ürün düzenlemesini kaldırmak istediğinize emin misiniz? (Mock ürünse orijinal hali kalır.)')) return
     setDeletingId(id)
     try {
-      const { doc, deleteDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      await deleteDoc(doc(db, 'catalog', id))
+      const res = await fetch(`/api/admin/catalog/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (!res.ok && res.status !== 404) throw new Error('Silme hatası')
       loadCatalog()
     } finally {
       setDeletingId(null)

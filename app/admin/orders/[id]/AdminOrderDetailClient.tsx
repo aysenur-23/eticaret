@@ -8,12 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Loader2, Package, Send, FileText } from 'lucide-react'
+import { ArrowLeft, Loader2, Package, FileText } from 'lucide-react'
 import { fmtTRY } from '@/lib/format'
 
 type OrderDetail = {
   id: string
-  source: 'firestore'
+  source: 'prisma' | 'firestore'
   orderId: string
   customer: Record<string, unknown>
   items: Array<{ id?: string; name: string; price: number; quantity: number; lineTotal?: number }>
@@ -34,12 +34,24 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'İptal' },
 ]
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'Beklemede', PENDING: 'Beklemede',
+  confirmed: 'Onaylandı', CONFIRMED: 'Onaylandı',
+  processing: 'İşleniyor', PROCESSING: 'İşleniyor',
+  shipped: 'Kargoda', SHIPPED: 'Kargoda',
+  delivered: 'Teslim Edildi', DELIVERED: 'Teslim Edildi',
+  cancelled: 'İptal', CANCELLED: 'İptal',
+  paid: 'Ödendi', PAID: 'Ödendi',
+  failed: 'Başarısız', FAILED: 'Başarısız',
+  pending_payment: 'Ödeme Bekleniyor',
+}
+
 export default function AdminOrderDetailPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const router = useRouter()
   const id = params.id as string
-  const source = searchParams.get('source') || 'firestore'
+  const source = searchParams.get('source') || 'prisma'
   const userId = searchParams.get('userId') || ''
 
   const [order, setOrder] = useState<OrderDetail | null>(null)
@@ -52,76 +64,39 @@ export default function AdminOrderDetailPage() {
 
   useEffect(() => {
     if (!id) return
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      return
-    }
-    ;(async () => {
-      try {
-        const { doc, getDoc, collection, query, where, getDocs } = await import('firebase/firestore')
-        const { getDb } = await import('@/lib/firebase/config')
-        const db = getDb()
-        let orderData: any = null
-
-        if (userId) {
-          // Kayıtlı kullanıcı siparişi
-          const snap = await getDoc(doc(db, 'users', userId, 'orders', id))
-          if (snap.exists()) {
-            orderData = { id: snap.id, source: 'firestore', ...snap.data() }
-          }
+    setLoading(true)
+    const url = userId
+      ? `/api/admin/orders/${id}?source=${source}&userId=${userId}`
+      : `/api/admin/orders/${id}?source=${source}`
+    fetch(url, { credentials: 'include' })
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (!data) { setOrder(null); return }
+        const mapped: OrderDetail = {
+          id: data.id,
+          source: data.source || source as 'prisma' | 'firestore',
+          orderId: data.orderId || data.id,
+          customer: data.customer || {},
+          items: (data.items || []).map((item: any) => ({
+            id: item.id,
+            name: item.name || item.productName || 'Ürün',
+            price: item.price ?? item.unitPrice ?? 0,
+            quantity: item.quantity,
+            lineTotal: item.lineTotal,
+          })),
+          pricing: data.pricing || {},
+          status: data.status || 'pending',
+          paymentStatus: data.paymentStatus || 'pending',
+          createdAt: data.createdAt || '',
+          trackingNumber: data.trackingNumber || '',
+          userId: data.userId || userId || undefined,
         }
-
-        if (!orderData) {
-          // guestOrders'da ara (doğrudan doc ID ile)
-          const guestDoc = await getDoc(doc(db, 'guestOrders', id))
-          if (guestDoc.exists()) {
-            orderData = { id: guestDoc.id, source: 'firestore', ...guestDoc.data() }
-          }
-        }
-
-        if (!orderData) {
-          // orderId alanıyla guestOrders'da sorgu yap
-          const q = query(collection(db, 'guestOrders'), where('orderId', '==', id))
-          const snap = await getDocs(q)
-          if (!snap.empty) {
-            const d = snap.docs[0]
-            orderData = { id: d.id, source: 'firestore', ...d.data() }
-          }
-        }
-
-        if (orderData) {
-          const customer = orderData.customer || {}
-          const pricing = orderData.pricing || {}
-          const items = orderData.items || []
-          const createdAt = orderData.createdAt as { seconds: number } | null
-          const mapped: OrderDetail = {
-            id: orderData.id,
-            source: 'firestore',
-            orderId: orderData.orderId || orderData.id,
-            customer,
-            items,
-            pricing,
-            status: orderData.status || 'pending',
-            paymentStatus: orderData.paymentStatus || 'pending',
-            createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : '',
-            trackingNumber: orderData.trackingNumber || '',
-            userId: userId || undefined,
-          }
-          setOrder(mapped)
-          setStatus(mapped.status)
-          setTrackingNumber(mapped.trackingNumber || '')
-        } else {
-          setOrder(null)
-        }
-      } catch (err) {
-        console.error('Order detail load error:', err)
-        setOrder(null)
-      } finally {
-        setLoading(false)
-      }
-    })()
+        setOrder(mapped)
+        setStatus(mapped.status)
+        setTrackingNumber(mapped.trackingNumber || '')
+      })
+      .catch(() => setOrder(null))
+      .finally(() => setLoading(false))
   }, [id, source, userId, router])
 
   const handleUpdate = async () => {
@@ -129,21 +104,19 @@ export default function AdminOrderDetailPage() {
     setUpdating(true)
     setMessage(null)
     try {
-      const { doc, updateDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      const updateData: Record<string, unknown> = { status }
-      if (trackingNumber) updateData.trackingNumber = trackingNumber
-
-      if (order.userId) {
-        await updateDoc(doc(db, 'users', order.userId, 'orders', order.id), updateData)
-      } else {
-        await updateDoc(doc(db, 'guestOrders', order.id), updateData)
-      }
+      const url = order.source === 'firestore' && order.userId
+        ? `/api/admin/orders/${order.id}?source=firestore&userId=${order.userId}`
+        : `/api/admin/orders/${order.id}?source=${order.source}`
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, ...(trackingNumber ? { trackingNumber } : {}) }),
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Güncelleme hatası')
       setOrder((prev) => prev ? { ...prev, status, trackingNumber: trackingNumber || prev.trackingNumber } : prev)
       setMessage({ type: 'success', text: 'Sipariş güncellendi.' })
-    } catch (err) {
-      console.error('Order update error:', err)
+    } catch {
       setMessage({ type: 'error', text: 'Güncelleme sırasında bir hata oluştu.' })
     } finally {
       setUpdating(false)
@@ -155,19 +128,19 @@ export default function AdminOrderDetailPage() {
     setUpdating(true)
     setMessage(null)
     try {
-      const { doc, updateDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-
-      if (order.userId) {
-        await updateDoc(doc(db, 'users', order.userId, 'orders', order.id), { paymentStatus: 'PAID' })
-      } else {
-        await updateDoc(doc(db, 'guestOrders', order.id), { paymentStatus: 'PAID' })
-      }
+      const url = order.source === 'firestore' && order.userId
+        ? `/api/admin/orders/${order.id}?source=firestore&userId=${order.userId}`
+        : `/api/admin/orders/${order.id}?source=${order.source}`
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus: 'PAID' }),
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Güncelleme hatası')
       setOrder((prev) => prev ? { ...prev, paymentStatus: 'PAID' } : prev)
       setMessage({ type: 'success', text: 'Ödendi olarak işaretlendi.' })
-    } catch (err) {
-      console.error('Mark paid error:', err)
+    } catch {
       setMessage({ type: 'error', text: 'Güncelleme sırasında bir hata oluştu.' })
     } finally {
       setUpdating(false)
@@ -179,20 +152,17 @@ export default function AdminOrderDetailPage() {
     setSendingInvoice(true)
     setMessage(null)
     try {
-      // Statik hosting: Fatura e-posta gönderimi mevcut değil (backend gerektirir)
-      // Firestore'a fatura gönderim talebi kaydedebiliriz
-      const { addDoc, collection: col, serverTimestamp: srvTs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      await addDoc(col(db, 'invoiceRequests'), {
-        orderId: id,
-        source,
-        userId,
-        requestedAt: srvTs(),
+      const res = await fetch(`/api/admin/orders/${order.id}/send-invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ source: order.source, userId: order.userId }),
+        credentials: 'include',
       })
-      setMessage({ type: 'success', text: 'Fatura gönderim talebi kaydedildi. E-posta gönderimi için backend servisi gereklidir.' })
-    } catch {
-      setMessage({ type: 'error', text: 'Fatura talebi kaydedilirken hata oluştu.' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Fatura gönderilemedi')
+      setMessage({ type: 'success', text: data.message || 'Fatura gönderildi.' })
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Fatura gönderilirken hata oluştu.' })
     } finally {
       setSendingInvoice(false)
     }
@@ -216,8 +186,9 @@ export default function AdminOrderDetailPage() {
           </Link>
         </Button>
         <Card>
-          <CardContent className="py-12 text-center text-gray-600">
-            Sipariş bulunamadı veya yetkiniz yok.
+          <CardContent className="py-12 text-center text-slate-600">
+            <Package className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+            Sipariş bulunamadı.
           </CardContent>
         </Card>
       </div>
@@ -237,30 +208,30 @@ export default function AdminOrderDetailPage() {
               Siparişlere Dön
             </Link>
           </Button>
-          <Badge variant="outline" className="text-xs">{order.source}</Badge>
+          <Badge variant="outline" className="text-xs capitalize">{order.source}</Badge>
         </div>
 
         {message && (
           <div
-            className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}
+            className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}
           >
             {message.text}
           </div>
         )}
 
         <Card className="rounded-xl border shadow-sm mb-6">
-          <CardHeader className="border-b bg-gray-50/50">
+          <CardHeader className="border-b bg-slate-50/50">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <CardTitle className="text-lg">Sipariş {order.orderId}</CardTitle>
-                <p className="text-sm text-gray-500 mt-1">
-                  {new Date(order.createdAt).toLocaleString('tr-TR')}
+                <p className="text-sm text-slate-500 mt-1">
+                  {order.createdAt ? new Date(order.createdAt).toLocaleString('tr-TR') : '—'}
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Badge variant="secondary">{order.status}</Badge>
+              <div className="flex gap-2 flex-wrap">
+                <Badge variant="secondary">{STATUS_LABELS[order.status] ?? order.status}</Badge>
                 <Badge variant={order.paymentStatus === 'PAID' || order.paymentStatus === 'paid' ? 'default' : 'outline'}>
-                  {order.paymentStatus}
+                  {STATUS_LABELS[order.paymentStatus] ?? order.paymentStatus}
                 </Badge>
               </div>
             </div>
@@ -268,11 +239,11 @@ export default function AdminOrderDetailPage() {
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Müşteri</h3>
-                <p className="text-sm text-gray-700">{customer.name || '—'}</p>
-                <p className="text-sm text-gray-600">{customer.email || '—'}</p>
-                <p className="text-sm text-gray-600">{customer.phone || '—'}</p>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-semibold text-slate-900 mb-2">Müşteri</h3>
+                <p className="text-sm text-slate-700">{customer.name || '—'}</p>
+                <p className="text-sm text-slate-600">{customer.email || '—'}</p>
+                <p className="text-sm text-slate-600">{customer.phone || '—'}</p>
+                <p className="text-sm text-slate-600 mt-1">
                   {[customer.addressLine, customer.district, customer.city, customer.postalCode].filter(Boolean).join(', ')}
                 </p>
               </div>
@@ -281,7 +252,7 @@ export default function AdminOrderDetailPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-gray-600">
+                  <tr className="border-b text-left text-slate-600">
                     <th className="py-2 pr-4">Ürün</th>
                     <th className="py-2 pr-4 text-right">Adet</th>
                     <th className="py-2 pr-4 text-right">Birim Fiyat</th>
@@ -307,19 +278,19 @@ export default function AdminOrderDetailPage() {
               <div className="text-sm space-y-1">
                 {pricing.subtotal != null && (
                   <div className="flex justify-between gap-8">
-                    <span className="text-gray-600">Ara toplam</span>
+                    <span className="text-slate-600">Ara toplam</span>
                     <span>{fmtTRY(pricing.subtotal)}</span>
                   </div>
                 )}
                 {pricing.tax != null && (
                   <div className="flex justify-between gap-8">
-                    <span className="text-gray-600">KDV</span>
+                    <span className="text-slate-600">KDV</span>
                     <span>{fmtTRY(pricing.tax)}</span>
                   </div>
                 )}
                 {pricing.shipping != null && (
                   <div className="flex justify-between gap-8">
-                    <span className="text-gray-600">Kargo</span>
+                    <span className="text-slate-600">Kargo</span>
                     <span>{fmtTRY(pricing.shipping)}</span>
                   </div>
                 )}
@@ -343,7 +314,7 @@ export default function AdminOrderDetailPage() {
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="mt-1 w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                className="mt-1 w-full max-w-xs rounded-lg border border-slate-300 px-3 py-2 text-sm bg-white"
               >
                 {STATUS_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -363,7 +334,8 @@ export default function AdminOrderDetailPage() {
               />
             </div>
             <Button onClick={handleUpdate} disabled={updating} className="rounded-lg bg-brand hover:bg-brand-hover">
-              {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Güncelle'}
+              {updating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Güncelle
             </Button>
           </CardContent>
         </Card>

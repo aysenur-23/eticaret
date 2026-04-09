@@ -51,6 +51,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [firebaseReady, setFirebaseReady] = useState(false)
+
+  // Admin sayfalarında Firebase oturumunu otomatik aç (Firestore okuma izni için)
+  React.useEffect(() => {
+    if (pathname === '/admin/auth') {
+      setFirebaseReady(true)
+      return
+    }
+    const signInToFirebase = async () => {
+      try {
+        const { getAuth } = await import('@/lib/firebase/config')
+        const { signInWithCustomToken } = await import('firebase/auth')
+        const auth = getAuth()
+        if (auth.currentUser?.uid === 'admin-panel-user') {
+          setFirebaseReady(true)
+          return
+        }
+        const res = await fetch('/api/admin/firebase-token', { credentials: 'include' })
+        if (res.ok) {
+          const data = await res.json()
+          if (data.firebaseCustomToken) {
+            await signInWithCustomToken(auth, data.firebaseCustomToken)
+          }
+        }
+      } catch {}
+      setFirebaseReady(true)
+    }
+    signInToFirebase()
+  }, [pathname])
 
   const handleLogout = async () => {
     try {
@@ -62,15 +91,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       const auth = getAuth()
       await signOut(auth)
     } catch {}
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('admin_uid')
-      localStorage.removeItem('admin_token')
-    }
     router.push('/admin/auth')
   }
 
   if (pathname === '/admin/auth') {
     return <>{children}</>
+  }
+
+  if (!firebaseReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
