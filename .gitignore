@@ -71,3 +71,4 @@ nul
 # Environment variables
 .env.local
 .env*.local
+public_html (2).zip
