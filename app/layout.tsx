@@ -22,13 +22,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   icons: {
     icon: [
-      { url: '/icon.png', type: 'image/png' },
-      { url: '/favicon.png', type: 'image/png' },
+      { url: '/favicon.ico', type: 'image/x-icon' },
+      { url: '/favicon-voltekno.png', type: 'image/png' },
     ],
     apple: [
-      { url: '/apple-icon.png', type: 'image/png' },
+      { url: '/favicon-voltekno.png', type: 'image/png' },
     ],
-    shortcut: ['/favicon.png'],
+    shortcut: ['/favicon.ico'],
   },
   title: {
     default: 'voltekno | Güneş Paneli, Akü, İnverter, EV Şarj ve Enerji Sistemleri',

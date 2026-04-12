@@ -181,6 +181,7 @@ export default function CheckoutPage() {
         items: orderItems,
         pricing: { subtotal, tax, shipping, total },
         paymentMethod: options.paymentMethod,
+        userId: user?.id || null,
         ...(options.paymentProvider ? { paymentProvider: options.paymentProvider } : {}),
       }),
     })
@@ -269,7 +270,7 @@ export default function CheckoutPage() {
     }
   }
 
-  /** Deneme için sipariş oluştur: Firestore'a doğrudan yaz (statik hosting). */
+  /** Deneme siparişi: normal sipariş akışıyla aynı, paymentMethod='bank_transfer', success URL'de payment=test */
   const handleTestOrder = async () => {
     const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
     const err: Record<string, string> = {}
@@ -300,7 +301,7 @@ export default function CheckoutPage() {
     setCheckoutErrors({})
     setIsTestOrderLoading(true)
     try {
-      const data = await createOrderWithApi({ paymentMethod: 'pending' })
+      const data = await createOrderWithApi({ paymentMethod: 'bank_transfer' })
       if (isFromCart) clearCart()
       const successUrl = `/checkout/success?order_id=${data.orderId}&payment=test`
       if (!user?.id && formData.createAccount) {

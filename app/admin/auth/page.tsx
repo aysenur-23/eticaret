@@ -3,17 +3,16 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ArrowLeft, Lock, Loader2, AlertCircle, Zap } from 'lucide-react'
+import { ArrowLeft, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react'
+import Image from 'next/image'
 
 export default function AdminAuthPage() {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,10 +56,9 @@ export default function AdminAuthPage() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#f4a11a] shadow-lg shadow-amber-500/20 mb-4">
-            <Zap className="w-7 h-7 text-white" strokeWidth={2.5} />
+          <div className="flex justify-center mb-4">
+            <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={180} height={54} className="object-contain brightness-0 invert" priority />
           </div>
-          <h1 className="text-xl font-bold text-white">Voltekno Admin</h1>
           <p className="text-sm text-white/40 mt-1">Yönetim paneline giriş yapın</p>
         </div>
 
@@ -73,23 +71,32 @@ export default function AdminAuthPage() {
               </div>
             )}
             <div className="space-y-1.5">
-              <Label htmlFor="admin-password" className="text-white/60 text-xs font-semibold uppercase tracking-wider">
+              <label htmlFor="admin-password" className="block text-white/60 text-xs font-semibold uppercase tracking-wider">
                 Şifre
-              </Label>
+              </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25 pointer-events-none" />
-                <Input
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none z-10" />
+                <input
                   id="admin-password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-white/8 border-white/15 text-white placeholder:text-white/25 focus:border-[#f4a11a] focus:ring-[#f4a11a]/20 rounded-xl h-11"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: 'white' }}
+                  className="w-full h-11 pl-10 pr-10 rounded-xl border border-white/15 text-sm outline-none focus:border-[#f4a11a] placeholder-white/25 transition-colors"
                   required
                   disabled={loading}
                   autoFocus
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors z-10"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
             <Button

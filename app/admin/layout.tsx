@@ -22,6 +22,7 @@ import {
   Zap,
   ChevronRight,
 } from 'lucide-react'
+import Image from 'next/image'
 
 const navSections = [
   {
@@ -63,14 +64,8 @@ function SidebarContent({
   return (
     <>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-white/8 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[#f4a11a] flex items-center justify-center shrink-0">
-          <Zap className="w-4 h-4 text-white" strokeWidth={2.5} />
-        </div>
-        <div>
-          <p className="font-bold text-white text-sm leading-tight">Voltekno</p>
-          <p className="text-[10px] text-white/40 leading-tight uppercase tracking-wider">Admin Panel</p>
-        </div>
+      <div className="flex items-center px-5 h-16 border-b border-white/8 shrink-0">
+        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={140} height={40} className="object-contain brightness-0 invert" priority />
       </div>
 
       {/* Nav */}
@@ -207,12 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#f4a11a] flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-          </div>
-          <span className="font-bold text-white text-sm">Voltekno Admin</span>
-        </div>
+        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={110} height={32} className="object-contain brightness-0 invert" />
         <div className="w-9" />
       </div>
 
