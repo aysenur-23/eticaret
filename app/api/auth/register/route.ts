@@ -62,13 +62,13 @@ export async function POST(request: NextRequest) {
     const verificationCode = verificationToken.slice(-6).toUpperCase()
 
     // Send verification email
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://imora.com'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://voltekno.com'
     const verificationUrl = `${baseUrl}/api/auth/verify-email?token=${verificationToken}`
     
     try {
       await sendEmailSMTP(
         user.email,
-        'E-posta Adresinizi Doğrulayın - IMORA',
+        'E-posta Adresinizi Doğrulayın - Voltekno',
         EmailVerification({
           name: user.name,
           verificationUrl,

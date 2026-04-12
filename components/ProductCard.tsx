@@ -141,12 +141,24 @@ export function ProductCard({
 
         {/* Bilgi alanı — içerik kadar uzar */}
         <div className={`${isCompact ? 'p-2 sm:p-3' : 'p-3'} border-t border-slate-100 flex flex-col`}>
-          <h3 className={`font-medium text-slate-900 line-clamp-3 leading-tight ${isCompact ? 'text-xs' : 'text-xs sm:text-sm'}`}>
+          {product.brand && (
+            <p className={`text-brand font-semibold uppercase tracking-wide mb-1 ${isCompact ? 'text-[10px]' : 'text-[10px] sm:text-xs'}`}>
+              {product.brand}
+            </p>
+          )}
+          <h3 className={`font-medium text-slate-900 line-clamp-2 leading-tight ${isCompact ? 'text-xs' : 'text-xs sm:text-sm'}`}>
             {product.name}
           </h3>
-          <p className={`mt-1.5 font-semibold text-slate-900 ${isCompact ? 'text-sm' : 'text-sm sm:text-base'}`}>
-            {formatPrice(displayPrice)}
-          </p>
+          <div className="flex items-center justify-between mt-1.5">
+            <p className={`font-bold text-slate-900 ${isCompact ? 'text-sm' : 'text-sm sm:text-base'}`}>
+              {formatPrice(displayPrice)}
+            </p>
+            {stock !== undefined && stock <= 5 && stock > 0 && (
+              <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                Son {stock} adet
+              </span>
+            )}
+          </div>
 
           {/* Sepet butonu — hover'da açılır */}
           <div className="mt-2 overflow-hidden">

@@ -128,7 +128,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.companyName}>
-            {process.env.COMPANY_LEGAL_NAME || 'IMORA'}
+            {process.env.COMPANY_LEGAL_NAME || 'Voltekno'}
           </Text>
           <View style={styles.companyInfo}>
             <Text>
@@ -187,13 +187,13 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
               <Text style={styles.colTitle}>{item.title}</Text>
               <Text style={styles.colQty}>{item.qty}</Text>
               <Text style={styles.colPrice}>
-                {item.unitPrice.toLocaleString('tr-TR', {
+                {(Number(item.unitPrice) || 0).toLocaleString('tr-TR', {
                   style: 'currency',
                   currency: 'TRY',
                 })}
               </Text>
               <Text style={styles.colTotal}>
-                {item.total.toLocaleString('tr-TR', {
+                {(Number(item.total) || 0).toLocaleString('tr-TR', {
                   style: 'currency',
                   currency: 'TRY',
                 })}
@@ -207,7 +207,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           <View style={styles.totalRow}>
             <Text>Ara Toplam:</Text>
             <Text>
-              {pricing.subtotal.toLocaleString('tr-TR', {
+              {(Number(pricing.subtotal) || 0).toLocaleString('tr-TR', {
                 style: 'currency',
                 currency: 'TRY',
               })}
@@ -216,7 +216,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           <View style={styles.totalRow}>
             <Text>KDV (%20):</Text>
             <Text>
-              {pricing.tax.toLocaleString('tr-TR', {
+              {(Number(pricing.tax) || 0).toLocaleString('tr-TR', {
                 style: 'currency',
                 currency: 'TRY',
               })}
@@ -225,7 +225,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           <View style={styles.totalRow}>
             <Text>Kargo:</Text>
             <Text>
-              {pricing.shipping.toLocaleString('tr-TR', {
+              {(Number(pricing.shipping) || 0).toLocaleString('tr-TR', {
                 style: 'currency',
                 currency: 'TRY',
               })}
@@ -234,7 +234,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({
           <View style={styles.totalRowFinal}>
             <Text>GENEL TOPLAM:</Text>
             <Text>
-              {pricing.total.toLocaleString('tr-TR', {
+              {(Number(pricing.total) || 0).toLocaleString('tr-TR', {
                 style: 'currency',
                 currency: 'TRY',
               })}

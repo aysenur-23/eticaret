@@ -387,8 +387,8 @@ export default function ProductDetailClient({ initialProduct, productId: product
               <h1 className="text-lg sm:text-xl font-bold text-slate-900 mb-3 tracking-tight leading-snug max-w-xl">{product.name}</h1>
 
               {product.variants && product.variants.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm font-semibold text-slate-700 mb-2">
+                <div className="mb-5">
+                  <p className="text-sm font-semibold text-slate-700 mb-2.5">
                     {product.category === 'Araç Şarj Kabloları' && product.id.startsWith('hims-22kw-tip2-')
                       ? tProduct('color')
                       : product.category === 'Araç Şarj Kabloları'
@@ -401,23 +401,29 @@ export default function ProductDetailClient({ initialProduct, productId: product
                         key={v.key}
                         type="button"
                         onClick={() => setSelectedVariant(v)}
-                        className={`rounded-xl border-2 px-4 py-2.5 text-left text-sm font-medium transition-colors ${selectedVariant?.key === v.key
-                          ? 'border-brand bg-brand/10 text-brand'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                        className={`relative rounded-lg border px-3 py-2 text-sm font-medium transition-all duration-150 ${selectedVariant?.key === v.key
+                          ? 'border-brand bg-brand text-white shadow-md shadow-brand/20'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                       >
                         <span className="block">{v.label}</span>
-                        <span className="text-xs text-slate-500 mt-0.5">{formatPrice(v.price)}</span>
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              <p className="text-2xl font-bold text-slate-900 tracking-tight">
-                {formatPrice(effectiveVariant ? effectiveVariant.price : product.price)}
-              </p>
-              <p className="text-sm text-slate-500 mb-2">
+              <div className="flex items-baseline gap-3 mb-1">
+                <p className="text-3xl font-bold text-slate-900 tracking-tight">
+                  {formatPrice(effectiveVariant ? effectiveVariant.price : product.price)}
+                </p>
+                {effectiveVariant && effectiveVariant.price !== product.price && (
+                  <p className="text-lg text-slate-400 line-through">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
+              </div>
+              <p className="text-sm text-slate-500 mb-4">
                 {tProduct('priceWithVAT')} {formatPrice((effectiveVariant ? effectiveVariant.price : product.price) * 1.20)}
               </p>
               <div className="mb-6">
@@ -436,79 +442,81 @@ export default function ProductDetailClient({ initialProduct, productId: product
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6 min-w-0">
-                <div className="flex items-center h-12 rounded-xl border border-slate-200 bg-white overflow-hidden shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-6">
+                <div className="flex items-center h-11 sm:h-12 rounded-xl border border-slate-200 bg-white overflow-hidden shrink-0 self-start sm:self-center">
                   <button
                     type="button"
                     disabled={outOfStock}
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="flex items-center justify-center h-12 w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    className="flex items-center justify-center h-11 sm:h-12 w-10 sm:w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                     aria-label={tCart('decreaseQty')}
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="flex items-center justify-center h-12 w-11 font-semibold text-slate-900 tabular-nums text-sm border-x border-slate-100 bg-white">
+                  <span className="flex items-center justify-center h-11 sm:h-12 w-10 sm:w-11 font-semibold text-slate-900 tabular-nums text-sm border-x border-slate-100 bg-white">
                     {outOfStock ? 0 : quantity}
                   </span>
                   <button
                     type="button"
                     disabled={outOfStock || quantity >= maxQuantity}
                     onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-                    className="flex items-center justify-center h-12 w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    className="flex items-center justify-center h-11 sm:h-12 w-10 sm:w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                     aria-label={tCart('increaseQty')}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <Button
-                  disabled={outOfStock}
-                  onClick={() => {
-                    const qty = displayQuantity
-                    if (outOfStock || qty < 1) return
-                    const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
-                    const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
-                    const price = effectiveVariant ? effectiveVariant.price : product.price
-                    addItem({
-                      id: cartId,
-                      name: displayName,
-                      description: product.description,
-                      price,
-                      image: product.image,
-                      category: product.category,
-                      quantity: qty,
-                    })
-                    addToast({ type: 'success', title: tProduct('addedToCartTitle'), description: tProduct('addedToCartDesc', { name: displayName }) })
-                  }}
-                  className="rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 flex-1 min-w-0 sm:min-w-[140px] bg-brand hover:bg-brand-hover text-white font-semibold text-sm sm:text-base text-center disabled:opacity-60 disabled:pointer-events-none"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2 shrink-0" />
-                  <span className="break-words">{outOfStock ? tCart('outOfStock') : tCart('addToCart')}</span>
-                </Button>
-                <Button
-                  disabled={outOfStock}
-                  onClick={() => {
-                    const qty = displayQuantity
-                    if (outOfStock || qty < 1) return
-                    const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
-                    const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
-                    const price = effectiveVariant ? effectiveVariant.price : product.price
-                    addItem({
-                      id: cartId,
-                      name: displayName,
-                      description: product.description,
-                      price,
-                      image: product.image,
-                      category: product.category,
-                      quantity: qty,
-                    })
-                    router.push('/cart')
-                  }}
-                  variant="destructive"
-                  className="rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 flex-1 min-w-0 sm:min-w-[160px] font-semibold text-sm sm:text-base text-center disabled:opacity-60 disabled:pointer-events-none"
-                >
-                  <Zap className="w-4 h-4 mr-2 shrink-0" />
-                  <span className="break-words">{outOfStock ? tCart('outOfStock') : tProduct('buyNow')}</span>
-                </Button>
+                <div className="flex flex-row items-center gap-2 flex-1 min-w-0">
+                  <Button
+                    disabled={outOfStock}
+                    onClick={() => {
+                      const qty = displayQuantity
+                      if (outOfStock || qty < 1) return
+                      const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
+                      const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
+                      const price = effectiveVariant ? effectiveVariant.price : product.price
+                      addItem({
+                        id: cartId,
+                        name: displayName,
+                        description: product.description,
+                        price,
+                        image: product.image,
+                        category: product.category,
+                        quantity: qty,
+                      })
+                      addToast({ type: 'success', title: tProduct('addedToCartTitle'), description: tProduct('addedToCartDesc', { name: displayName }) })
+                    }}
+                    className="rounded-xl h-11 sm:h-12 py-2 px-3 sm:px-4 flex-1 min-w-0 sm:basis-[120px] bg-brand hover:bg-brand-hover text-white font-semibold text-sm text-center disabled:opacity-60 disabled:pointer-events-none"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1.5 shrink-0" />
+                    <span className="truncate">{outOfStock ? tCart('outOfStock') : tCart('addToCart')}</span>
+                  </Button>
+                  <Button
+                    disabled={outOfStock}
+                    onClick={() => {
+                      const qty = displayQuantity
+                      if (outOfStock || qty < 1) return
+                      const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
+                      const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
+                      const price = effectiveVariant ? effectiveVariant.price : product.price
+                      addItem({
+                        id: cartId,
+                        name: displayName,
+                        description: product.description,
+                        price,
+                        image: product.image,
+                        category: product.category,
+                        quantity: qty,
+                      })
+                      router.push('/cart')
+                    }}
+                    variant="destructive"
+                    className="rounded-xl h-11 sm:h-12 py-2 px-3 sm:px-4 flex-1 min-w-0 sm:basis-[120px] font-semibold text-sm text-center disabled:opacity-60 disabled:pointer-events-none"
+                  >
+                    <Zap className="w-4 h-4 mr-1.5 shrink-0" />
+                    <span className="truncate">{outOfStock ? tCart('outOfStock') : tProduct('buyNow')}</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Görselin sağında: Bu ürün size uygun mu? – tıklanınca mini form açılır */}

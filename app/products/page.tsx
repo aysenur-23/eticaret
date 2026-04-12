@@ -276,7 +276,7 @@ function ProductsPageContent() {
           type="search"
           placeholder={tProducts('searchPlaceholder')}
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1) }}
           className="flex-1 min-w-0 max-w-full h-10 rounded-lg border-slate-200 bg-slate-50 text-sm"
           autoComplete="off"
         />

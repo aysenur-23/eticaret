@@ -42,19 +42,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Müşteri numarası: Prisma userId varsa ve customerNo yoksa otomatik ata
+    // Prisma'da gerçekten var olan userId'yi kullan; yoksa null (FK kırılmasın)
+    let resolvedUserId: string | null = null
     if (userId) {
       const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { customerNo: true },
+        select: { id: true, customerNo: true },
       })
-      if (user && !user.customerNo) {
-        const customerNo = await getNextCustomerNo()
-        await prisma.user.update({
-          where: { id: userId },
-          data: { customerNo },
-        })
+      if (user) {
+        resolvedUserId = user.id
+        if (!user.customerNo) {
+          const customerNo = await getNextCustomerNo()
+          await prisma.user.update({ where: { id: userId }, data: { customerNo } })
+        }
       }
+      // user bulunamazsa resolvedUserId null kalır — misafir sipariş olarak işlenir
     }
 
     const orderNo = await getNextOrderNo()
@@ -71,7 +73,7 @@ export async function POST(request: NextRequest) {
       const lineVat = lineSubtotal * (VAT_RATE / 100)
       const lineTotal = Math.round((lineSubtotal + lineVat) * 100) / 100
       return {
-        variantId: item.variantId || null,
+        variantId: null, // mock/statik ürünlerde DB'de variant kaydı yok; FK hatasını önlemek için null
         productName: (item.name || 'Ürün').slice(0, 500),
         quantity: qty,
         unitPrice,
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
     const order = await prisma.order.create({
       data: {
         orderNo,
-        userId: userId || null,
+        userId: resolvedUserId,
         status: 'PENDING',
         paymentStatus: paymentId ? 'PAID' : 'PENDING',
         paymentMethod: paymentProvider ? (paymentProvider as string) : paymentMethod,
@@ -121,11 +123,30 @@ export async function POST(request: NextRequest) {
 
     const notificationData = {
       orderId: order.orderNo,
-      orderData: { ...order, customer, config, choices, pricing: { ...pricing, items } },
+      orderData: { ...order, customer, config, choices },
       customer: {
         name: customer.name,
         email: customer.email,
+        phone: customer.phone,
+        addressLine: customer.addressLine,
+        city: customer.city,
+        district: customer.district,
+        postalCode: customer.postalCode,
+        billingType: customer.billingType,
+        companyName: customer.companyName,
+        taxId: customer.taxId,
+        taxOffice: customer.taxOffice,
       },
+      pricing: {
+        subtotal: order.subtotal,
+        tax: order.vatTotal,
+        shipping: order.shippingCost,
+        total: order.total,
+      },
+      items: order.lines,
+      paymentMethod,
+      config,
+      choices,
     }
 
     try {
@@ -138,7 +159,7 @@ export async function POST(request: NextRequest) {
     let paymentResult: { redirectUrl?: string; clientSecret?: string; requiresRedirect: boolean } | undefined
     if (paymentProvider && (paymentProvider === 'stripe' || paymentProvider === 'paytr')) {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || (request.headers.get('origin') || 'https://imora.com')
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || (request.headers.get('origin') || 'https://voltekno.com')
         const successUrl = `${baseUrl.replace(/\/$/, '')}/checkout/success?order_id=${order.orderNo}&session_id={CHECKOUT_SESSION_ID}`
         const cancelUrl = `${baseUrl.replace(/\/$/, '')}/checkout/cancel`
         const adapter = getPaymentAdapter(paymentProvider as PaymentProvider)

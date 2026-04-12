@@ -24,7 +24,10 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 
-const navSections = [
+type NavItem = { href: string; label: string; icon: any; exact?: boolean }
+type NavSection = { title: string; items: NavItem[] }
+
+const navSections: NavSection[] = [
   {
     title: 'Genel',
     items: [
@@ -81,17 +84,16 @@ function SidebarContent({
                 const isActive = item.exact
                   ? pathname === item.href
                   : pathname?.startsWith(item.href) && item.href !== '/admin'
-                    || (item.href === '/admin' && pathname === '/admin')
+                  || (item.href === '/admin' && pathname === '/admin')
                 return (
                   <li key={item.href}>
                     <Link
                       href={item.href}
                       onClick={onNavClick}
-                      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                        isActive
-                          ? 'bg-white/10 text-white'
-                          : 'text-white/55 hover:bg-white/6 hover:text-white/90'
-                      }`}
+                      className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive
+                        ? 'bg-white/10 text-white'
+                        : 'text-white/55 hover:bg-white/6 hover:text-white/90'
+                        }`}
                     >
                       <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#f4a11a]' : 'text-white/40 group-hover:text-white/70'}`} />
                       <span className="flex-1 truncate">{item.label}</span>
@@ -149,19 +151,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           const data = await res.json()
           if (data.firebaseCustomToken) await signInWithCustomToken(auth, data.firebaseCustomToken)
         }
-      } catch {}
+      } catch { }
       setFirebaseReady(true)
     }
     signIn()
   }, [pathname])
 
   const handleLogout = async () => {
-    try { await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }) } catch {}
+    try { await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' }) } catch { }
     try {
       const { getAuth } = await import('@/lib/firebase/config')
       const { signOut } = await import('firebase/auth')
       await signOut(getAuth())
-    } catch {}
+    } catch { }
     router.push('/admin/auth')
   }
 
@@ -228,7 +230,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Top bar */}
         <div className="hidden lg:flex items-center gap-2 h-14 px-8 bg-white border-b border-slate-100 shrink-0">
           <p className="text-sm font-semibold text-slate-700">{activeItem?.label ?? 'Admin Panel'}</p>
-          <span className="ml-auto text-xs text-slate-400">voltekno.com/admin</span>
         </div>
 
         {/* Page content */}

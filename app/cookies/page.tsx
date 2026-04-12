@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Çerez Politikası | IMORA',
-  description: 'IMORA çerez politikası ve çerez kullanımı hakkında bilgiler.',
+  title: 'Çerez Politikası | Voltekno',
+  description: 'Voltekno çerez politikası ve çerez kullanımı hakkında bilgiler.',
 }
 
 export default function CookiesPage() {
@@ -34,7 +34,7 @@ export default function CookiesPage() {
 
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">2. ÇEREZLERİN KULLANIM AMACI</h2>
-              <p className="mb-4">IMORA olarak çerezleri aşağıdaki amaçlarla kullanıyoruz:</p>
+              <p className="mb-4">Voltekno olarak çerezleri aşağıdaki amaçlarla kullanıyoruz:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Web sitesinin temel işlevlerinin çalışmasını sağlamak</li>
                 <li>Kullanıcı tercihlerini hatırlamak</li>
@@ -157,10 +157,10 @@ export default function CookiesPage() {
               <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">9. İLETİŞİM</h2>
               <p className="mb-2">Çerez politikamız hakkında sorularınız için:</p>
               <p className="mb-2">
-                <strong>E-posta:</strong> info@imora.com
+                <strong>E-posta:</strong> info@voltekno.com
               </p>
               <p>
-                <strong>Web:</strong> www.imora.com
+                <strong>Web:</strong> www.voltekno.com
               </p>
               <p className="mt-4 text-sm text-gray-600">
                 <strong>Son Güncelleme:</strong> {new Date().toLocaleDateString('tr-TR')}

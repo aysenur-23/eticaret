@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquare, Search, Loader2, RefreshCw, Mail, Phone, ChevronDown, ChevronUp } from 'lucide-react'
+import { MessageSquare, Search, Loader2, RefreshCw, Mail, Phone, ChevronDown, ChevronUp, Package, ExternalLink } from 'lucide-react'
 
 type ContactMessage = {
   id: string
@@ -17,6 +17,8 @@ type ContactMessage = {
   message: string
   emailSent: boolean
   createdAt: string
+  productId?: string | null
+  productName?: string | null
 }
 
 export default function AdminIletisimPage() {
@@ -41,15 +43,21 @@ export default function AdminIletisimPage() {
       const rows: ContactMessage[] = snap.docs.map((d) => {
         const data = d.data()
         const createdAt = data.createdAt as { seconds: number } | null
+        // Mesaj içinde ürün adı varsa çıkar
+        const message = data.message || ''
+        const productMatch = message.match(/\[Ürün: ([^\]]+)\]/)
+        const productName = productMatch ? productMatch[1] : (data.productName || null)
         return {
           id: d.id,
           name: data.name || '',
           email: data.email || '',
           phone: data.phone || null,
           subject: data.subject || '',
-          message: data.message || '',
+          message: message,
           emailSent: data.emailSent === true,
           createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : '',
+          productId: data.productId || null,
+          productName: productName,
         }
       })
 
@@ -74,7 +82,8 @@ export default function AdminIletisimPage() {
       m.name.toLowerCase().includes(q) ||
       m.email.toLowerCase().includes(q) ||
       m.subject.toLowerCase().includes(q) ||
-      (m.phone || '').includes(q)
+      (m.phone || '').includes(q) ||
+      (m.productName || '').toLowerCase().includes(q)
     )
   })
 
@@ -148,6 +157,9 @@ export default function AdminIletisimPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-semibold text-slate-900 text-sm">{msg.name}</span>
+                            {msg.productName && (
+                              <Badge className="bg-brand/10 text-brand border-0 text-xs">{msg.productName}</Badge>
+                            )}
                             {!msg.emailSent && (
                               <Badge className="bg-amber-100 text-amber-800 border-0 text-xs">E-posta gönderilemedi</Badge>
                             )}
@@ -203,6 +215,26 @@ export default function AdminIletisimPage() {
                           <div>
                             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Konu</p>
                             <p className="text-sm text-slate-900">{msg.subject}</p>
+                            {msg.productName && (
+                              <div className="mt-2">
+                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">İlgili Ürün</p>
+                                <div className="flex items-center gap-2">
+                                  <Package className="w-3.5 h-3.5 text-brand" />
+                                  <span className="text-sm font-medium text-slate-900">{msg.productName}</span>
+                                  {msg.productId && (
+                                    <a
+                                      href={`/products/${msg.productId}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-0.5 text-xs text-brand hover:underline"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                      Ürünü Gör
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div>

@@ -452,15 +452,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ayırıcı: Ürünler ile Neden IMORA arası */}
+      {/* Ayırıcı: Ürünler ile Neden Voltekno arası */}
       <div className="w-full border-t border-slate-200/80 bg-slate-100/40" aria-hidden />
 
       {/* Neden Bizi Tercih Etmelisiniz */}
-      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-imora-heading">
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-voltekno-heading">
         <div className={containerClass}>
           <header className="text-center mb-10 md:mb-14">
             <span className={sectionOverlineClass}>{t('whyUs')}</span>
-            <h2 id="why-imora-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
+            <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
               {t('whyIMORA')}
             </h2>
             <p className={`${sectionDescClass} max-w-2xl mx-auto mt-2 text-center`}>

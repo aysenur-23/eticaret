@@ -509,7 +509,7 @@ Tüketici, yasal istisnalar dışında ürünü teslim aldığı tarihten itibar
 Müşteri, sipariş vermeden önce ön bilgilendirme metnini, mesafeli satış sözleşmesini ve ödeme koşullarını okuyup kabul ettiğini beyan eder.
 
 Sözleşme Tarihi: ${new Date().toLocaleDateString('tr-TR')}
-Satıcı: IMORA`}
+Satıcı: Voltekno`}
                   {showModal === 'privacy' && `GİZLİLİK SÖZLEŞMESİ
 
 1. Toplanan Veriler
@@ -544,7 +544,7 @@ Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
 - Müşteri destek süreçlerinin yürütülmesi
 - Yasal yükümlülüklerin yerine getirilmesi
 
-Haklarınız için bizimle iletişime geçebilirsiniz: info@imora.com`}
+Haklarınız için bizimle iletişime geçebilirsiniz: info@voltekno.com`}
                 </div>
               </div>
               <div className="p-4 border-t border-slate-200 bg-slate-50 pb-safe">

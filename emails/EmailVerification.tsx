@@ -27,7 +27,7 @@ export function EmailVerification({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>🔋 IMORA</Text>
+            <Text style={logo}>Voltekno</Text>
           </Section>
           
           <Section style={content}>
@@ -38,7 +38,7 @@ export function EmailVerification({
             </Text>
             
             <Text style={text}>
-              IMORA'a hoş geldiniz! Hesabınızı aktifleştirmek için e-posta adresinizi doğrulamanız gerekiyor.
+              Voltekno'ya hoş geldiniz! Hesabınızı aktifleştirmek için e-posta adresinizi doğrulamanız gerekiyor.
             </Text>
 
             <Section style={buttonContainer}>
@@ -68,7 +68,7 @@ export function EmailVerification({
               Bu e-posta otomatik olarak gönderilmiştir. Lütfen yanıtlamayın.
             </Text>
             <Text style={footer}>
-              © {new Date().getFullYear()} IMORA. Tüm hakları saklıdır.
+              © {new Date().getFullYear()} Voltekno. Tüm hakları saklıdır.
             </Text>
           </Section>
         </Container>

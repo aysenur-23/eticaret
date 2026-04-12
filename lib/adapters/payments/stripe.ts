@@ -38,7 +38,7 @@ export class StripeAdapter implements PaymentAdapter {
                 unit_amount: amountCents,
                 product_data: {
                   name: `Sipariş ${input.metadata?.orderNo || input.orderId}`,
-                  description: 'IMORA sipariş ödemesi',
+                  description: 'Voltekno sipariş ödemesi',
                 },
               },
               quantity: 1,

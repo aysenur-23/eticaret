@@ -46,7 +46,7 @@ function ContactFormEmail({ name, email, phone, subject, message }: {
       }
     }, [
       React.createElement('p', { key: 'intro', style: { marginBottom: '20px' } }, 
-        'IMORA web sitesinden yeni bir iletişim formu mesajı alındı:'
+        'Voltekno web sitesinden yeni bir iletişim formu mesajı alındı:'
       ),
       React.createElement('div', { key: 'details', style: { marginBottom: '20px' } }, [
         React.createElement('p', { key: 'name' }, [
@@ -104,7 +104,7 @@ function ContactFormEmail({ name, email, phone, subject, message }: {
         }
       }, [
         React.createElement('p', { key: 'note', style: { margin: 0 } }, 
-          'Bu mesaj IMORA web sitesi iletişim formundan gönderilmiştir.'
+          'Bu mesaj Voltekno web sitesi iletişim formundan gönderilmiştir.'
         )
       ])
     ])
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin email from environment or use default
-    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
+    const adminEmail = process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@voltekno.com'
 
     // Send email to admin
     const emailResult = await sendEmailSMTP(
