@@ -57,7 +57,7 @@ export default function AdminAuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={180} height={54} className="object-contain brightness-0 invert" priority />
+            <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={180} height={54} style={{ height: 'auto' }} className="object-contain brightness-0 invert" priority />
           </div>
           <p className="text-sm text-white/40 mt-1">Yönetim paneline giriş yapın</p>
         </div>

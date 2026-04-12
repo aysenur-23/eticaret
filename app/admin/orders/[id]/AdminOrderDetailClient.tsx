@@ -26,24 +26,24 @@ type OrderDetail = {
 }
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: 'Beklemede' },
-  { value: 'confirmed', label: 'Onaylandı' },
-  { value: 'processing', label: 'İşleniyor' },
-  { value: 'shipped', label: 'Kargoya Verildi' },
-  { value: 'delivered', label: 'Teslim Edildi' },
-  { value: 'cancelled', label: 'İptal' },
+  { value: 'PENDING', label: 'Beklemede' },
+  { value: 'PICKING', label: 'Onaylandı / Hazırlanıyor' },
+  { value: 'SHIPPED', label: 'Kargoya Verildi' },
+  { value: 'DELIVERED', label: 'Teslim Edildi' },
+  { value: 'CANCELLED', label: 'İptal' },
+  { value: 'RETURNED', label: 'İade' },
 ]
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Beklemede', PENDING: 'Beklemede',
   confirmed: 'Onaylandı', CONFIRMED: 'Onaylandı',
-  processing: 'İşleniyor', PROCESSING: 'İşleniyor',
+  processing: 'Hazırlanıyor', PROCESSING: 'Hazırlanıyor',
+  picking: 'Hazırlanıyor', PICKING: 'Hazırlanıyor',
   shipped: 'Kargoda', SHIPPED: 'Kargoda',
   delivered: 'Teslim Edildi', DELIVERED: 'Teslim Edildi',
   cancelled: 'İptal', CANCELLED: 'İptal',
+  returned: 'İade', RETURNED: 'İade',
   paid: 'Ödendi', PAID: 'Ödendi',
-  failed: 'Başarısız', FAILED: 'Başarısız',
-  pending_payment: 'Ödeme Bekleniyor',
 }
 
 export default function AdminOrderDetailPage() {

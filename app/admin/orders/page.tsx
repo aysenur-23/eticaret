@@ -28,20 +28,20 @@ const STATUS_LABELS: Record<string, string> = {
   PENDING: 'Beklemede',
   confirmed: 'Onaylandı',
   CONFIRMED: 'Onaylandı',
-  processing: 'İşleniyor',
-  PROCESSING: 'İşleniyor',
+  processing: 'Hazırlanıyor',
+  PROCESSING: 'Hazırlanıyor',
+  picking: 'Hazırlanıyor',
+  PICKING: 'Hazırlanıyor',
   shipped: 'Kargoda',
   SHIPPED: 'Kargoda',
   delivered: 'Teslim Edildi',
   DELIVERED: 'Teslim Edildi',
   cancelled: 'İptal',
   CANCELLED: 'İptal',
+  returned: 'İade',
+  RETURNED: 'İade',
   PAID: 'Ödendi',
   paid: 'Ödendi',
-  failed: 'Başarısız',
-  FAILED: 'Başarısız',
-  refunded: 'İade',
-  REFUNDED: 'İade',
 }
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
@@ -51,21 +51,21 @@ const STATUS_BADGE_CLASS: Record<string, string> = {
   CONFIRMED: 'bg-blue-100 text-blue-800 border-0',
   processing: 'bg-indigo-100 text-indigo-800 border-0',
   PROCESSING: 'bg-indigo-100 text-indigo-800 border-0',
+  picking: 'bg-indigo-100 text-indigo-800 border-0',
+  PICKING: 'bg-indigo-100 text-indigo-800 border-0',
   shipped: 'bg-purple-100 text-purple-800 border-0',
   SHIPPED: 'bg-purple-100 text-purple-800 border-0',
   delivered: 'bg-green-100 text-green-800 border-0',
   DELIVERED: 'bg-green-100 text-green-800 border-0',
   cancelled: 'bg-red-100 text-red-800 border-0',
   CANCELLED: 'bg-red-100 text-red-800 border-0',
+  returned: 'bg-slate-100 text-slate-700 border-0',
+  RETURNED: 'bg-slate-100 text-slate-700 border-0',
   PAID: 'bg-green-100 text-green-800 border-0',
   paid: 'bg-green-100 text-green-800 border-0',
-  failed: 'bg-red-100 text-red-800 border-0',
-  FAILED: 'bg-red-100 text-red-800 border-0',
-  refunded: 'bg-slate-100 text-slate-700 border-0',
-  REFUNDED: 'bg-slate-100 text-slate-700 border-0',
 }
 
-const FILTER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
+const FILTER_STATUSES = ['PENDING', 'PICKING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
 
 async function loadOrdersFromAPI(): Promise<OrderRow[]> {
   const res = await fetch('/api/admin/orders', { credentials: 'include' })
@@ -339,27 +339,17 @@ export default function AdminOrdersPage() {
                               <Button
                                 size="sm"
                                 className="h-7 text-xs bg-green-600 hover:bg-green-700"
-                                onClick={() => handleStatusChange(row, 'confirmed')}
+                                onClick={() => handleStatusChange(row, 'PICKING')}
                                 disabled={isUpdating}
                               >
                                 {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Onayla'}
                               </Button>
                             )}
-                            {row.status === 'confirmed' && (
-                              <Button
-                                size="sm"
-                                className="h-7 text-xs bg-blue-600 hover:bg-blue-700"
-                                onClick={() => handleStatusChange(row, 'processing')}
-                                disabled={isUpdating}
-                              >
-                                {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : 'İşle'}
-                              </Button>
-                            )}
-                            {row.status === 'processing' && (
+                            {(row.status === 'PICKING' || row.status === 'picking') && (
                               <Button
                                 size="sm"
                                 className="h-7 text-xs bg-indigo-600 hover:bg-indigo-700"
-                                onClick={() => handleStatusChange(row, 'shipped')}
+                                onClick={() => handleStatusChange(row, 'SHIPPED')}
                                 disabled={isUpdating}
                               >
                                 {isUpdating ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Kargoya Ver'}

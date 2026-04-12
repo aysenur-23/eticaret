@@ -65,7 +65,7 @@ function SidebarContent({
     <>
       {/* Logo */}
       <div className="flex items-center px-5 h-16 border-b border-white/8 shrink-0">
-        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={140} height={40} className="object-contain brightness-0 invert" priority />
+        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={140} height={40} style={{ height: 'auto' }} className="object-contain brightness-0 invert" priority />
       </div>
 
       {/* Nav */}
@@ -202,7 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         >
           <Menu className="w-5 h-5" />
         </button>
-        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={110} height={32} className="object-contain brightness-0 invert" />
+        <Image src="/voltekno-logo-transparent.png" alt="Voltekno" width={110} height={32} style={{ height: 'auto' }} className="object-contain brightness-0 invert" />
         <div className="w-9" />
       </div>
 
