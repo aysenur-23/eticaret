@@ -501,7 +501,7 @@ export default function ProductDetailClient({ initialProduct, productId: product
                     router.push('/cart')
                   }}
                   variant="destructive"
-                  className="flex-1 rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 font-semibold text-sm sm:text-base disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center"
+                  className="flex-1 rounded-xl h-12 px-4 sm:px-5 font-semibold text-sm sm:text-base disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center"
                 >
                   <Zap className="w-4 h-4 mr-2 shrink-0" />
                   <span className="break-words">{outOfStock ? tCart('outOfStock') : tProduct('buyNow')}</span>
@@ -555,30 +555,30 @@ export default function ProductDetailClient({ initialProduct, productId: product
               })()}
 
               {/* Güven / servis mini blok */}
-              <div className="mt-5 grid grid-cols-4 gap-2">
-                <div className="flex flex-col items-center text-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div className="mt-5 grid grid-cols-4 gap-1.5">
+                <div className="flex flex-col items-center text-center gap-1 bg-emerald-50 border border-emerald-100 rounded-xl p-2">
+                  <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">2 Yıl<br/>Garanti</p>
+                  <p className="text-[12px] font-bold text-slate-800 leading-tight">2 Yıl Garanti</p>
                 </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-blue-50 border border-blue-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Truck className="w-4 h-4 text-blue-600" />
+                <div className="flex flex-col items-center text-center gap-1 bg-blue-50 border border-blue-100 rounded-xl p-2">
+                  <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                    <Truck className="w-3.5 h-3.5 text-blue-600" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Hızlı<br/>Kargo</p>
+                  <p className="text-[12px] font-bold text-slate-800 leading-tight">Hızlı Kargo</p>
                 </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-brand/5 border border-brand/15 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
-                    <Headphones className="w-4 h-4 text-brand" />
+                <div className="flex flex-col items-center text-center gap-1 bg-brand/5 border border-brand/15 rounded-xl p-2">
+                  <div className="w-7 h-7 rounded-full bg-brand/10 flex items-center justify-center shrink-0">
+                    <Headphones className="w-3.5 h-3.5 text-brand" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Teknik<br/>Destek</p>
+                  <p className="text-[12px] font-bold text-slate-800 leading-tight">Teknik Destek</p>
                 </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-amber-50 border border-amber-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                    <RotateCcw className="w-4 h-4 text-amber-600" />
+                <div className="flex flex-col items-center text-center gap-1 bg-amber-50 border border-amber-100 rounded-xl p-2">
+                  <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                    <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
                   </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">14 Gün<br/>İade</p>
+                  <p className="text-[12px] font-bold text-slate-800 leading-tight">14 Gün İade</p>
                 </div>
               </div>
 

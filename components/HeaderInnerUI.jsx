@@ -250,7 +250,6 @@ export function HeaderInnerUI(props) {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            portal={false}
             align="center"
             collisionPadding={24}
             sideOffset={1}
@@ -273,9 +272,9 @@ export function HeaderInnerUI(props) {
                       sizes="140px"
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-950/16 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 p-3">
-                      <p className={`${headerDisplay.className} text-[13px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white`}>
+                      <p className={`${headerDisplay.className} text-[13px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]`}>
                         {featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
                       </p>
                     </div>
@@ -308,7 +307,7 @@ export function HeaderInnerUI(props) {
                       <Link
                         href={card.href}
                         onClick={() => setOpenMenu(null)}
-                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[13px] font-semibold text-slate-700 transition-colors hover:text-slate-950"
+                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[13px] font-semibold text-slate-800 transition-colors hover:text-slate-950"
                       >
                         <span className="truncate pr-3">
                           {card.translate ? t(card.title) : card.title}
@@ -454,7 +453,7 @@ export function HeaderInnerUI(props) {
       {/* Şerit 2: Ana menü */}
       <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
-          <nav className="flex items-center gap-0.5 min-w-0 overflow-visible h-[52px]" aria-label="Ana menu">
+          <nav className="flex items-center gap-0.5 min-w-0 overflow-hidden h-[52px]" aria-label="Ana menu">
             {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
             {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
