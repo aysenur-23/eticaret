@@ -608,10 +608,10 @@ export default function HomePage() {
           <header className="text-center mb-10 md:mb-14">
             <span className={sectionOverlineClass}>{t('whyUs')}</span>
             <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
-              {t('whyIMORA')}
+              {t('whyVoltekno')}
             </h2>
             <p className={`${sectionDescClass} max-w-xl mx-auto text-center`}>
-              {t('whyIMORADesc')}
+              {t('whyVolteknoDesc')}
             </p>
           </header>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
