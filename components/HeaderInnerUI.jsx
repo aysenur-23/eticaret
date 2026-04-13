@@ -211,7 +211,7 @@ export function HeaderInnerUI(props) {
     }, 200)
   }
 
-  const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
+  const menuPanelClass = 'w-[min(520px,calc(100vw-6rem))] max-w-[520px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
   const desktopNavItemClass = (isActive) =>
     `group relative flex items-center justify-center px-3 xl:px-4 py-1.5 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
   const desktopNavLabelClass = `${headerDisplay.className} text-[12px] xl:text-[13px] font-bold tracking-[-0.01em] leading-[1.2] whitespace-nowrap`
@@ -258,11 +258,11 @@ export function HeaderInnerUI(props) {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="grid grid-cols-[210px_minmax(0,1fr)] gap-0">
+            <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-0">
               <Link
                 href={featuredCard?.href || categoryHref || '/products'}
                 onClick={() => setOpenMenu(null)}
-                className="group relative hidden min-h-[220px] overflow-hidden border-r border-slate-200 bg-slate-100 md:block"
+                className="group relative hidden min-h-[160px] overflow-hidden border-r border-slate-200 bg-slate-100 md:block"
               >
                 {featuredCard ? (
                   <>
@@ -270,15 +270,12 @@ export function HeaderInnerUI(props) {
                       src={featuredCard.image}
                       alt={featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
                       fill
-                      sizes="240px"
+                      sizes="140px"
                       className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-950/16 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-4">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/70">
-                        {t(labelKey)}
-                      </p>
-                      <p className={`${headerDisplay.className} mt-2 text-[19px] font-extrabold leading-[1.02] tracking-[-0.04em] text-white`}>
+                    <div className="absolute inset-x-0 bottom-0 p-3">
+                      <p className={`${headerDisplay.className} text-[13px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white`}>
                         {featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
                       </p>
                     </div>
