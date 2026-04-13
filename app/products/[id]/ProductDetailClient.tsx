@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Package, ChevronRight, Minus, Plus, ShoppingCart, Zap, Send, ZoomIn, X, ChevronLeft, ShieldCheck, Truck, Headset, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Package, ChevronRight, Minus, Plus, ShoppingCart, Zap, Send, ZoomIn, X, ChevronLeft, ShieldCheck, Truck, Headphones, RotateCcw } from 'lucide-react'
 import { fmtPrice } from '@/lib/format'
 import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
 import { useExchangeRates } from '@/lib/useExchangeRates'
@@ -528,7 +528,7 @@ export default function ProductDetailClient({ initialProduct, productId: product
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <Headset className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+                  <Headphones className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs font-bold text-slate-800">Teknik Destek</p>
                     <p className="text-xs text-slate-500 mt-0.5">Her zaman yanınızdayız</p>

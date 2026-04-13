@@ -62,14 +62,20 @@
       "Bash(Out-Null)",
       "Bash(Write-Output \"created\")",
       "Bash(npx firebase:*)",
-      "Bash(cp \"/c/Users/aslan/Desktop/bahce.jpg\"   \"/c/Users/aslan/Desktop/eticaret - Kopya/public/images/packages/custom/bahce.jpg\")",
-      "Bash(cp \"/c/Users/aslan/Desktop/villa.jpg\"   \"/c/Users/aslan/Desktop/eticaret - Kopya/public/images/packages/custom/villa.jpg\")",
-      "Bash(cp \"/c/Users/aslan/Desktop/karavan.png\" \"/c/Users/aslan/Desktop/eticaret - Kopya/public/images/packages/custom/karavan.png\")",
-      "Bash(cp \"/c/Users/aslan/Desktop/tarla.png\"   \"/c/Users/aslan/Desktop/eticaret - Kopya/public/images/packages/custom/tarla.png\")",
-      "Bash(cp \"/c/Users/aslan/Desktop/marin.jpg\"   \"/c/Users/aslan/Desktop/eticaret - Kopya/public/images/packages/custom/marin.jpg\")",
-      "Bash(gh auth:*)",
-      "Bash(gh org:*)",
-      "Bash(ls /c/Users/aslan/Desktop/\"eticaret - Kopya\"/app/api/admin/catalog/[productId]/)"
+      "Bash(npm install:*)",
+      "Bash(git -C \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.claude\\\\worktrees\\\\wonderful-booth\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.claude\\\\worktrees\\\\wonderful-booth\" branch -a)",
+      "Bash(git -C \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.claude\\\\worktrees\\\\wonderful-booth\" show main:components/Logo.tsx)",
+      "Bash(git -C \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.claude\\\\worktrees\\\\wonderful-booth\" show main:app/layout.tsx)",
+      "Bash(git -C \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.claude\\\\worktrees\\\\wonderful-booth\" show main:components/Footer.tsx)",
+      "Bash(cp \"C:/Users/aslan/Desktop/Voltekno.png\" \"C:/Users/aslan/Desktop/eticaret - Kopya/.claude/worktrees/wonderful-booth/public/logo.png\")",
+      "Bash(cp \"C:/Users/aslan/Desktop/favicom.PNG\" \"C:/Users/aslan/Desktop/eticaret - Kopya/.claude/worktrees/wonderful-booth/public/icon.png\")",
+      "Bash(python3 -c ':*)",
+      "Bash(python3)",
+      "Bash(ls \"/c/Users/aslan/Desktop/eticaret - Kopya/.claude/worktrees/wonderful-booth/.env\"*)",
+      "Bash(del \"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.git\\\\worktrees\\\\wonderful-booth\\\\index.lock\")",
+      "Bash(cmd /c \"del \\\\\"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.git\\\\worktrees\\\\wonderful-booth\\\\index.lock\\\\\"\")",
+      "Bash(cmd /c \"if exist \\\\\"C:\\\\Users\\\\aslan\\\\Desktop\\\\eticaret - Kopya\\\\.git\\\\worktrees\\\\wonderful-booth\\\\index.lock\\\\\" \\(echo EXISTS\\) else \\(echo NOT FOUND\\)\")"
     ]
   }
 }
