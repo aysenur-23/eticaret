@@ -23,8 +23,6 @@ import {
   Clock,
   Cpu,
   Flame,
-  Leaf,
-  Anchor,
 } from 'lucide-react'
 import { ProductCard } from '@/components/ProductCard'
 import { mockProducts } from '@/lib/products-mock'
@@ -147,7 +145,7 @@ const REFERENCE_PROJECTS = [
     capacity: '10 kW',
     type: 'Hibrit Sistem',
     desc: 'Yazlık villa için tam bağımsız enerji çözümü, 3 fazlı hibrit inverter ve lityum batarya.',
-    icon: Sun,
+    image: '/images/packages/custom/villa.jpg',
     color: 'from-orange-400 to-red-500',
   },
   {
@@ -156,7 +154,7 @@ const REFERENCE_PROJECTS = [
     capacity: '30 kW',
     type: 'Off-Grid Solar',
     desc: 'Şebekesiz tarla sulama sistemi. Kuyu pompası besleme, mevsimlik bağımsız çalışma.',
-    icon: Leaf,
+    image: '/images/packages/custom/tarla.png',
     color: 'from-emerald-500 to-green-600',
   },
   {
@@ -165,7 +163,7 @@ const REFERENCE_PROJECTS = [
     capacity: '22 kW AC',
     type: 'Ticari EV Şarj',
     desc: 'AVM otoparkı için 8 noktalı çift taraflı AC şarj istasyonu kurulumu.',
-    icon: Zap,
+    image: '/images/categories/sarj.png',
     color: 'from-blue-500 to-blue-700',
   },
   {
@@ -174,7 +172,7 @@ const REFERENCE_PROJECTS = [
     capacity: '15 kWh',
     type: 'Marin Sistem',
     desc: 'Tekne için lityum batarya sistemi, düşük voltaj DC dağıtım ve solar şarj regülatörü.',
-    icon: Anchor,
+    image: '/images/packages/custom/marin.jpg',
     color: 'from-sky-500 to-cyan-600',
   },
 ]
@@ -291,50 +289,82 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       {/* ─── 1. YENİ HERO ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 pt-14 pb-18 md:pt-20 md:pb-24 px-4" aria-label="Ana başlık">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand/25 via-slate-950 to-slate-900 pointer-events-none" />
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-brand/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 -right-20 w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-        <div className="relative container mx-auto max-w-4xl text-center px-4">
-          <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/40 px-4 py-1.5 text-xs font-bold text-brand-light uppercase tracking-widest mb-8">
-            <Zap className="w-3.5 h-3.5 fill-current" />
-            Türkiye'nin Enerji Mağazası
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.06] mb-6">
-            Temiz Enerji&nbsp;
-            <span className="text-brand">Her Yerde,</span>
-            <br className="hidden sm:block" />
-            &nbsp;Her İhtiyaç İçin
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Güneş paneli, batarya, inverter ve EV şarj çözümleri.
-            Enerji bağımsızlığınız için doğru ürün, uzman destek.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center flex-wrap">
-            <Button asChild size="lg" className="bg-brand hover:bg-brand-hover text-white font-bold rounded-xl shadow-lg shadow-brand/30 px-7 h-12 w-full sm:w-auto">
-              <Link href="/products" className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4" />
-                Ürünleri İncele
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-slate-600 bg-white/5 text-white hover:bg-white/15 hover:border-slate-400 rounded-xl px-7 h-12 w-full sm:w-auto">
-              <Link href="/paketler" className="flex items-center gap-2">
-                <Package className="w-4 h-4" />
-                Paketleri Gör
-              </Link>
-            </Button>
-            <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 px-7 h-12 w-full sm:w-auto">
-              <Link href="/ges" className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Teklif Al
-              </Link>
-            </Button>
-          </div>
-          <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 justify-center text-slate-400 text-xs font-medium">
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Güvenli Ödeme</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Hızlı Kargo</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Teknik Destek</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Vade Farksız Taksit</span>
+      <section className="relative overflow-hidden bg-slate-950" aria-label="Ana başlık">
+        {/* Subtle background glows */}
+        <div className="absolute -top-60 -left-60 w-[700px] h-[700px] rounded-full bg-brand/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-violet-500/8 blur-3xl pointer-events-none" />
+
+        <div className="relative container mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 py-16 md:py-20 lg:py-24">
+
+            {/* Left: text + CTAs */}
+            <div className="flex-1 min-w-0 flex flex-col items-start text-left max-w-xl lg:max-w-none">
+              <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/40 px-4 py-1.5 text-xs font-bold text-brand-light uppercase tracking-widest mb-7">
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                Türkiye'nin Enerji Mağazası
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight leading-[1.06] mb-5">
+                Temiz Enerji<br />
+                <span className="text-brand">Her Yerde,</span><br />
+                Her İhtiyaç İçin
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 mb-9 leading-relaxed max-w-lg">
+                Güneş paneli, batarya, inverter ve EV şarj çözümleri.
+                Enerji bağımsızlığınız için doğru ürün, uzman destek.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Button asChild size="lg" className="bg-brand hover:bg-brand-hover text-white font-bold rounded-xl shadow-lg shadow-brand/30 px-7 h-12">
+                  <Link href="/products" className="flex items-center gap-2">
+                    <ShoppingBag className="w-4 h-4" />
+                    Ürünleri İncele
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-slate-600 bg-white/5 text-white hover:bg-white/15 hover:border-slate-400 rounded-xl px-7 h-12">
+                  <Link href="/paketler" className="flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    Paketleri Gör
+                  </Link>
+                </Button>
+                <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 px-7 h-12">
+                  <Link href="/ges" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Teklif Al
+                  </Link>
+                </Button>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-slate-400 text-xs font-medium">
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Güvenli Ödeme</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Hızlı Kargo</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Teknik Destek</span>
+                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Vade Farksız Taksit</span>
+              </div>
+            </div>
+
+            {/* Right: hero image */}
+            <div className="relative flex-shrink-0 w-full lg:w-[48%] xl:w-[50%]">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+                {/* Gradient fade at bottom-left to blend into the dark bg */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/60 via-transparent to-transparent z-10 pointer-events-none rounded-2xl" />
+                <Image
+                  src="/images/ges/solar-hero-premium.png"
+                  alt="Voltekno güneş enerji sistemi kurulumu"
+                  width={900}
+                  height={620}
+                  className="w-full h-auto object-cover"
+                  priority
+                />
+                {/* Floating stat badges */}
+                <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Toplam Kurulum</p>
+                  <p className="text-lg font-extrabold text-slate-900 leading-tight">500+ Proje</p>
+                </div>
+                <div className="absolute bottom-4 left-4 z-20 bg-emerald-500/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg">
+                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide">Enerji Tasarrufu</p>
+                  <p className="text-lg font-extrabold text-white leading-tight">%80'e kadar</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -716,32 +746,36 @@ export default function HomePage() {
             <p className={sectionDescClass}>Gerçek projeler, gerçek sonuçlar.</p>
           </header>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-            {REFERENCE_PROJECTS.map((project) => {
-              const Icon = project.icon
-              return (
-                <div key={project.title} className="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                  <div className={`h-1.5 w-full bg-gradient-to-r ${project.color}`} />
-                  <div className="p-5">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className={`shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${project.color} flex items-center justify-center`}>
-                        <Icon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900 text-sm leading-tight">{project.title}</h3>
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3" />{project.location}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="text-xs font-bold bg-slate-100 text-slate-700 rounded-lg px-2.5 py-1">{project.capacity}</span>
-                      <span className="text-xs font-medium bg-brand/10 text-brand rounded-lg px-2.5 py-1">{project.type}</span>
-                    </div>
-                    <p className="text-xs text-slate-600 leading-relaxed">{project.desc}</p>
+            {REFERENCE_PROJECTS.map((project) => (
+              <div key={project.title} className="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                {/* Image */}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  {/* Dark gradient overlay at bottom */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-slate-900/20 to-transparent pointer-events-none" />
+                  {/* Location badge top-left */}
+                  <div className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1">
+                    <MapPin className="w-3 h-3 text-brand" />
+                    <span className="text-[10px] font-bold text-slate-700">{project.location}</span>
+                  </div>
+                  {/* Capacity badge bottom */}
+                  <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5">
+                    <span className={`text-[10px] font-bold bg-gradient-to-r ${project.color} text-white rounded-md px-2 py-0.5`}>{project.capacity}</span>
+                    <span className="text-[10px] font-medium bg-white/90 text-slate-700 rounded-md px-2 py-0.5">{project.type}</span>
                   </div>
                 </div>
-              )
-            })}
+                {/* Info */}
+                <div className="p-4">
+                  <h3 className="font-bold text-slate-900 text-sm mb-1.5 group-hover:text-brand transition-colors">{project.title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{project.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
