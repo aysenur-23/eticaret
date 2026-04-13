@@ -13,25 +13,22 @@ import {
   Battery,
   Sun,
   Truck,
-  Home,
-  Leaf,
-  Anchor,
-  Building2,
-  Factory,
   Package,
   FileText,
   CheckCircle2,
   Calculator,
+  TrendingUp,
+  MapPin,
   ArrowRight,
-  ChevronRight,
+  Clock,
   Cpu,
   Flame,
-  Settings,
-  MapPin,
-  TrendingUp,
+  Leaf,
+  Anchor,
 } from 'lucide-react'
 import { ProductCard } from '@/components/ProductCard'
 import { mockProducts } from '@/lib/products-mock'
+import { PACKAGE_CATEGORIES } from '@/lib/package-categories'
 import { useTranslations } from 'next-intl'
 import type { MockProduct } from '@/lib/products-mock'
 
@@ -43,148 +40,81 @@ const HERO_SLIDES: { src: string; href: string }[] = [
 ]
 const HERO_SLIDE_INTERVAL_MS = 5000
 
-const USE_CASES = [
+// Orijinal 5 paket + 4 yeni senaryo
+const EXTRA_USE_CASES = [
   {
-    key: 'villa',
-    label: 'Villa',
-    desc: 'Yüksek tüketimli konutlar için hibrit çözümler',
-    icon: Home,
-    color: 'from-blue-500 to-blue-600',
-    href: '/paketler/villa-paketleri',
-  },
-  {
-    key: 'bag-evi',
-    label: 'Bağ / Dağ Evi',
-    desc: 'Şebekeden bağımsız küçük konutlar',
-    icon: Leaf,
-    color: 'from-emerald-500 to-emerald-600',
-    href: '/paketler/bag-evi-paketleri',
-  },
-  {
-    key: 'karavan',
-    label: 'Karavan',
-    desc: 'Mobil yaşam için taşınabilir enerji',
-    icon: Truck,
-    color: 'from-amber-500 to-amber-600',
-    href: '/paketler/karavan-paketleri',
-  },
-  {
-    key: 'tarim',
-    label: 'Tarım / Sulama',
-    desc: 'Solar pompa ve sulama sistemleri',
-    icon: Flame,
-    color: 'from-green-600 to-green-700',
-    href: '/paketler/sulama-paketleri',
-  },
-  {
-    key: 'marin',
-    label: 'Marin',
-    desc: 'Tekne ve yatlar için marin paketler',
-    icon: Anchor,
-    color: 'from-sky-500 to-sky-600',
-    href: '/paketler/marin-paketleri',
-  },
-  {
-    key: 'isletme',
-    label: 'İşletme',
-    desc: 'Ticari tesis ve işyerleri için enerji',
-    icon: Building2,
-    color: 'from-violet-500 to-violet-600',
+    slug: 'isletme',
+    title: 'İşletme',
+    description: 'Ticari tesis ve işyerleri için enerji çözümleri.',
+    image: '/images/hero/hero-4.png',
+    objectPosition: 'center 40%',
+    imageAlt: 'İşletme ve ticari tesis enerji çözümleri',
     href: '/ges',
   },
   {
-    key: 'ev-sarj',
-    label: 'EV Şarj',
-    desc: 'Araç şarj istasyonu kurulumu',
-    icon: Zap,
-    color: 'from-yellow-500 to-orange-500',
+    slug: 'ev-sarj-senaryosu',
+    title: 'EV Şarj',
+    description: 'Araç şarj istasyonu kurulumu ve ürünleri.',
+    image: '/images/categories/sarj.png',
+    objectPosition: 'center center',
+    imageAlt: 'Elektrikli araç şarj istasyonu',
     href: '/category/elektrikli-arac-sarj-urunleri',
   },
   {
-    key: 'cati-ges',
-    label: 'Çatı GES',
-    desc: 'Şehir evi ve apartman GES sistemleri',
-    icon: Sun,
-    color: 'from-orange-400 to-red-500',
+    slug: 'cati-ges',
+    title: 'Çatı GES',
+    description: 'Şehir evi ve apartman güneş enerji sistemleri.',
+    image: '/images/categories/panel.png',
+    objectPosition: 'center center',
+    imageAlt: 'Çatı güneş enerji sistemi',
     href: '/ges',
   },
   {
-    key: 'endustriyel',
-    label: 'Endüstriyel',
-    desc: 'Fabrika ve büyük tesis projeleri',
-    icon: Factory,
-    color: 'from-slate-500 to-slate-700',
+    slug: 'endustriyel',
+    title: 'Endüstriyel',
+    description: 'Fabrika ve büyük tesis enerji projeleri.',
+    image: '/images/hero/hero-3.png',
+    objectPosition: 'center 40%',
+    imageAlt: 'Endüstriyel enerji projesi',
     href: '/contact',
   },
 ]
 
-const CATEGORIES_GRID = [
-  {
-    label: 'Güneş Paneli',
-    desc: 'Mono ve poli kristal panel modelleri',
-    href: '/category/gunes-enerjisi',
-    icon: Sun,
-    color: 'text-orange-500',
-    bg: 'bg-orange-50',
-  },
-  {
-    label: 'Batarya',
-    desc: 'Lityum ve kurşun asit akü seçenekleri',
-    href: '/category/batarya-depolama',
-    icon: Battery,
-    color: 'text-emerald-500',
-    bg: 'bg-emerald-50',
-  },
-  {
-    label: 'İnverter',
-    desc: 'Hibrit, off-grid ve mikro inverterler',
-    href: '/category/inverterler',
-    icon: Cpu,
-    color: 'text-violet-500',
-    bg: 'bg-violet-50',
-  },
-  {
-    label: 'EV Şarj',
-    desc: 'AC / DC şarj istasyonları ve kablolar',
-    href: '/category/elektrikli-arac-sarj-urunleri',
-    icon: Zap,
-    color: 'text-blue-500',
-    bg: 'bg-blue-50',
-  },
-  {
-    label: 'Enerji Depolama',
-    desc: 'ESS ve taşınabilir güç istasyonları',
-    href: '/category/batarya-depolama',
-    icon: Package,
-    color: 'text-sky-500',
-    bg: 'bg-sky-50',
-  },
-  {
-    label: 'Isı Pompası',
-    desc: 'HVAC ve ısı pompası sistemleri',
-    href: '/category/isi-pompasi-hvac',
-    icon: Flame,
-    color: 'text-red-500',
-    bg: 'bg-red-50',
-  },
-  {
-    label: 'Enerji Yönetimi',
-    desc: 'Akıllı sayaç ve izleme sistemleri',
-    href: '/category/enerji-yonetimi',
-    icon: Settings,
-    color: 'text-slate-500',
-    bg: 'bg-slate-100',
-  },
-  {
-    label: 'Tüm Ürünler',
-    desc: 'Ürün kataloğumuza göz atın',
-    href: '/products',
-    icon: ShoppingBag,
-    color: 'text-brand',
-    bg: 'bg-brand/10',
-    isAll: true,
-  },
-]
+const FEATURED_ROW_MAX = 10
+
+function getFeaturedRowProducts(products: MockProduct[] = mockProducts): MockProduct[] {
+  const featured = products.filter((p) => p.featured || (p.discount != null && p.discount > 0))
+  const sliced = featured.slice(0, FEATURED_ROW_MAX)
+  if (sliced.length <= 1) return sliced
+  const byCategory = new Map<string, MockProduct[]>()
+  for (const p of sliced) {
+    const list = byCategory.get(p.category) ?? []
+    list.push(p)
+    byCategory.set(p.category, list)
+  }
+  Array.from(byCategory.values()).forEach((list) => list.sort((a, b) => a.id.localeCompare(b.id)))
+  const categories = Array.from(byCategory.keys()).sort()
+  const result: MockProduct[] = []
+  let lastCategory: string | null = null
+  while (result.length < sliced.length) {
+    let picked = false
+    for (const cat of categories) {
+      const list = byCategory.get(cat)!
+      if (list.length === 0 || cat === lastCategory) continue
+      result.push(list.shift()!)
+      lastCategory = cat
+      picked = true
+      break
+    }
+    if (!picked) {
+      for (const cat of categories) {
+        const list = byCategory.get(cat)!
+        if (list.length > 0) { result.push(list.shift()!); lastCategory = cat; break }
+      }
+    }
+  }
+  return result
+}
 
 const HOW_IT_WORKS = [
   {
@@ -256,6 +186,8 @@ const BLOG_PLACEHOLDER = [
     desc: 'AC ve DC şarj farkları, güç seviyeleri ve ev elektrik altyapısına uygunluk rehberi.',
     category: 'EV Şarj',
     icon: Zap,
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-400',
   },
   {
     slug: 'gunes-paneli-verimlilik',
@@ -263,6 +195,8 @@ const BLOG_PLACEHOLDER = [
     desc: 'Panel gücü, yıllık üretim tahmini ve yatırım geri dönüş hesabı hakkında kapsamlı rehber.',
     category: 'Güneş Enerjisi',
     icon: Sun,
+    iconBg: 'bg-orange-50',
+    iconColor: 'text-orange-400',
   },
   {
     slug: 'lityum-vs-kursum-asit',
@@ -270,19 +204,47 @@ const BLOG_PLACEHOLDER = [
     desc: 'Fiyat, ömür, derinlik deşarj ve kullanım senaryolarına göre kapsamlı akü karşılaştırması.',
     category: 'Batarya',
     icon: Battery,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-400',
   },
 ]
 
-function getPopularProducts(products: MockProduct[] = mockProducts): MockProduct[] {
-  const popular = products.filter((p) => p.featured || (p.discount != null && p.discount > 0))
-  const rest = products.filter((p) => !popular.find((fp) => fp.id === p.id))
-  return [...popular, ...rest].slice(0, 8)
-}
+// Orijinal 3 kategori + genişletilmiş liste — fotoğraf yoksa renk+ikon
+const EXTRA_CATEGORY_ITEMS = [
+  {
+    href: '/category/inverterler',
+    title: 'İnverterler',
+    subtitle: 'Hibrit, off-grid ve mikro inverterler',
+    icon: Cpu,
+    bg: 'from-teal-600 to-teal-800',
+  },
+  {
+    href: '/category/batarya-depolama',
+    title: 'Enerji Depolama',
+    subtitle: 'ESS ve taşınabilir güç istasyonları',
+    icon: Package,
+    bg: 'from-violet-600 to-violet-800',
+  },
+  {
+    href: '/category/isi-pompasi-hvac',
+    title: 'Isı Pompası / HVAC',
+    subtitle: 'İklimlendirme ve ısıtma sistemleri',
+    icon: Flame,
+    bg: 'from-red-600 to-orange-700',
+  },
+  {
+    href: '/category/enerji-yonetimi',
+    title: 'Enerji Yönetimi',
+    subtitle: 'Akıllı sayaç ve izleme sistemleri',
+    icon: Zap,
+    bg: 'from-cyan-600 to-sky-700',
+  },
+]
 
 export default function HomePage() {
   const t = useTranslations('home')
   const [allProducts, setAllProducts] = useState(mockProducts)
-  const popularProducts = useMemo(() => getPopularProducts(allProducts), [allProducts])
+  const featuredRowProducts = useMemo(() => getFeaturedRowProducts(allProducts), [allProducts])
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
@@ -299,6 +261,12 @@ export default function HomePage() {
     return () => clearTimeout(timer)
   }, [currentSlide])
 
+  const sectionPadding = 'py-8 sm:py-12 md:py-16 lg:py-20'
+  const containerClass = 'container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] min-w-0'
+  const sectionTitleClass = 'text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight'
+  const sectionOverlineClass = 'block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2'
+  const sectionDescClass = 'text-slate-600 text-sm sm:text-base mt-1'
+
   const faqItems = [
     { q: t('faqQ1'), a: t('faqA1') },
     { q: t('faqQ2'), a: t('faqA2') },
@@ -306,8 +274,8 @@ export default function HomePage() {
     { q: t('faqQ4'), a: t('faqA4') },
     { q: t('faqQ5'), a: t('faqA5') },
   ]
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
 
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -318,40 +286,30 @@ export default function HomePage() {
     })),
   }
 
-  const containerClass = 'container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] min-w-0'
-  const sectionPadding = 'py-12 sm:py-16 md:py-20'
-  const sectionTitleClass = 'text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight'
-  const sectionOverlineClass = 'block text-xs font-bold uppercase tracking-widest text-brand mb-2'
-  const sectionDescClass = 'text-slate-500 text-sm sm:text-base mt-2 leading-relaxed'
-
   return (
-    <div className="min-h-full w-full max-w-full min-w-0 overflow-x-hidden bg-white">
+    <div className="min-h-full w-full max-w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/80">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      {/* ─── 1. HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 pt-16 pb-20 md:pt-24 md:pb-32 px-4" aria-label="Ana başlık">
+      {/* ─── 1. YENİ HERO ────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-slate-950 pt-14 pb-18 md:pt-20 md:pb-24 px-4" aria-label="Ana başlık">
         <div className="absolute inset-0 bg-gradient-to-br from-brand/25 via-slate-950 to-slate-900 pointer-events-none" />
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-brand/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-20 w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
-
         <div className="relative container mx-auto max-w-4xl text-center px-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/40 px-4 py-1.5 text-xs font-bold text-brand-light uppercase tracking-widest mb-8">
             <Zap className="w-3.5 h-3.5 fill-current" />
             Türkiye'nin Enerji Mağazası
           </div>
-
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.06] mb-6">
             Temiz Enerji&nbsp;
             <span className="text-brand">Her Yerde,</span>
             <br className="hidden sm:block" />
             &nbsp;Her İhtiyaç İçin
           </h1>
-
           <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
             Güneş paneli, batarya, inverter ve EV şarj çözümleri.
             Enerji bağımsızlığınız için doğru ürün, uzman destek.
           </p>
-
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center flex-wrap">
             <Button asChild size="lg" className="bg-brand hover:bg-brand-hover text-white font-bold rounded-xl shadow-lg shadow-brand/30 px-7 h-12 w-full sm:w-auto">
               <Link href="/products" className="flex items-center gap-2">
@@ -372,7 +330,6 @@ export default function HomePage() {
               </Link>
             </Button>
           </div>
-
           <div className="mt-10 flex flex-wrap gap-x-6 gap-y-2 justify-center text-slate-400 text-xs font-medium">
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Güvenli Ödeme</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Hızlı Kargo</span>
@@ -382,84 +339,163 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 2. KULLANIM SENARYOLARI ──────────────────────────────────────── */}
-      <section className={`${sectionPadding} opacity-0 animate-section-in`} aria-labelledby="use-cases-heading">
+      {/* ─── 2. KULLANIM SENARYOLARI (orijinal Paket Kategorileri yapısı + eklemeler) ── */}
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="use-cases-heading">
         <div className={containerClass}>
-          <header className="mb-8 md:mb-10">
-            <span className={sectionOverlineClass}>Kullanım Senaryoları</span>
-            <h2 id="use-cases-heading" className={sectionTitleClass}>Hangi İhtiyaç İçin?</h2>
-            <p className={sectionDescClass}>Kullanım alanınıza özel enerji çözümlerini keşfedin.</p>
+          <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <span className={sectionOverlineClass}>Kullanım Senaryoları</span>
+              <h2 id="use-cases-heading" className={sectionTitleClass}>Hangi İhtiyaç İçin?</h2>
+              <p className={sectionDescClass}>Kullanım alanınıza özel hazırlanmış enerji çözümleri.</p>
+            </div>
+            <Link href="/paketler" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+              Tüm Paketler <ArrowUpRight className="w-4 h-4" />
+            </Link>
           </header>
 
-          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-3 md:gap-4">
-            {USE_CASES.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className="group flex flex-col items-center gap-2.5 rounded-2xl border border-slate-200 bg-white p-4 hover:border-brand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-center touch-manipulation"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-5 h-5 text-white" />
+          {/* Üst satır: 3 büyük kart — orijinal PACKAGE_CATEGORIES yapısı */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            {PACKAGE_CATEGORIES.slice(0, 3).map((item) => (
+              <Link
+                key={item.slug}
+                href={`/paketler/${item.slug}`}
+                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    className="object-cover opacity-85 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    style={{ objectPosition: item.objectPosition ?? 'center' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Enerji Paketi</p>
+                    <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
+                    <p className="mt-1 text-sm text-white/60 line-clamp-1">{item.description}</p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-light group-hover:gap-2 transition-all">
+                      İncele <ArrowUpRight className="w-3.5 h-3.5" />
+                    </span>
                   </div>
-                  <span className="text-xs font-bold text-slate-800 leading-tight">{item.label}</span>
-                  <span className="hidden lg:block text-[10px] text-slate-500 leading-snug line-clamp-2">{item.desc}</span>
-                </Link>
-              )
-            })}
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Orta satır: 2 geniş kart */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            {PACKAGE_CATEGORIES.slice(3).map((item) => (
+              <Link
+                key={item.slug}
+                href={`/paketler/${item.slug}`}
+                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
+              >
+                <div className="relative aspect-[16/7] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    className="object-cover opacity-85 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    style={{ objectPosition: item.objectPosition ?? 'center' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Enerji Paketi</p>
+                      <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
+                      <p className="mt-1 text-sm text-white/60 line-clamp-1">{item.description}</p>
+                    </div>
+                    <span className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white group-hover:bg-brand group-hover:border-brand transition-all duration-300">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Alt satır: 4 ek senaryo (aynı kart stili) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {EXTRA_USE_CASES.map((item) => (
+              <Link
+                key={item.slug}
+                href={item.href}
+                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
+              >
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    className="object-cover opacity-75 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    style={{ objectPosition: item.objectPosition }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-4">
+                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight">{item.title}</h3>
+                    <p className="mt-0.5 text-xs text-white/55 line-clamp-1">{item.description}</p>
+                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-light group-hover:gap-2 transition-all">
+                      İncele <ArrowUpRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ─── 3. POPÜLER ÜRÜNLER ───────────────────────────────────────────── */}
-      <section className={`${sectionPadding} bg-slate-50/70 opacity-0 animate-section-in animate-section-in-delay-1`} aria-labelledby="popular-products-heading">
+      {/* ─── 3. POPÜLER ÜRÜNLER (orijinal "Öne Çıkan" scroll yapısı, yeni başlık) ── */}
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-1`} aria-labelledby="popular-products-heading">
         <div className={containerClass}>
-          <header className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div>
-              <span className={sectionOverlineClass}>Popüler Ürünler</span>
-              <h2 id="popular-products-heading" className={sectionTitleClass}>En Çok Tercih Edilenler</h2>
-              <p className={sectionDescClass}>Müşterilerimizin en çok satın aldığı ürünler.</p>
-            </div>
-            <Link href="/products" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline">
-              Tümünü Gör <ArrowUpRight className="w-4 h-4" />
-            </Link>
+          <header className="mb-6 md:mb-8">
+            <span className={sectionOverlineClass}>En Çok Tercih Edilenler</span>
+            <h2 id="popular-products-heading" className={sectionTitleClass}>
+              Popüler Ürünler
+            </h2>
+            <p className={sectionDescClass}>Müşterilerimizin en çok satın aldığı ürünler.</p>
           </header>
-
-          {popularProducts.length === 0 ? (
-            <p className="text-slate-500 py-8">Henüz ürün bulunmuyor.</p>
+          {featuredRowProducts.length === 0 ? (
+            <p className="text-slate-500 py-8">{t('noProductsYet')}</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 min-w-0">
-              {popularProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    description: product.description,
-                    price: product.price,
-                    image: product.image,
-                    category: product.category,
-                    brand: product.brand,
-                  }}
-                  oldPrice={product.oldPrice}
-                  discount={product.discount}
-                  badges={product.tags}
-                  sku={product.sku}
-                  stock={product.stock}
-                  isVariantProduct={product.isVariantProduct}
-                  variant="compact"
-                />
-              ))}
+            <div className="overflow-hidden -mx-1 px-1 group/scroll rounded-2xl">
+              <div className="flex gap-4 sm:gap-5 w-max animate-featured-scroll" style={{ width: 'max-content' }}>
+                {[...featuredRowProducts, ...featuredRowProducts].map((product, i) => (
+                  <div key={`${product.id}-${i}`} className="flex-none w-[180px] sm:w-[200px] md:w-[220px] min-w-0">
+                    <ProductCard
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        description: product.description,
+                        price: product.price,
+                        image: product.image,
+                        category: product.category,
+                        brand: product.brand,
+                      }}
+                      oldPrice={product.oldPrice}
+                      discount={product.discount}
+                      badges={product.tags}
+                      sku={product.sku}
+                      stock={product.stock}
+                      isVariantProduct={product.isVariantProduct}
+                      variant="compact"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* ─── 4. SLIDER ────────────────────────────────────────────────────── */}
-      <section className="py-8 sm:py-10 px-4 sm:px-6 md:px-8" aria-label="Fırsatlar ve Kampanyalar">
+      {/* ─── 4. SLIDER (sayfanın ortasına taşındı) ──────────────────────── */}
+      <section className="pt-0 pb-8 sm:pb-12 px-4 sm:px-6 md:px-8 lg:px-10" aria-label={t('heroTitle2')}>
         <div className="w-full max-w-[1600px] mx-auto min-w-0">
-          <div className="relative w-full rounded-2xl md:rounded-3xl bg-slate-900 shadow-xl min-h-[28vh] sm:min-h-0 aspect-[3/1.4] sm:aspect-[9/4] md:aspect-[5/2] ring-1 ring-slate-200/30 overflow-hidden">
+          <div className="relative w-full rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-900 shadow-xl min-h-[28vh] sm:min-h-0 aspect-[3/2] sm:aspect-[9/4] md:aspect-[5/2] ring-1 ring-slate-200/30 overflow-hidden">
             {HERO_SLIDES.map((slide, index) => (
               <div
                 key={slide.src + index}
@@ -468,7 +504,7 @@ export default function HomePage() {
               >
                 <Link
                   href={slide.href}
-                  className="absolute inset-0 block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="absolute inset-0 block w-full h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                   aria-label={index === 0 ? t('heroSlideLabelCharge') : (index === 1 || index === 3) ? t('heroSlideLabelCable') : t('heroSlideLabelAll')}
                 >
                   <Image
@@ -483,7 +519,7 @@ export default function HomePage() {
                 </Link>
               </div>
             ))}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none z-[2]" aria-hidden />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none z-[2]" aria-hidden />
             <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-[3] flex gap-1.5">
               {HERO_SLIDES.map((_, i) => (
                 <button
@@ -491,7 +527,7 @@ export default function HomePage() {
                   type="button"
                   aria-label={t('slideDotLabel', { n: i + 1 })}
                   onClick={() => setCurrentSlide(i)}
-                  className={`rounded-full transition-all duration-300 touch-manipulation w-1.5 h-1.5 sm:w-2 sm:h-2 ${i === currentSlide ? 'bg-white ring-2 ring-white/60 shadow-md' : 'bg-white/60 hover:bg-white/80'}`}
+                  className={`rounded-full transition-all duration-300 touch-manipulation min-w-[10px] min-h-[10px] w-1.5 h-1.5 sm:w-2 sm:h-2 flex items-center justify-center ${i === currentSlide ? 'bg-white ring-2 ring-white/60 shadow-md scale-100' : 'bg-white/60 hover:bg-white/80 active:bg-white backdrop-blur-[1px]'}`}
                 />
               ))}
             </div>
@@ -499,37 +535,72 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 5. KATEGORİLER ───────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} opacity-0 animate-section-in`} aria-labelledby="categories-heading">
+      {/* ─── 5. KATEGORİLER (orijinal fotoğraf kart yapısı + genişletilmiş) ─ */}
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="main-categories-heading">
         <div className={containerClass}>
-          <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-            <div>
-              <span className={sectionOverlineClass}>Kategoriler</span>
-              <h2 id="categories-heading" className={sectionTitleClass}>Tüm Ürün Kategorileri</h2>
-              <p className={sectionDescClass}>İhtiyacınıza göre kategori seçin, ürünleri filtreleyin.</p>
-            </div>
-            <Link href="/products" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline">
-              Tüm Ürünler <ArrowUpRight className="w-4 h-4" />
-            </Link>
+          <header className="mb-5 sm:mb-8 md:mb-10">
+            <span className={sectionOverlineClass}>{t('categoryDetails')}</span>
+            <h2 id="main-categories-heading" className={sectionTitleClass}>
+              {t('categoriesTitle')}
+            </h2>
+            <p className={sectionDescClass}>{t('categoriesDesc')}</p>
           </header>
 
+          {/* Orijinal 3 büyük fotoğraf kartı */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 md:gap-6 min-w-0 mb-4">
+            {[
+              { href: '/category/elektrikli-arac-sarj-urunleri', title: t('categoryCharge'), subtitle: t('categoryChargeDesc'), image: '/images/categories/sarj.png', objectPosition: 'center center' },
+              { href: '/category/batarya-depolama', title: t('categoryBattery'), subtitle: t('categoryBatteryDesc'), image: '/images/categories/batarya.png', objectPosition: 'center center' },
+              { href: '/category/gunes-enerjisi', title: t('categorySolar'), subtitle: t('categorySolarDesc'), image: '/images/categories/panel.png', objectPosition: 'center center' },
+            ].map((item) => (
+              <Link
+                key={item.title}
+                href={item.href}
+                className="group relative block rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-300 min-w-0 touch-manipulation"
+              >
+                <div className="aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-slate-100">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                    style={{ objectPosition: item.objectPosition }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" aria-hidden />
+                </div>
+                <div className="p-3 sm:p-4 border-t border-slate-100">
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5 group-hover:text-brand transition-colors line-clamp-1">{item.title}</h3>
+                  <p className="text-slate-600 text-xs sm:text-sm line-clamp-2 mb-3">{item.subtitle}</p>
+                  <span className="inline-flex items-center rounded-lg sm:rounded-xl bg-brand text-white text-[10px] sm:text-xs font-bold px-3 py-2 sm:px-4 sm:py-2.5 transition-all duration-300 shadow-sm group-hover:opacity-90">
+                    {t('categoryIncele')}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Ekstra kategoriler — ikon+renk kart (görsel yok olanlar) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            {CATEGORIES_GRID.map((item) => {
+            {EXTRA_CATEGORY_ITEMS.map((item) => {
               const Icon = item.icon
               return (
                 <Link
-                  key={item.label}
+                  key={item.href}
                   href={item.href}
-                  className={`group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3.5 hover:border-brand hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 touch-manipulation${item.isAll ? ' border-brand/30 bg-brand/5' : ''}`}
+                  className="group relative block rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 touch-manipulation"
                 >
-                  <div className={`shrink-0 w-10 h-10 rounded-xl ${item.bg} flex items-center justify-center`}>
-                    <Icon className={`w-5 h-5 ${item.color}`} />
+                  <div className={`aspect-[4/3] sm:aspect-[3/2] bg-gradient-to-br ${item.bg} flex flex-col items-center justify-center gap-2 p-4`}>
+                    <Icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
+                    <span className="text-white/60 text-[9px] font-bold uppercase tracking-widest group-hover:text-white/80 transition-colors">Kategori</span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-sm font-bold text-slate-900 group-hover:text-brand transition-colors leading-tight${item.isAll ? ' text-brand' : ''}`}>{item.label}</p>
-                    <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">{item.desc}</p>
+                  <div className="p-3 sm:p-4 border-t border-slate-100 bg-white">
+                    <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5 group-hover:text-brand transition-colors line-clamp-1">{item.title}</h3>
+                    <p className="text-slate-600 text-xs sm:text-sm line-clamp-2 mb-3">{item.subtitle}</p>
+                    <span className="inline-flex items-center rounded-lg sm:rounded-xl bg-brand text-white text-[10px] sm:text-xs font-bold px-3 py-2 sm:px-4 sm:py-2.5 transition-all duration-300 shadow-sm group-hover:opacity-90">
+                      {t('categoryIncele')}
+                    </span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-brand shrink-0 transition-colors" />
                 </Link>
               )
             })}
@@ -538,18 +609,17 @@ export default function HomePage() {
       </section>
 
       {/* ─── 6. NASIL ÇALIŞIR ─────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} bg-slate-950 opacity-0 animate-section-in`} aria-labelledby="how-it-works-heading">
+      <section className={`${sectionPadding} bg-slate-950 min-w-0 opacity-0 animate-section-in`} aria-labelledby="how-it-works-heading">
         <div className={containerClass}>
           <header className="text-center mb-10 md:mb-14">
             <span className="block text-xs font-bold uppercase tracking-widest text-brand mb-2">Nasıl Çalışır?</span>
-            <h2 id="how-it-works-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            <h2 id="how-it-works-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">
               3 Adımda Enerji Çözümü
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base mt-3 max-w-xl mx-auto leading-relaxed">
+            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-xl mx-auto leading-relaxed">
               İhtiyacından siparişe, siparişten teslimat ve kuruluma kadar tüm süreçte yanınızdayız.
             </p>
           </header>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {HOW_IT_WORKS.map((item) => {
               const Icon = item.icon
@@ -568,19 +638,19 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 7. TEKLİF AL CTA BLOĞU ──────────────────────────────────────── */}
-      <section className="relative overflow-hidden opacity-0 animate-section-in" aria-labelledby="quote-cta-heading">
-        <div className="bg-gradient-to-r from-brand via-blue-600 to-violet-600 py-16 md:py-20 px-4">
+      {/* ─── 7. TEKLİF AL CTA ─────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden min-w-0 opacity-0 animate-section-in" aria-labelledby="quote-cta-heading">
+        <div className="bg-gradient-to-r from-brand via-blue-600 to-violet-600 py-14 md:py-20 px-4">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(255,255,255,0.08)_0%,_transparent_60%)] pointer-events-none" />
           <div className="container mx-auto max-w-3xl text-center relative">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white uppercase tracking-widest mb-6">
               <TrendingUp className="w-3.5 h-3.5" />
               Para Kazandıran Adım
             </div>
-            <h2 id="quote-cta-heading" className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
+            <h2 id="quote-cta-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight mb-4">
               Enerji Faturanızı Düşürmeye<br className="hidden sm:block" /> Hazır mısınız?
             </h2>
-            <p className="text-white/80 text-base sm:text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+            <p className="text-white/80 text-base max-w-xl mx-auto mb-10 leading-relaxed">
               Ücretsiz ön keşif formunu doldurun, size özel teklif hazırlayalım.
               Ya da GES hesaplama aracımızı kullanın.
             </p>
@@ -602,15 +672,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 8. NEDEN VOLTEKNO ────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} bg-slate-50/60 opacity-0 animate-section-in animate-section-in-delay-2`} aria-labelledby="why-voltekno-heading">
+      {/* ─── 8. NEDEN VOLTEKNO (orijinal yapı) ───────────────────────────── */}
+      <div className="w-full border-t border-slate-200/80 bg-slate-100/40" aria-hidden />
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-voltekno-heading">
         <div className={containerClass}>
           <header className="text-center mb-10 md:mb-14">
             <span className={sectionOverlineClass}>{t('whyUs')}</span>
             <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
               {t('whyVoltekno')}
             </h2>
-            <p className={`${sectionDescClass} max-w-xl mx-auto text-center`}>
+            <p className={`${sectionDescClass} max-w-2xl mx-auto mt-2 text-center`}>
               {t('whyVolteknoDesc')}
             </p>
           </header>
@@ -637,14 +708,13 @@ export default function HomePage() {
       </section>
 
       {/* ─── 9. REFERANS PROJELER ─────────────────────────────────────────── */}
-      <section className={`${sectionPadding} opacity-0 animate-section-in`} aria-labelledby="reference-projects-heading">
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="reference-projects-heading">
         <div className={containerClass}>
           <header className="mb-8 md:mb-10">
             <span className={sectionOverlineClass}>Referans Projeler</span>
             <h2 id="reference-projects-heading" className={sectionTitleClass}>Tamamlanan Projelerden</h2>
             <p className={sectionDescClass}>Gerçek projeler, gerçek sonuçlar.</p>
           </header>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {REFERENCE_PROJECTS.map((project) => {
               const Icon = project.icon
@@ -677,7 +747,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── 10. BLOG ─────────────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} bg-slate-50/60 opacity-0 animate-section-in animate-section-in-delay-1`} aria-labelledby="blog-heading">
+      <section className={`${sectionPadding} bg-slate-50/60 min-w-0 opacity-0 animate-section-in animate-section-in-delay-1`} aria-labelledby="blog-heading">
         <div className={containerClass}>
           <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
             <div>
@@ -685,11 +755,10 @@ export default function HomePage() {
               <h2 id="blog-heading" className={sectionTitleClass}>Enerji Rehberi</h2>
               <p className={sectionDescClass}>Bilgilendirici yazılar, ürün karşılaştırmaları ve kurulum rehberleri.</p>
             </div>
-            <Link href="/blog" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:underline">
+            <Link href="/blog" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
               Tüm Yazılar <ArrowUpRight className="w-4 h-4" />
             </Link>
           </header>
-
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {BLOG_PLACEHOLDER.map((post) => {
               const Icon = post.icon
@@ -699,13 +768,13 @@ export default function HomePage() {
                   href="/blog"
                   className="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                    <Icon className="w-12 h-12 text-slate-300 group-hover:text-slate-400 transition-colors" />
+                  <div className={`h-40 ${post.iconBg} flex items-center justify-center`}>
+                    <Icon className={`w-12 h-12 ${post.iconColor} group-hover:scale-110 transition-transform duration-300`} />
                   </div>
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-[10px] font-bold uppercase tracking-widest bg-brand/10 text-brand rounded-lg px-2.5 py-1">{post.category}</span>
-                      <span className="text-[10px] text-slate-400 font-medium">Yakında</span>
+                      <span className="flex items-center gap-1 text-[10px] text-slate-400 font-medium"><Clock className="w-3 h-3" />Yakında</span>
                     </div>
                     <h3 className="font-bold text-slate-900 text-sm leading-snug mb-2 group-hover:text-brand transition-colors line-clamp-2">{post.title}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">{post.desc}</p>
@@ -720,8 +789,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 11. SSS ──────────────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} opacity-0 animate-section-in animate-section-in-delay-2`} aria-labelledby="home-faq-heading">
+      {/* ─── 11. SSS (orijinal yapı) ──────────────────────────────────────── */}
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-2`} aria-labelledby="home-faq-heading">
         <div className={containerClass}>
           <header className="mb-8 md:mb-10">
             <span className={sectionOverlineClass}>{t('faqOverline')}</span>
@@ -731,7 +800,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             {faqItems.map((item) => (
               <article key={item.q} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-                <h3 className="text-sm font-bold text-slate-900">{item.q}</h3>
+                <h3 className="text-base font-semibold text-slate-900">{item.q}</h3>
                 <p className="mt-2 text-sm text-slate-600 leading-relaxed">{item.a}</p>
               </article>
             ))}
