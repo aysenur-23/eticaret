@@ -7,6 +7,6 @@ Disallow: /admin/
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://bataryakit.com/sitemap.xml
+Sitemap: https://voltekno.com/sitemap.xml
 
 

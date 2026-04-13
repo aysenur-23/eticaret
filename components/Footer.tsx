@@ -3,7 +3,6 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { Logo } from './Logo'
 import {
   Mail,
   Phone,
@@ -15,10 +14,10 @@ import {
   Youtube,
   CreditCard,
   ShieldCheck,
-  ArrowRight,
-  Zap,
   Send,
+  Zap,
 } from 'lucide-react'
+import { Logo } from './Logo'
 
 function NewsletterForm() {
   const [mounted, setMounted] = React.useState(false)
@@ -50,15 +49,15 @@ function NewsletterForm() {
 
   if (status === 'success') {
     return (
-      <div className="flex items-center gap-2 text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-4 py-3">
+      <p className="text-sm text-emerald-300 flex items-center gap-2 py-1">
         <ShieldCheck className="w-4 h-4 shrink-0" />
         {t('newsletterSuccess')}
-      </div>
+      </p>
     )
   }
 
   return (
-    <form className="flex gap-2" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="flex gap-2 max-w-sm w-full">
       <label htmlFor="newsletter-email" className="sr-only">{t('emailPlaceholder')}</label>
       {mounted ? (
         <input
@@ -68,21 +67,21 @@ function NewsletterForm() {
           value={email}
           onChange={(e) => { setEmail(e.target.value); setStatus('idle') }}
           required
-          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand/40 transition-all"
+          className="flex-1 min-h-[44px] bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/40"
         />
       ) : (
-        <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 min-h-[42px]" aria-hidden />
+        <div className="flex-1 min-h-[44px] bg-white/10 border border-white/20 rounded-lg" aria-hidden />
       )}
       <button
         type="submit"
         disabled={status === 'loading'}
-        aria-label={t('newsletterSubscribe')}
-        className="shrink-0 w-10 h-10 flex items-center justify-center bg-brand hover:bg-brand-hover rounded-xl text-white transition-all disabled:opacity-50 shadow-[0_6px_16px_rgba(220,38,38,0.25)]"
+        className="min-h-[44px] bg-white text-brand font-semibold px-4 rounded-lg text-sm hover:bg-white/90 transition-colors disabled:opacity-50 shrink-0 flex items-center gap-1.5 touch-manipulation"
       >
-        <Send className="w-4 h-4" />
+        <Send className="w-3.5 h-3.5" />
+        {t('newsletterSubscribe')}
       </button>
       {status === 'error' && (
-        <p className="text-xs text-red-400 mt-1 absolute">{t('newsletterError')}</p>
+        <p className="absolute mt-1 text-xs text-red-300">{t('newsletterError')}</p>
       )}
     </form>
   )
@@ -92,174 +91,205 @@ export function Footer() {
   const t = useTranslations('footer')
   const currentYear = new Date().getFullYear()
 
-  const sectionLabel = 'text-[10px] font-bold uppercase tracking-[0.16em] text-slate-600 mb-4'
-  const navLink = 'group flex items-center gap-1.5 py-1 text-sm text-slate-400 hover:text-white transition-colors'
+  const headingClass = 'text-white/60 font-semibold text-[11px] uppercase tracking-widest mb-4'
+  const linkClass = 'text-slate-400 text-sm py-1.5 block hover:text-white transition-colors'
+
+  const socials = [
+    { Icon: Facebook, name: 'Facebook', href: 'https://facebook.com/voltekno' },
+    { Icon: Twitter, name: 'Twitter / X', href: 'https://x.com/voltekno' },
+    { Icon: Instagram, name: 'Instagram', href: 'https://instagram.com/voltekno' },
+    { Icon: Linkedin, name: 'LinkedIn', href: 'https://linkedin.com/company/voltekno' },
+    { Icon: Youtube, name: 'YouTube', href: 'https://youtube.com/@voltekno' },
+  ] as const
 
   return (
-    <footer className="bg-[#080d1a] text-slate-300">
+    <footer className="bg-slate-900 text-slate-400 pb-safe">
 
-      {/* Üst aksan çizgisi */}
-      <div className="h-px bg-gradient-to-r from-transparent via-brand/50 to-transparent" />
+      {/* Bülten şeridi */}
+      <div className="bg-brand">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-7">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+            <div>
+              <h2 className="text-white font-bold text-lg">{t('newsletter')}</h2>
+              <p className="text-white/70 text-sm mt-0.5">{t('newsletterDesc')}</p>
+            </div>
+            <div className="relative">
+              <NewsletterForm />
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-10">
+      {/* Ana içerik */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-6">
 
-        {/* ── 4 sütun grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+          {/* Kolon 1: Marka + iletişim (4 col) */}
+          <div className="sm:col-span-2 lg:col-span-4 space-y-5">
+            {/* Logo — beyaz bg kutusunda net görünür */}
+            <div className="bg-white rounded-2xl px-5 py-3 inline-flex items-center">
+              <Logo size="lg" href="/" />
+            </div>
 
-          {/* 1 — Marka */}
-          <div className="space-y-5">
-            <Logo size="lg" href="/" className="invert brightness-200" />
             <p className="text-sm text-slate-400 leading-relaxed">
               {t('aboutDesc')}
             </p>
 
+            {/* İletişim bilgileri — logo kolonunda, göze çarpan */}
+            <ul className="space-y-3 text-sm">
+              <li>
+                <a href="tel:+905518291613" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group">
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-brand/20 transition-colors">
+                    <Phone className="w-3.5 h-3.5 text-brand" aria-hidden />
+                  </span>
+                  <span className="font-semibold">+90 551 829 16 13</span>
+                </a>
+              </li>
+              <li>
+                <a href="mailto:info@voltekno.com" className="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group">
+                  <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-brand/20 transition-colors">
+                    <Mail className="w-3.5 h-3.5 text-brand" aria-hidden />
+                  </span>
+                  <span>info@voltekno.com</span>
+                </a>
+              </li>
+              <li className="flex items-start gap-3 text-slate-400">
+                <span className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-brand" aria-hidden />
+                </span>
+                <span className="text-sm leading-relaxed">{t('location')}</span>
+              </li>
+            </ul>
+
             {/* Sosyal medya */}
-            <div className="flex gap-2 pt-1">
-              {([
-                { Icon: Facebook, name: 'Facebook' },
-                { Icon: Twitter,   name: 'Twitter / X' },
-                { Icon: Instagram, name: 'Instagram' },
-                { Icon: Linkedin,  name: 'LinkedIn' },
-                { Icon: Youtube,   name: 'YouTube' },
-              ] as const).map(({ Icon, name }) => (
+            <div className="flex gap-2 flex-wrap pt-1">
+              {socials.map(({ Icon, name, href }) => (
                 <a
                   key={name}
-                  href="#"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={name}
-                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-500 hover:bg-brand hover:border-brand hover:text-white transition-all"
+                  className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-brand hover:border-brand hover:text-white transition-all"
                 >
-                  <Icon className="w-3.5 h-3.5" aria-hidden />
+                  <Icon className="w-4 h-4" aria-hidden />
                 </a>
               ))}
             </div>
-          </div>
 
-          {/* 2 — Linkler */}
-          <div className="space-y-7">
-            <div>
-              <p className={sectionLabel}>{t('quickLinks')}</p>
-              <ul className="space-y-0.5">
-                {[
-                  { href: '/',                     label: t('home') },
-                  { href: '/products',             label: t('products') },
-                  { href: '/categories',           label: t('categories') },
-                  { href: '/products?sort=newest', label: t('campaigns') },
-                  { href: '/contact',              label: t('b2bContact') },
-                ].map((item) => (
-                  <li key={item.href + item.label}>
-                    <Link href={item.href} className={navLink}>
-                      <ArrowRight className="w-3 h-3 text-brand opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className={sectionLabel}>{t('customerService')}</p>
-              <ul className="space-y-0.5">
-                {[
-                  { href: '/contact', label: t('contact') },
-                  { href: '/faq',      label: t('faq') },
-                  { href: '/shipping', label: t('shipping') },
-                  { href: '/returns',  label: t('returns') },
-                ].map((item) => (
-                  <li key={item.href}>
-                    <Link href={item.href} className={navLink}>
-                      <ArrowRight className="w-3 h-3 text-brand opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* 3 — GES & İletişim */}
-          <div className="space-y-7">
-            <div>
-              <p className={sectionLabel}>{t('gesTeklifSection')}</p>
-              <ul className="space-y-0.5">
-                {[
-                  { href: '/ges',                    label: t('ges') },
-                  { href: '/ges',                    label: t('teklifAl') },
-                  { href: '/ges/teklif-dogrulama',   label: t('gesQuoteVerify') },
-                ].map((item) => (
-                  <li key={item.href + item.label}>
-                    <Link href={item.href} className={navLink}>
-                      <Zap className="w-3 h-3 text-brand shrink-0" />
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <p className={sectionLabel}>{t('contact')}</p>
-              <ul className="space-y-3 text-sm">
-                <li>
-                  <a href="mailto:info@voltekno.com" className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-colors">
-                    <span className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                      <Mail className="w-3.5 h-3.5 text-brand" aria-hidden />
-                    </span>
-                    info@voltekno.com
-                  </a>
-                </li>
-                <li>
-                  <a href="tel:+905343288383" className="flex items-center gap-2.5 text-slate-400 hover:text-white transition-colors">
-                    <span className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                      <Phone className="w-3.5 h-3.5 text-brand" aria-hidden />
-                    </span>
-                    +90 534 328 83 83
-                  </a>
-                </li>
-                <li className="flex items-start gap-2.5 text-slate-500">
-                  <span className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-600" aria-hidden />
-                  </span>
-                  {t('location')}
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* 4 — Bülten + Güven */}
-          <div className="space-y-6">
-            <div>
-              <p className={sectionLabel}>{t('newsletter')}</p>
-              <p className="text-xs text-slate-500 mb-3 leading-relaxed">{t('newsletterDesc')}</p>
-              <NewsletterForm />
-            </div>
-
-            {/* Güven rozetleri */}
-            <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 space-y-3">
-              <p className={sectionLabel + ' mb-2'}>{t('paymentTrust')}</p>
-              <div className="flex items-center gap-2.5 text-slate-400 text-sm">
-                <CreditCard className="w-4 h-4 text-brand shrink-0" aria-hidden />
+            {/* SSL / ödeme güveni */}
+            <div className="flex items-center gap-4 pt-1 border-t border-white/5">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <CreditCard className="w-3.5 h-3.5 shrink-0" aria-hidden />
                 {t('securePayment')}
               </div>
-              <div className="flex items-center gap-2.5 text-slate-400 text-sm">
-                <ShieldCheck className="w-4 h-4 text-brand shrink-0" aria-hidden />
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden />
                 {t('sslCert')}
               </div>
             </div>
           </div>
 
+          {/* Kolon 2: Ürünler (2 col) */}
+          <div className="lg:col-span-2">
+            <h3 className={headingClass}>Ürünler</h3>
+            <ul className="space-y-0">
+              {[
+                { href: '/products', label: 'Tüm Ürünler' },
+                { href: '/category/gunes-enerjisi', label: 'Güneş Panelleri' },
+                { href: '/category/batarya-depolama', label: 'Akü & Depolama' },
+                { href: '/category/inverterler', label: 'İnverterler' },
+                { href: '/category/elektrikli-arac-sarj-urunleri', label: 'EV Şarj' },
+                { href: '/paketler', label: 'Enerji Paketleri' },
+              ].map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={linkClass}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kolon 3: Hizmetler (2 col) */}
+          <div className="lg:col-span-2">
+            <h3 className={headingClass}>Hizmetler</h3>
+            <ul className="space-y-0">
+              {[
+                { href: '/ges', label: 'GES Hesaplama', highlight: true },
+                { href: '/ges/teklif-dogrulama', label: 'Teklif Doğrulama' },
+                { href: '/contact', label: 'Teklif Al' },
+                { href: '/contact', label: 'Teknik Destek' },
+                { href: '/paketler', label: 'Hazır Paketler' },
+                { href: '/products?q=sulama', label: 'Sulama Çözümleri' },
+              ].map((item) => (
+                <li key={item.href + item.label}>
+                  <Link
+                    href={item.href}
+                    className={item.highlight
+                      ? 'text-yellow-400 hover:text-yellow-300 text-sm py-1.5 block transition-colors flex items-center gap-1.5 font-semibold'
+                      : linkClass
+                    }
+                  >
+                    {item.highlight && <Zap className="w-3.5 h-3.5" />}
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kolon 4: Müşteri Hizmetleri (2 col) */}
+          <div className="lg:col-span-2">
+            <h3 className={headingClass}>{t('customerService')}</h3>
+            <ul className="space-y-0">
+              {[
+                { href: '/faq', labelKey: 'faq' as const },
+                { href: '/shipping', labelKey: 'shipping' as const },
+                { href: '/returns', labelKey: 'returns' as const },
+                { href: '/contact', labelKey: 'contact' as const },
+              ].map((item) => (
+                <li key={item.labelKey}>
+                  <Link href={item.href} className={linkClass}>{t(item.labelKey)}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Kolon 5: Kurumsal (2 col) */}
+          <div className="lg:col-span-2">
+            <h3 className={headingClass}>Kurumsal</h3>
+            <ul className="space-y-0">
+              {[
+                { href: '/privacy', label: 'Gizlilik Politikası' },
+                { href: '/terms', label: 'Uzaktan Satış Sözleşmesi' },
+                { href: '/cookies', label: 'Çerez Politikası' },
+                { href: '/contact', label: 'Hakkımızda' },
+              ].map((item) => (
+                <li key={item.href + item.label}>
+                  <Link href={item.href} className={linkClass}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
         </div>
       </div>
 
-      {/* ── Alt bar ── */}
-      <div className="border-t border-white/[0.06]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[11px] text-slate-600">
-            © {currentYear} <span className="text-slate-500 font-medium">Voltekno</span>. {t('copyright')}
+      {/* Alt bar */}
+      <div className="border-t border-white/5">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-slate-600">
+            © {currentYear} voltekno. {t('copyright')}
           </p>
-          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1">
-            <Link href="/privacy" className="text-[11px] text-slate-600 hover:text-slate-300 transition-colors">{t('privacy')}</Link>
-            <Link href="/terms"   className="text-[11px] text-slate-600 hover:text-slate-300 transition-colors">{t('terms')}</Link>
-            <Link href="/cookies" className="text-[11px] text-slate-600 hover:text-slate-300 transition-colors">{t('cookies')}</Link>
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs">
+            {[
+              { href: '/privacy', labelKey: 'privacy' as const },
+              { href: '/terms', labelKey: 'terms' as const },
+              { href: '/cookies', labelKey: 'cookies' as const },
+            ].map((item) => (
+              <Link key={item.labelKey} href={item.href} className="text-slate-600 hover:text-slate-400 transition-colors">
+                {t(item.labelKey)}
+              </Link>
+            ))}
           </nav>
         </div>
       </div>

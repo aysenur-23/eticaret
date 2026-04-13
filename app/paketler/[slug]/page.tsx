@@ -2,38 +2,51 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, CheckCircle2, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PACKAGE_CATEGORIES, getPackageCategory } from '@/lib/package-categories'
-import { mockProducts } from '@/lib/products-mock'
-import { ProductCard } from '@/components/ProductCard'
+import {
+  Users,
+  Zap,
+  Clock,
+  Package,
+  ArrowUpRight,
+  CheckCircle2,
+  ChevronRight,
+  Sun,
+} from 'lucide-react'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
-const MAX_PRODUCTS = 16
 
 export function generateStaticParams() {
   return PACKAGE_CATEGORIES.map((item) => ({ slug: item.slug }))
+}
+
+const SLUG_KEYWORDS: Record<string, string[]> = {
+  'bag-evi-paketleri': ['bağ evi güneş enerji paketi', 'bağ evi solar sistem', 'küçük ges kurulumu', 'bağ evi akü sistemi'],
+  'villa-paketleri': ['villa güneş paneli', 'villa solar sistem', 'ev ges kurulumu', 'villa hibrit inverter'],
+  'karavan-paketleri': ['karavan güneş paneli', 'karavan solar paketi', 'karavan akü', 'mobil güneş sistemi'],
+  'sulama-paketleri': ['sulama güneş enerjisi', 'solar sulama sistemi', 'tarım güneş paneli', 'güneş enerjili sulama'],
+  'marin-paketleri': ['tekne güneş paneli', 'marin batarya', 'yacht güneş enerji', 'deniz lityum akü'],
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const item = getPackageCategory(params.slug)
   if (!item) return { title: 'Paket Bulunamadı | voltekno' }
 
-  const title = `${item.seoTitle} | voltekno`
+  const title = `${item.title} | voltekno`
   const description = item.seoDescription
 
   return {
     title,
     description,
-    keywords: item.keywords,
+    keywords: SLUG_KEYWORDS[params.slug] ?? [],
     alternates: { canonical: `/paketler/${item.slug}` },
     openGraph: {
       title,
       description,
       type: 'website',
       siteName: 'voltekno',
-      url: `${SITE_URL}/paketler/${item.slug}`,
-      images: [{ url: item.image, alt: item.imageAlt, width: 1600, height: 900 }],
+      images: [{ url: item.image, alt: item.title, width: 900, height: 600 }],
     },
     twitter: {
       card: 'summary_large_image',
@@ -72,17 +85,6 @@ export default function PaketDetailPage({ params }: { params: { slug: string } }
   const item = getPackageCategory(params.slug)
   if (!item) notFound()
 
-  const categorySet = new Set(item.productCategories)
-  const relatedProducts = mockProducts
-    .filter((p) => categorySet.has(p.category))
-    .slice(0, MAX_PRODUCTS)
-
-  // Kategori bazlı ürün sayıları (gösterim için)
-  const categoryCounts = item.productCategories.map((cat) => ({
-    cat,
-    count: mockProducts.filter((p) => p.category === cat).length,
-  })).filter((x) => x.count > 0)
-
   return (
     <div className="min-h-screen bg-slate-50">
       <script
@@ -94,156 +96,163 @@ export default function PaketDetailPage({ params }: { params: { slug: string } }
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqSchema(item)) }}
       />
 
-      {/* Hero */}
-      <div className="bg-white border-b border-slate-200/80">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-8 md:py-12">
-          <nav className="text-sm text-slate-500 mb-6 flex items-center gap-1.5 flex-wrap">
-            <Link href="/" className="hover:text-slate-900 transition-colors">Ana Sayfa</Link>
-            <span className="text-slate-300">/</span>
-            <Link href="/paketler" className="hover:text-slate-900 transition-colors">Paketler</Link>
-            <span className="text-slate-300">/</span>
-            <span className="text-slate-900 font-medium">{item.title}</span>
-          </nav>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl py-8 md:py-12">
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-center">
-            {/* Sol: görsel */}
-            <div className="lg:col-span-2 relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-              <Image
-                src={item.image}
-                alt={item.imageAlt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                style={{ objectPosition: item.objectPosition ?? 'center' }}
-                priority
-              />
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+          <Link href="/" className="hover:text-slate-900 transition-colors">Ana Sayfa</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <Link href="/paketler" className="hover:text-slate-900 transition-colors">Paketler</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-slate-900 font-medium">{item.title}</span>
+        </nav>
+
+        {/* Hero: görsel + başlık + CTA */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start mb-10">
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-slate-200 shadow-md bg-white">
+            <Image
+              src={item.image}
+              alt={item.title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              <span className="inline-flex items-center gap-1.5 bg-white/95 text-brand font-semibold text-xs px-3 py-1.5 rounded-full shadow-sm">
+                <Sun className="w-3.5 h-3.5" />
+                Güneş Enerji Paketi
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand mb-3">Paket Kategorisi</p>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-4">{item.title}</h1>
+            <p className="text-slate-600 text-base leading-relaxed mb-6">{item.seoDescription}</p>
+
+            {/* Kim için */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-6 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-brand-light flex items-center justify-center shrink-0 mt-0.5">
+                  <Users className="w-4 h-4 text-brand" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Kimler İçin?</p>
+                  <p className="text-sm text-slate-700 leading-relaxed">{item.forWhom}</p>
+                </div>
+              </div>
             </div>
 
-            {/* Sağ: bilgi */}
-            <div className="lg:col-span-3">
-              <span className="inline-block text-xs font-semibold uppercase tracking-widest text-brand mb-3">
-                Paket Kategorisi
-              </span>
-              <h1 className="text-3xl md:text-4xl xl:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-                {item.title}
-              </h1>
-              <p className="mt-4 text-slate-600 text-base md:text-lg leading-relaxed">
-                {item.seoDescription}
-              </p>
-              <p className="mt-2 text-slate-500 text-sm">{item.targetAudience}</p>
-
-              {/* Kullanım alanları */}
-              <div className="mt-5 flex flex-wrap gap-2">
-                {item.useCases.map((uc) => (
-                  <span key={uc} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700">
-                    <CheckCircle2 className="w-3 h-3 text-brand shrink-0" />
-                    {uc}
-                  </span>
-                ))}
-              </div>
-
-              {/* Kategori sayımları */}
-              {categoryCounts.length > 0 && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {categoryCounts.map(({ cat, count }) => (
-                    <span key={cat} className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 border border-red-200 px-3 py-1 text-xs font-semibold text-brand">
-                      <Zap className="w-3 h-3 shrink-0" />
-                      {cat} <span className="text-brand/60">({count})</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Button asChild className="bg-brand hover:bg-brand-hover text-white rounded-xl">
-                  <a href="#urunler">Ürünleri İncele</a>
-                </Button>
-                <Button asChild variant="outline" className="rounded-xl border-slate-300">
-                  <Link href="/ges">GES Hesaplama</Link>
-                </Button>
-                <Button asChild variant="outline" className="rounded-xl border-slate-300">
-                  <Link href="/contact">Teklif Al</Link>
-                </Button>
-              </div>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild className="bg-brand hover:bg-brand-hover text-white rounded-xl min-h-[48px] touch-manipulation">
+                <Link href={`/products?q=${encodeURIComponent(item.searchHint)}`} className="inline-flex items-center gap-2">
+                  İlgili Ürünleri Gör
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl border-slate-300 min-h-[48px] touch-manipulation">
+                <Link href="/ges">GES Hesapla</Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-xl border-slate-300 min-h-[48px] touch-manipulation">
+                <Link href="/contact">Teklif Al</Link>
+              </Button>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-10 md:py-14 space-y-12">
-
-        {/* Ürünler bölümü */}
-        <section id="urunler">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                {item.shortTitle} Paketine Uygun Ürünler
-              </h2>
-              <p className="text-slate-500 text-sm mt-1">
-                {relatedProducts.length} ürün listeleniyor — {item.productCategories.length} kategori
-              </p>
+        {/* Kullanım Senaryosu: 4 kart */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+          {/* Kaç cihaz */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
+              <Zap className="w-5 h-5 text-amber-600" />
             </div>
-            <Link
-              href={`/products?q=${encodeURIComponent(item.searchHint)}`}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline shrink-0"
-            >
-              Tümünü Gör
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Kaç Cihazı Çalıştırır?</p>
+            <ul className="space-y-1.5">
+              {item.deviceList.map((d) => (
+                <li key={d} className="flex items-start gap-2 text-sm text-slate-700">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
+                  {d}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {relatedProducts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
-              <p className="text-slate-500">Bu kategoriye ait ürün bulunamadı.</p>
-              <Button asChild variant="outline" className="mt-4">
-                <Link href="/products">Tüm Ürünler</Link>
-              </Button>
+          {/* Günlük kullanım */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
+              <Clock className="w-5 h-5 text-blue-600" />
             </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-              {relatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Ortalama Günlük Kullanım</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{item.dailyUsage}</p>
+          </div>
 
-          {/* Kategori bazlı alt filtreler */}
-          {categoryCounts.length > 1 && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {categoryCounts.map(({ cat }) => (
-                <Link
-                  key={cat}
-                  href={`/products?category=${encodeURIComponent(cat)}`}
-                  className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors"
-                >
-                  {cat}
-                </Link>
-              ))}
+          {/* İçindekiler */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mb-3">
+              <Package className="w-5 h-5 text-emerald-600" />
             </div>
-          )}
-        </section>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">İçindekiler</p>
+            <ul className="space-y-1.5">
+              {item.includesItems.map((inc) => (
+                <li key={inc} className="flex items-start gap-2 text-sm text-slate-700">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  {inc}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Paket Detayları */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <section className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Kullanım Senaryoları</h2>
+          {/* Yükseltme seçenekleri */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-3">
+              <ArrowUpRight className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Yükseltme Seçenekleri</p>
+            <ul className="space-y-1.5">
+              {item.upgradeOptions.map((opt) => (
+                <li key={opt} className="flex items-start gap-2 text-sm text-slate-700">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                  {opt}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Kullanım senaryoları + paket içeriği yan yana */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-md bg-brand-light flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-brand" />
+              </span>
+              Kullanım Senaryoları
+            </h2>
             <ul className="space-y-2.5">
               {item.useCases.map((useCase) => (
-                <li key={useCase} className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 mt-0.5 text-brand shrink-0" />
-                  <span className="text-slate-700 text-sm">{useCase}</span>
+                <li key={useCase} className="flex items-start gap-3 text-sm text-slate-700">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-brand shrink-0" />
+                  {useCase}
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="bg-white border border-slate-200 rounded-2xl p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Paket İçeriği Öne Çıkanlar</h2>
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <h2 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center">
+                <Package className="w-3.5 h-3.5 text-slate-700" />
+              </span>
+              Öne Çıkan Özellikler
+            </h2>
             <ul className="space-y-2.5">
               {item.includedHighlights.map((feature) => (
-                <li key={feature} className="flex items-start gap-2.5">
-                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-slate-900 shrink-0" />
-                  <span className="text-slate-700 text-sm">{feature}</span>
+                <li key={feature} className="flex items-start gap-3 text-sm text-slate-700">
+                  <span className="mt-1.5 h-2 w-2 rounded-full bg-slate-900 shrink-0" />
+                  {feature}
                 </li>
               ))}
             </ul>
@@ -251,42 +260,43 @@ export default function PaketDetailPage({ params }: { params: { slug: string } }
         </div>
 
         {/* SSS */}
-        <section className="bg-white border border-slate-200 rounded-2xl p-6">
-          <h2 className="text-lg font-bold text-slate-900 mb-5">Sık Sorulan Sorular</h2>
+        <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-8">
+          <h2 className="text-base font-bold text-slate-900 mb-4">Sık Sorulan Sorular</h2>
           <div className="space-y-3">
             {item.faq.map((qa) => (
-              <details key={qa.question} className="group border border-slate-200 rounded-xl p-4">
-                <summary className="cursor-pointer font-semibold text-slate-900 list-none flex items-center justify-between gap-2">
+              <details key={qa.question} className="group border border-slate-200 rounded-xl overflow-hidden">
+                <summary className="cursor-pointer font-semibold text-slate-900 px-4 py-3.5 flex items-center justify-between gap-2 select-none hover:bg-slate-50 transition-colors">
                   {qa.question}
-                  <span className="text-slate-400 text-lg leading-none group-open:rotate-45 transition-transform">+</span>
+                  <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 transition-transform group-open:rotate-90" />
                 </summary>
-                <p className="mt-3 text-slate-600 text-sm leading-relaxed">{qa.answer}</p>
+                <p className="text-slate-600 text-sm px-4 py-3 border-t border-slate-100">{qa.answer}</p>
               </details>
             ))}
           </div>
         </section>
 
-        {/* Alt bağlantılar */}
+        {/* Kategori navigasyon linkleri */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             href="/products"
-            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors"
+            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-slate-700 hover:border-brand hover:text-brand transition-colors text-sm font-medium"
           >
             Tüm Ürünler
           </Link>
           <Link
             href="/category/gunes-enerjisi"
-            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors"
+            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-slate-700 hover:border-brand hover:text-brand transition-colors text-sm font-medium"
           >
             Güneş Enerjisi
           </Link>
           <Link
             href="/category/batarya-depolama"
-            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-sm font-medium text-slate-700 hover:border-brand hover:text-brand transition-colors"
+            className="text-center rounded-xl border border-slate-200 bg-white py-3 px-4 text-slate-700 hover:border-brand hover:text-brand transition-colors text-sm font-medium"
           >
             Batarya ve Depolama
           </Link>
         </section>
+
       </div>
     </div>
   )

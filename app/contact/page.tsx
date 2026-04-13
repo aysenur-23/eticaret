@@ -268,10 +268,10 @@ export default function ContactPage() {
               </div>
               <h3 className="font-semibold text-slate-900 mb-1">Telefon</h3>
               <a
-                href="tel:+905343288383"
+                href="tel:+905518291613"
                 className="text-slate-800 hover:text-slate-600 text-sm font-medium block py-2 touch-manipulation min-h-[44px] flex items-center"
               >
-                0534 328 8383
+                0551 829 16 13
               </a>
             </CardContent>
           </Card>

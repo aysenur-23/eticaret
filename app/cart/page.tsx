@@ -509,7 +509,7 @@ Tüketici, yasal istisnalar dışında ürünü teslim aldığı tarihten itibar
 Müşteri, sipariş vermeden önce ön bilgilendirme metnini, mesafeli satış sözleşmesini ve ödeme koşullarını okuyup kabul ettiğini beyan eder.
 
 Sözleşme Tarihi: ${new Date().toLocaleDateString('tr-TR')}
-Satıcı: Voltekno`}
+Satıcı: Voltekno Enerji Sistemleri`}
                   {showModal === 'privacy' && `GİZLİLİK SÖZLEŞMESİ
 
 1. Toplanan Veriler

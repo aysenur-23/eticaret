@@ -25,7 +25,7 @@ export default function PasswordResetEmail({
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>Voltekno</Text>
+            <Text style={logo}>⚡ Voltekno</Text>
           </Section>
           
           <Section style={content}>
