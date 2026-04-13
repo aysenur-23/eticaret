@@ -259,6 +259,7 @@ export function Footer() {
             <h3 className={headingClass}>Kurumsal</h3>
             <ul className="space-y-0">
               {[
+                { href: '/blog', label: 'Blog' },
                 { href: '/privacy', label: 'Gizlilik Politikası' },
                 { href: '/terms', label: 'Uzaktan Satış Sözleşmesi' },
                 { href: '/cookies', label: 'Çerez Politikası' },

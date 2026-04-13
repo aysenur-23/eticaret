@@ -457,6 +457,7 @@ export function HeaderInnerUI(props) {
             {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
             {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
+            {renderDesktopLink('/blog', 'Blog', pathname === '/blog' || pathname?.startsWith('/blog/'), 'BLOG')}
             {renderDesktopLink('/contact', t('navContact'), pathname === '/contact', 'DESTEK')}
           </nav>
         </div>
@@ -607,8 +608,15 @@ export function HeaderInnerUI(props) {
               </div>
             </div>
 
+            {/* Blog */}
+            <div className="pt-1">
+              <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium transition-colors touch-manipulation ${pathname === '/blog' ? 'bg-white text-brand shadow-sm border border-slate-200/80' : 'text-slate-700 hover:bg-white/80'}`}>
+                <Sun className={`w-5 h-5 shrink-0 ${pathname === '/blog' ? 'text-brand' : 'text-slate-400'}`} />
+                Blog
+              </Link>
+            </div>
             {/* İletişim */}
-            <div className="pt-2">
+            <div className="pt-1">
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium transition-colors touch-manipulation ${pathname === '/contact' ? 'bg-white text-brand shadow-sm border border-slate-200/80' : 'text-slate-700 hover:bg-white/80'}`}>
                 <Phone className={`w-5 h-5 shrink-0 ${pathname === '/contact' ? 'text-brand' : 'text-slate-400'}`} />
                 {t('navContact')}
