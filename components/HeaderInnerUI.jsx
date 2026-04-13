@@ -211,10 +211,10 @@ export function HeaderInnerUI(props) {
     }, 200)
   }
 
-  const menuPanelClass = 'w-[min(520px,calc(100vw-6rem))] max-w-[520px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
+  const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
   const desktopNavItemClass = (isActive) =>
     `group relative flex items-center justify-center px-3 xl:px-4 py-1.5 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
-  const desktopNavLabelClass = `${headerDisplay.className} text-[12px] xl:text-[13px] font-bold tracking-[-0.01em] leading-[1.2] whitespace-nowrap`
+  const desktopNavLabelClass = `${headerDisplay.className} text-[12px] xl:text-[13px] font-bold tracking-[-0.01em] leading-[1.2] truncate`
   const desktopNavSubLabelClass = 'hidden'
 
   const navDropdown = (labelKey, items, categoryHref, groupKey) => {
