@@ -91,19 +91,36 @@ export default function ProductDetailClient({ initialProduct, productId: product
   const [contactSubmitting, setContactSubmitting] = useState(false)
   const [contactSent, setContactSent] = useState(false)
   const [contactFormOpen, setContactFormOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
     if (!productId) return
-    const data = mockProductsMap[productId] ?? null
-    setProduct(data)
-    const initialVariant =
-      data?.defaultVariantKey && data.variants?.length
-        ? data.variants.find((v) => v.key === data.defaultVariantKey) ?? data.variants[0]
-        : data?.variants?.[0] ?? null
-    setSelectedVariant(initialVariant)
-    const st = typeof data?.stock === 'number' ? data.stock : 0
-    setQuantity(st > 0 ? 1 : 0)
-    setLoading(false)
+    setLoading(true)
+    fetch(`/api/products/${productId}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((fetched) => {
+        const data = fetched ?? mockProductsMap[productId] ?? null
+        setProduct(data)
+        const initialVariant =
+          data?.defaultVariantKey && data.variants?.length
+            ? data.variants.find((v: { key: string }) => v.key === data.defaultVariantKey) ?? data.variants[0]
+            : data?.variants?.[0] ?? null
+        setSelectedVariant(initialVariant)
+        const st = typeof data?.stock === 'number' ? data.stock : 0
+        setQuantity(st > 0 ? 1 : 0)
+      })
+      .catch(() => {
+        const data = mockProductsMap[productId] ?? null
+        setProduct(data)
+        const initialVariant =
+          data?.defaultVariantKey && data.variants?.length
+            ? data.variants.find((v) => v.key === data.defaultVariantKey) ?? data.variants[0]
+            : data?.variants?.[0] ?? null
+        setSelectedVariant(initialVariant)
+        const st = typeof data?.stock === 'number' ? data.stock : 0
+        setQuantity(st > 0 ? 1 : 0)
+      })
+      .finally(() => setLoading(false))
   }, [productId])
 
   /** Varyant seçiliyse ve üründe imagesByVariant varsa o varyantın görselleri; yoksa product.images */
@@ -118,12 +135,57 @@ export default function ProductDetailClient({ initialProduct, productId: product
     }
     return (product.images ?? [product.image]).filter(Boolean) as string[]
   }, [product, effectiveVariant])
-  const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
     setSelectedIndex(0)
   }, [productId, effectiveVariant?.key])
 
+  /** Birleşik kablo sayfasında sadece diğer metreler (aynı seri, farklı uzunluk = farklı ürün). SKU listesi değil kart gösterilecek. */
+  const isMergedCableProduct = product?.category === 'Araç Şarj Kabloları' && product?.id.startsWith('hims-22kw-tip2-') && product?.id.endsWith('-elektrikli-arac-sarj-kablosu')
+  const otherLengthProducts = React.useMemo(() => {
+    if (!isMergedCableProduct || !product) return []
+    return mockProducts.filter(
+      (p) =>
+        p.id !== product.id &&
+        p.category === 'Araç Şarj Kabloları' &&
+        p.id.startsWith('hims-22kw-tip2-') &&
+        p.id.endsWith('-elektrikli-arac-sarj-kablosu')
+    )
+  }, [product?.id, isMergedCableProduct])
+
+  /** Diğer seri varyantları (kablo dışı ürünlerde kullanılır; kart olarak gösterilir) */
+  const getEMEFFamilyKey = (p: (typeof mockProducts)[number]) =>
+    p.sku?.match(/^EMEF-[A-Z0-9]{4}/)?.[0] ?? ((p as { productFamilyKey?: string }).productFamilyKey?.startsWith?.('EMEF-') ? (p as { productFamilyKey?: string }).productFamilyKey! : null)
+  const familyVariants = React.useMemo(() => {
+    if (isMergedCableProduct || !product) return []
+    const fk = getEMEFFamilyKey(product)
+    if (!fk) return []
+    return mockProducts.filter((p) => p.id !== product.id && getEMEFFamilyKey(p) === fk)
+  }, [product?.id, product?.sku, (product as { productFamilyKey?: string } | null)?.productFamilyKey, isMergedCableProduct])
+
+  /** Önerilen ürünler: en az 4–5 adet; önce tamamlayıcı/kategori, eksikse genel listeden tamamlanır */
+  const MIN_RECOMMENDED = 5
+  const recommendedProducts = React.useMemo(() => {
+    if (!product) return []
+    const complementary = product.category ? COMPLEMENTARY_BY_CATEGORY[product.category] : undefined
+    let ids = complementary
+      ? complementary.productIds.filter((id) => id !== product.id && mockProductsMap[id])
+      : mockProducts
+        .filter((p) => p.category === product.category && p.id !== product.id)
+        .slice(0, Math.max(MIN_RECOMMENDED, 8))
+        .map((p) => p.id)
+    ids = ids.slice(0, 8)
+    if (ids.length < MIN_RECOMMENDED) {
+      const extra = mockProducts
+        .filter((p) => p.id !== product.id && !ids.includes(p.id))
+        .slice(0, MIN_RECOMMENDED - ids.length)
+        .map((p) => p.id)
+      ids = [...ids, ...extra]
+    }
+    return ids
+      .map((id) => mockProductsMap[id])
+      .filter(Boolean) as (typeof mockProducts)[number][]
+  }, [product?.id, product?.category])
 
   if (loading) {
     return (
@@ -172,52 +234,6 @@ export default function ProductDetailClient({ initialProduct, productId: product
   const isLowStock = stock > 0 && stock <= 5
   const maxQuantity = Math.max(1, stock)
   const displayQuantity = outOfStock ? 0 : Math.min(quantity, maxQuantity)
-
-  /** Birleşik kablo sayfasında sadece diğer metreler (aynı seri, farklı uzunluk = farklı ürün). SKU listesi değil kart gösterilecek. */
-  const isMergedCableProduct = product.category === 'Araç Şarj Kabloları' && product.id.startsWith('hims-22kw-tip2-') && product.id.endsWith('-elektrikli-arac-sarj-kablosu')
-  const otherLengthProducts = React.useMemo(() => {
-    if (!isMergedCableProduct) return []
-    return mockProducts.filter(
-      (p) =>
-        p.id !== product.id &&
-        p.category === 'Araç Şarj Kabloları' &&
-        p.id.startsWith('hims-22kw-tip2-') &&
-        p.id.endsWith('-elektrikli-arac-sarj-kablosu')
-    )
-  }, [product.id, isMergedCableProduct])
-
-  /** Diğer seri varyantları (kablo dışı ürünlerde kullanılır; kart olarak gösterilir) */
-  const getEMEFFamilyKey = (p: (typeof mockProducts)[number]) =>
-    p.sku?.match(/^EMEF-[A-Z0-9]{4}/)?.[0] ?? ((p as { productFamilyKey?: string }).productFamilyKey?.startsWith?.('EMEF-') ? (p as { productFamilyKey?: string }).productFamilyKey! : null)
-  const familyVariants = React.useMemo(() => {
-    if (isMergedCableProduct) return []
-    const fk = getEMEFFamilyKey(product)
-    if (!fk) return []
-    return mockProducts.filter((p) => p.id !== product.id && getEMEFFamilyKey(p) === fk)
-  }, [product.id, product.sku, (product as { productFamilyKey?: string }).productFamilyKey, isMergedCableProduct])
-
-  /** Önerilen ürünler: en az 4–5 adet; önce tamamlayıcı/kategori, eksikse genel listeden tamamlanır */
-  const MIN_RECOMMENDED = 5
-  const recommendedProducts = React.useMemo(() => {
-    const complementary = product.category ? COMPLEMENTARY_BY_CATEGORY[product.category] : undefined
-    let ids = complementary
-      ? complementary.productIds.filter((id) => id !== product.id && mockProductsMap[id])
-      : mockProducts
-        .filter((p) => p.category === product.category && p.id !== product.id)
-        .slice(0, Math.max(MIN_RECOMMENDED, 8))
-        .map((p) => p.id)
-    ids = ids.slice(0, 8)
-    if (ids.length < MIN_RECOMMENDED) {
-      const extra = mockProducts
-        .filter((p) => p.id !== product.id && !ids.includes(p.id))
-        .slice(0, MIN_RECOMMENDED - ids.length)
-        .map((p) => p.id)
-      ids = [...ids, ...extra]
-    }
-    return ids
-      .map((id) => mockProductsMap[id])
-      .filter(Boolean) as (typeof mockProducts)[number][]
-  }, [product.id, product.category])
 
   return (
     <ProductPageShell

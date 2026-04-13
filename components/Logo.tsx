@@ -13,26 +13,29 @@ interface LogoProps {
 }
 
 export function Logo({ size = 'md', className, href, asDiv = false }: LogoProps) {
-  const heightMap = {
-    sm: 28,
-    md: 36,
-    lg: 44,
-    xl: 56,
+  const frameSizeClasses = {
+    sm: 'h-11 w-[184px]',
+    md: 'h-12 w-[204px]',
+    lg: 'h-16 w-[252px]',
+    xl: 'h-[54px] w-[226px]',
   }
 
-  const h = heightMap[size]
-  // Logo is 1100x300 px → aspect ratio ≈ 3.67
-  const w = Math.round(h * 3.67)
-
   const logoElement = (
-    <Image
-      src="/logo.png"
-      alt="Voltekno Enerji Sistemleri"
-      width={w}
-      height={h}
-      priority
-      className="object-contain"
-    />
+    <span
+      className={cn(
+        'relative block',
+        frameSizeClasses[size]
+      )}
+    >
+      <Image
+        src="/voltekno-logo-transparent.png"
+        alt="Voltekno Enerji Sistemleri"
+        fill
+        priority={size === 'lg' || size === 'xl'}
+        sizes="(max-width: 768px) 184px, (max-width: 1280px) 252px, 368px"
+        className="object-contain object-left"
+      />
+    </span>
   )
 
   if (asDiv) {
@@ -46,7 +49,7 @@ export function Logo({ size = 'md', className, href, asDiv = false }: LogoProps)
   return (
     <Link
       href={href || '/'}
-      className={cn('flex items-center cursor-pointer hover:opacity-80 transition-opacity', className)}
+      className={cn('flex items-center cursor-pointer hover:opacity-90 transition-opacity', className)}
     >
       {logoElement}
     </Link>

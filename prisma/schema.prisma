@@ -158,6 +158,8 @@ enum Lifecycle {
 
 enum OrderStatus {
   PENDING
+  CONFIRMED
+  PROCESSING
   PAID
   PICKING
   SHIPPED

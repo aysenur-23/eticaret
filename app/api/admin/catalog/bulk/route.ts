@@ -1,0 +1,114 @@
+/**
+ * Admin Bulk Catalog API
+ * PATCH /api/admin/catalog/bulk
+ * Seçilen N ürüne tek istekle toplu işlem uygular.
+ *
+ * Body: {
+ *   ids: string[]
+ *   action: 'feature' | 'unfeature' | 'apply_discount' | 'reset_stock' | 'set_stock'
+ *   value?: number  // apply_discount → % oran (0-99), set_stock → adet
+ * }
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { checkAdmin } from '@/lib/adminAuth'
+import { getMergedProducts } from '@/lib/catalog-merge'
+
+export async function PATCH(request: NextRequest) {
+  const auth = await checkAdmin(request)
+  if ('error' in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
+  try {
+    const body = await request.json()
+    const { ids, action, value } = body as {
+      ids: string[]
+      action: 'feature' | 'unfeature' | 'apply_discount' | 'reset_stock' | 'set_stock'
+      value?: number
+    }
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: 'ids gerekli.' }, { status: 400 })
+    }
+    if (!action) {
+      return NextResponse.json({ error: 'action gerekli.' }, { status: 400 })
+    }
+
+    let affected = 0
+
+    if (action === 'feature' || action === 'unfeature') {
+      const featured = action === 'feature'
+      // Upsert her ID için — transaction içinde
+      await prisma.$transaction(
+        ids.map((productId) =>
+          prisma.productOverride.upsert({
+            where: { productId },
+            update: { featured },
+            create: { productId, name: productId, price: 0, category: 'Diğer', featured },
+          })
+        )
+      )
+      affected = ids.length
+    }
+
+    else if (action === 'apply_discount') {
+      if (typeof value !== 'number' || value <= 0 || value >= 100) {
+        return NextResponse.json({ error: 'value: 1-99 arası indirim oranı gerekli.' }, { status: 400 })
+      }
+      // Mevcut fiyatları bul (mock + override)
+      const allProducts = await getMergedProducts()
+      const idSet = new Set(ids)
+      const toUpdate = allProducts.filter((p) => idSet.has(p.id))
+
+      await prisma.$transaction(
+        toUpdate.map((p) => {
+          const discountedPrice = Math.round(p.price * (1 - value / 100))
+          return prisma.productOverride.upsert({
+            where: { productId: p.id },
+            update: { price: discountedPrice },
+            create: { productId: p.id, name: p.name, price: discountedPrice, category: p.category ?? 'Diğer' },
+          })
+        })
+      )
+      affected = toUpdate.length
+    }
+
+    else if (action === 'reset_stock') {
+      await prisma.$transaction(
+        ids.map((productId) =>
+          prisma.stockOverride.upsert({
+            where: { productId },
+            update: { stock: 0 },
+            create: { productId, stock: 0 },
+          })
+        )
+      )
+      affected = ids.length
+    }
+
+    else if (action === 'set_stock') {
+      const stockVal = typeof value === 'number' && value >= 0 ? Math.floor(value) : 0
+      await prisma.$transaction(
+        ids.map((productId) =>
+          prisma.stockOverride.upsert({
+            where: { productId },
+            update: { stock: stockVal },
+            create: { productId, stock: stockVal },
+          })
+        )
+      )
+      affected = ids.length
+    }
+
+    else {
+      return NextResponse.json({ error: 'Bilinmeyen action.' }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true, affected })
+  } catch (error) {
+    console.error('Admin bulk PATCH error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

@@ -12,6 +12,23 @@ import type { NotificationData } from '@/lib/notifications'
 import { buildInvoiceDataFromPrisma, buildInvoiceDataFromNormalized } from '@/lib/invoice-data'
 import { generateAndSendInvoice } from '@/lib/invoice-send'
 
+/** Admin UI'dan gelen lowercase/mixed status → Prisma OrderStatus (uppercase, mevcut enum değerleri) */
+function normalizeStatus(s: string | undefined): string | undefined {
+  if (!s) return undefined
+  const map: Record<string, string> = {
+    pending: 'PENDING',
+    confirmed: 'PICKING',   // "Onaylandı" → picking
+    processing: 'PICKING',  // "İşleniyor" → picking
+    paid: 'PAID',
+    picking: 'PICKING',
+    shipped: 'SHIPPED',
+    delivered: 'DELIVERED',
+    cancelled: 'CANCELLED',
+    returned: 'RETURNED',
+  }
+  return map[s.toLowerCase()] ?? s.toUpperCase()
+}
+
 function normalizeOrderForResponse(order: {
   id: string
   source: 'prisma' | 'firestore'
@@ -189,7 +206,9 @@ export async function PATCH(
     return NextResponse.json({ error: 'Geçersiz JSON' }, { status: 400 })
   }
 
-  const { status, paymentStatus, trackingNumber } = body
+  const { status: rawStatus, paymentStatus: rawPaymentStatus, trackingNumber } = body
+  const status = normalizeStatus(rawStatus)
+  const paymentStatus = rawPaymentStatus ? rawPaymentStatus.toUpperCase() : undefined
 
   try {
     if (source === 'prisma') {
@@ -202,8 +221,8 @@ export async function PATCH(
       }
 
       const updateData: Record<string, unknown> = {}
-      if (status !== undefined) updateData.status = status
-      if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus
+      if (status !== undefined) updateData.status = status as any
+      if (paymentStatus !== undefined) updateData.paymentStatus = paymentStatus as any
       if (trackingNumber !== undefined) updateData.trackingNumber = trackingNumber
 
       if (Object.keys(updateData).length > 0) {

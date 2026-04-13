@@ -100,21 +100,21 @@
 
 @layer base {
   :root {
-    /* Site renk paleti – bordo + mavi, e-ticaret uyumlu */
-    --brand: 350 48% 36%;           /* bordo – ana marka rengi */
-    --brand-hover: 350 48% 28%;
-    --brand-light: 350 55% 96%;    /* açık bordo arka plan */
+    /* Site renk paleti – lacivert + sarı, e-ticaret uyumlu */
+    --brand: 220 62% 26%;           /* lacivert – ana marka rengi */
+    --brand-hover: 220 62% 20%;
+    --brand-light: 220 60% 95%;    /* açık lacivert arka plan */
     --brand-foreground: 0 0% 100%;
     --surface: 210 40% 98%;        /* sayfa arka planı */
     --surface-elevated: 0 0% 100%;
     --ink: 222 47% 11%;            /* ana metin */
     --ink-muted: 215 16% 47%;
     --border-palette: 214 32% 91%;
-    /* Hero: koyu mavi gradient (bordo-mavi uyumu) */
-    --hero-start: 217 50% 12%;
-    --hero-mid: 217 45% 16%;
-    --hero-end: 217 40% 20%;
-    --hero-accent: 40 33% 96%;     /* başlık vurgusu */
+    /* Hero: koyu lacivert gradient */
+    --hero-start: 220 62% 10%;
+    --hero-mid: 220 58% 15%;
+    --hero-end: 220 55% 20%;
+    --hero-accent: 42 95% 85%;     /* sarı başlık vurgusu */
 
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
@@ -122,22 +122,22 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 350 48% 36%;
+    --primary: 220 62% 26%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 30% 96%;      /* hafif mavi ton */
+    --secondary: 220 40% 96%;      /* hafif lacivert ton */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 350 55% 96%;
-    --accent-foreground: 350 48% 36%;
+    --accent: 220 60% 95%;
+    --accent-foreground: 220 62% 26%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 350 48% 36%;
+    --ring: 220 62% 26%;
     --radius: 0.75rem;
-    --chart-1: 350 48% 36%;
-    --chart-2: 217 65% 42%;
+    --chart-1: 220 62% 26%;
+    --chart-2: 38 91% 50%;
     --chart-3: 222 47% 25%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;

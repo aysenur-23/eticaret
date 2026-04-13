@@ -34,32 +34,37 @@ export async function GET(request: NextRequest) {
     }
 
     if (source === 'all' || source === 'firestore') {
-      const db = isFirebaseAdminConfigured() ? getAdminFirestore() : null
-      if (db) {
-        const snapshot = await db.collectionGroup('orders').orderBy('createdAt', 'desc').limit(limit).get()
-        result.firestore = snapshot.docs.map((d) => {
-          const data = d.data()
-          const createdAt = data.createdAt
-          const createdAtDate =
-            createdAt && typeof (createdAt as { toDate?: () => Date }).toDate === 'function'
-              ? (createdAt as { toDate: () => Date }).toDate()
-              : createdAt instanceof Date
-                ? createdAt
-                : new Date()
-          const parentUserId = d.ref.parent?.parent?.id ?? null
-          return {
-            id: d.id,
-            userId: parentUserId,
-            source: 'firestore',
-            orderId: data.orderId || d.id,
-            customer: data.customer || {},
-            items: data.items || [],
-            pricing: data.pricing || {},
-            status: data.status || 'pending',
-            paymentStatus: data.paymentStatus || 'pending',
-            createdAt: createdAtDate,
-          }
-        })
+      try {
+        const db = isFirebaseAdminConfigured() ? getAdminFirestore() : null
+        if (db) {
+          const snapshot = await db.collectionGroup('orders').orderBy('createdAt', 'desc').limit(limit).get()
+          result.firestore = snapshot.docs.map((d) => {
+            const data = d.data()
+            const createdAt = data.createdAt
+            const createdAtDate =
+              createdAt && typeof (createdAt as { toDate?: () => Date }).toDate === 'function'
+                ? (createdAt as { toDate: () => Date }).toDate()
+                : createdAt instanceof Date
+                  ? createdAt
+                  : new Date()
+            const parentUserId = d.ref.parent?.parent?.id ?? null
+            return {
+              id: d.id,
+              userId: parentUserId,
+              source: 'firestore',
+              orderId: data.orderId || d.id,
+              customer: data.customer || {},
+              items: data.items || [],
+              pricing: data.pricing || {},
+              status: data.status || 'pending',
+              paymentStatus: data.paymentStatus || 'pending',
+              createdAt: createdAtDate,
+            }
+          })
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore orders query failed (index missing?):', (firestoreErr as Error).message)
+        result.firestore = []
       }
     }
 

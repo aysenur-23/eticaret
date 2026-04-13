@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Percent, Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
+import { Percent, Plus, Pencil, Trash2, Loader2, ToggleLeft, ToggleRight } from 'lucide-react'
 import { CATEGORY_GROUPS } from '@/lib/categories'
 import { mockProducts } from '@/lib/products-mock'
 
@@ -75,36 +75,10 @@ export default function AdminIndirimlerPage() {
   })
 
   const loadDiscounts = async () => {
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      return
-    }
     try {
-      const { collection: col, getDocs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      const snap = await getDocs(col(db, 'discounts'))
-      const rows: Discount[] = snap.docs.map((d) => {
-        const data = d.data()
-        const createdAt = data.createdAt as { seconds: number } | null
-        const updatedAt = data.updatedAt as { seconds: number } | null
-        return {
-          id: d.id,
-          name: data.name || '',
-          scope: data.scope || 'ALL',
-          categoryName: data.categoryName ?? null,
-          productIds: data.productIds ?? null,
-          type: data.type || 'PERCENT',
-          value: data.value || 0,
-          startDate: data.startDate ?? null,
-          endDate: data.endDate ?? null,
-          active: data.active ?? true,
-          createdAt: createdAt?.seconds ? new Date(createdAt.seconds * 1000).toISOString() : '',
-          updatedAt: updatedAt?.seconds ? new Date(updatedAt.seconds * 1000).toISOString() : '',
-        }
-      })
+      const res = await fetch('/api/admin/discounts', { credentials: 'include' })
+      if (!res.ok) throw new Error('API hatası')
+      const rows: Discount[] = await res.json()
       setDiscounts(rows)
     } catch {
       setDiscounts([])
@@ -153,9 +127,6 @@ export default function AdminIndirimlerPage() {
     e.preventDefault()
     setSaving(true)
     try {
-      const { doc, setDoc, addDoc, collection: col, serverTimestamp: srvTs } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
       const body = {
         name: form.name.trim(),
         scope: form.scope,
@@ -166,12 +137,23 @@ export default function AdminIndirimlerPage() {
         startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
         endDate: form.endDate ? new Date(form.endDate).toISOString() : null,
         active: form.active,
-        updatedAt: srvTs(),
       }
       if (editingId) {
-        await setDoc(doc(db, 'discounts', editingId), body, { merge: true })
+        const res = await fetch(`/api/admin/discounts/${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        })
+        if (!res.ok) throw new Error('Güncelleme hatası')
       } else {
-        await addDoc(col(db, 'discounts'), { ...body, createdAt: srvTs() })
+        const res = await fetch('/api/admin/discounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          credentials: 'include',
+        })
+        if (!res.ok) throw new Error('Oluşturma hatası')
       }
       setDialogOpen(false)
       loadDiscounts()
@@ -184,13 +166,31 @@ export default function AdminIndirimlerPage() {
     if (!confirm('Bu indirimi silmek istediğinize emin misiniz?')) return
     setDeletingId(id)
     try {
-      const { doc, deleteDoc } = await import('firebase/firestore')
-      const { getDb } = await import('@/lib/firebase/config')
-      const db = getDb()
-      await deleteDoc(doc(db, 'discounts', id))
+      const res = await fetch(`/api/admin/discounts/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      if (!res.ok) throw new Error('Silme hatası')
       loadDiscounts()
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  const handleToggleActive = async (d: Discount) => {
+    setTogglingId(d.id)
+    try {
+      await fetch(`/api/admin/discounts/${d.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !d.active }),
+        credentials: 'include',
+      })
+      setDiscounts((prev) => prev.map((x) => x.id === d.id ? { ...x, active: !x.active } : x))
+    } finally {
+      setTogglingId(null)
     }
   }
 
@@ -207,7 +207,7 @@ export default function AdminIndirimlerPage() {
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">İndirimler</h1>
+          <h1 className="text-xl font-bold text-slate-900">İndirimler</h1>
           <p className="text-slate-600 mt-1">Kampanya indirimlerini tanımlayın (tüm ürünler, kategori veya ürün bazlı)</p>
         </div>
         <Button onClick={openCreate} className="shrink-0">
@@ -264,11 +264,23 @@ export default function AdminIndirimlerPage() {
                           : '–'}
                       </td>
                       <td className="py-3 px-2">
-                        {d.active ? (
-                          <Badge className="bg-green-100 text-green-800 border-0">Aktif</Badge>
-                        ) : (
-                          <Badge variant="secondary">Pasif</Badge>
-                        )}
+                        <button
+                          onClick={() => handleToggleActive(d)}
+                          disabled={togglingId === d.id}
+                          className="flex items-center gap-1.5 disabled:opacity-50 transition-opacity"
+                          title={d.active ? 'Pasifleştir' : 'Aktifleştir'}
+                        >
+                          {togglingId === d.id ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                          ) : d.active ? (
+                            <ToggleRight className="w-6 h-6 text-green-500" />
+                          ) : (
+                            <ToggleLeft className="w-6 h-6 text-slate-300" />
+                          )}
+                          <span className={`text-xs font-medium ${d.active ? 'text-green-600' : 'text-slate-400'}`}>
+                            {d.active ? 'Aktif' : 'Pasif'}
+                          </span>
+                        </button>
                       </td>
                       <td className="py-3 px-2 text-right">
                         <Button variant="ghost" size="icon" onClick={() => openEdit(d)} className="h-8 w-8">
@@ -279,7 +291,7 @@ export default function AdminIndirimlerPage() {
                           size="icon"
                           onClick={() => handleDelete(d.id)}
                           disabled={deletingId === d.id}
-                          className="h-8 w-8 text-brand hover:text-brand-hover hover:bg-brand-light"
+                          className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
                         >
                           {deletingId === d.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                         </Button>

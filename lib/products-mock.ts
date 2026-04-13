@@ -1207,7 +1207,7 @@ Cihazı çalıştırma: Kaçak akım devre kesicisine basarak açın. Güç bağ
   {
     id: 'dc-hizli-sarj-istasyonu-50kw',
     brand: 'TommaTech',
-    image: '/images/products/dc-charger-placeholder.jpg',
+    image: '/images/products/placeholder.png',
     sku: 'TT-DC-50KW',
     name: 'DC Hızlı Şarj İstasyonu (50 kW)',
     description: 'Ticari alanlar ve otoyol kenarları için 50 kW yüksek hızlı DC şarj istasyonu. CCS2 ve CHAdeMO desteği.',

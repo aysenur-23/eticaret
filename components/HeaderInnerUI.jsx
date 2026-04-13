@@ -1,8 +1,11 @@
-'use client'
+﻿'use client'
 
 import React, { useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { Manrope } from 'next/font/google'
 import { fmtPrice } from '@/lib/format'
+import { mockProducts, PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/products-mock'
 import { HeaderWrapper } from './HeaderWrapper'
 import { HeaderTopBar } from './HeaderTopBar'
 import { Logo } from './Logo'
@@ -13,18 +16,84 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTitle } from './ui/sheet'
-import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone, Zap, Battery, Sun, Cpu, Thermometer, Activity } from 'lucide-react'
+import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone, Zap, Battery, Sun, Cpu } from 'lucide-react'
+
+const headerDisplay = Manrope({
+  subsets: ['latin'],
+  weight: ['700', '800'],
+})
 
 const GROUP_ICONS = {
   'elektrikli-arac-sarj-urunleri': Zap,
   'batarya-depolama': Battery,
   'gunes-enerjisi': Sun,
   'inverterler': Cpu,
-  'isi-pompasi-hvac': Thermometer,
-  'enerji-yonetimi': Activity,
+}
+
+const CATEGORY_MENU_IMAGE_BY_VALUE = mockProducts.reduce((acc, product) => {
+  if (!product.category || !product.image || product.image === PLACEHOLDER_PRODUCT_IMAGE) return acc
+  if (!acc[product.category]) acc[product.category] = product.image
+  return acc
+}, {})
+
+const GROUP_MENU_META = {
+  'elektrikli-arac-sarj-urunleri': {
+    badge: 'ELEKTRIKLI ARAC SARJ URUNLERI',
+    eyebrow: 'Premium Sarj Cozumleri',
+    accent: '#2563eb',
+    surface: 'from-blue-50/90 via-white to-slate-50',
+  },
+  'batarya-depolama': {
+    badge: 'AKU VE BATARYALAR',
+    eyebrow: 'Enerji Depolama',
+    accent: '#f4a11a',
+    surface: 'from-amber-50/90 via-white to-slate-50',
+  },
+  inverterler: {
+    badge: 'INVERTERLER',
+    eyebrow: 'Guvenilir Donusum',
+    accent: '#0f766e',
+    surface: 'from-teal-50/90 via-white to-slate-50',
+  },
+  'gunes-enerjisi': {
+    badge: 'GUNES ENERJISI',
+    eyebrow: 'Yuksek Verimlilik',
+    accent: '#65a30d',
+    surface: 'from-lime-50/80 via-white to-slate-50',
+  },
+  'isi-pompasi-hvac': {
+    badge: 'ISI POMPASI VE HVAC',
+    eyebrow: 'Iklimlendirme',
+    accent: '#7c3aed',
+    surface: 'from-violet-50/80 via-white to-slate-50',
+  },
+  'enerji-yonetimi': {
+    badge: 'ENERJI YONETIMI',
+    eyebrow: 'Akilli Izleme',
+    accent: '#0891b2',
+    surface: 'from-cyan-50/80 via-white to-slate-50',
+  },
+}
+
+function getMenuGridClass(count) {
+  if (count <= 2) return 'grid grid-cols-2 gap-5 border-b border-slate-100 pb-7'
+  if (count <= 4) return 'grid grid-cols-2 gap-5 border-b border-slate-100 pb-7 xl:grid-cols-4'
+  if (count <= 6) return 'grid grid-cols-2 gap-5 border-b border-slate-100 pb-7 lg:grid-cols-3'
+  return 'grid grid-cols-2 gap-5 border-b border-slate-100 pb-7 lg:grid-cols-4'
+}
+
+function getMenuCards(groupKey, items) {
+  return items.map((item) => ({
+    title: item.labelKey,
+    href: `/products?category=${encodeURIComponent(item.value)}`,
+    image: CATEGORY_MENU_IMAGE_BY_VALUE[item.value] || PLACEHOLDER_PRODUCT_IMAGE,
+    translate: true,
+  }))
 }
 
 export function HeaderInnerUI(props) {
@@ -53,16 +122,11 @@ export function HeaderInnerUI(props) {
     navLinks,
   } = props
 
-  const [megaOpen, setMegaOpen] = React.useState(false)
+  const [openMenu, setOpenMenu] = React.useState(null)
   const [expandedGroups, setExpandedGroups] = React.useState(new Set())
-  const megaTimeoutRef = React.useRef(null)
+  const timeoutRef = React.useRef(null)
   const desktopSearchRef = useRef(null)
   const mobileSearchRef = useRef(null)
-
-  const openMega = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true) }
-  const closeMega = () => { megaTimeoutRef.current = setTimeout(() => setMegaOpen(false), 150) }
-
-  useEffect(() => { setMegaOpen(false) }, [pathname])
 
   useEffect(() => {
     if (!searchOpen) return
@@ -136,6 +200,143 @@ export function HeaderInnerUI(props) {
     })
   }
 
+  /** İmleç trigger ile content arasında gezerken kapanmayı geciktirmek için. */
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpenMenu(null)
+    }, 200)
+  }
+
+  const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
+  const desktopNavItemClass = (isActive) =>
+    `group relative flex items-center justify-center px-3 xl:px-4 py-1.5 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
+  const desktopNavLabelClass = `${headerDisplay.className} text-[12px] xl:text-[13px] font-bold tracking-[-0.01em] leading-[1.2] whitespace-nowrap`
+  const desktopNavSubLabelClass = 'hidden'
+
+  const navDropdown = (labelKey, items, categoryHref, groupKey) => {
+    const isGroupPageActive = categoryHref && pathname.startsWith(categoryHref)
+    const menuCards = getMenuCards(groupKey, items)
+    const featuredCard = menuCards[0]
+    const remainingCards = menuCards.slice(0, 8)
+    return (
+      <div
+        key={groupKey}
+        className="relative min-w-0 flex-1"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <DropdownMenu modal={false} open={openMenu === labelKey} onOpenChange={(open) => {
+          if (open) {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current)
+            setOpenMenu(labelKey)
+          } else if (openMenu === labelKey) {
+            setOpenMenu(null)
+          }
+        }}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className={`${desktopNavItemClass(isGroupPageActive || openMenu === labelKey)} border-0 outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${(isGroupPageActive || openMenu === labelKey) ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+              onMouseEnter={() => { handleMouseEnter(); setOpenMenu(labelKey) }}
+            >
+              <span className={`${desktopNavLabelClass} max-w-[15ch]`}>
+                {t(labelKey)}
+              </span>
+              <ChevronDown className={`ml-1 h-3 w-3 shrink-0 text-slate-400 transition-transform duration-200 ${openMenu === labelKey ? 'rotate-180' : ''}`} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            portal={false}
+            align="center"
+            collisionPadding={24}
+            sideOffset={1}
+            className={menuPanelClass}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="grid grid-cols-[210px_minmax(0,1fr)] gap-0">
+              <Link
+                href={featuredCard?.href || categoryHref || '/products'}
+                onClick={() => setOpenMenu(null)}
+                className="group relative hidden min-h-[220px] overflow-hidden border-r border-slate-200 bg-slate-100 md:block"
+              >
+                {featuredCard ? (
+                  <>
+                    <Image
+                      src={featuredCard.image}
+                      alt={featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
+                      fill
+                      sizes="240px"
+                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-950/16 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 p-4">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/70">
+                        {t(labelKey)}
+                      </p>
+                      <p className={`${headerDisplay.className} mt-2 text-[19px] font-extrabold leading-[1.02] tracking-[-0.04em] text-white`}>
+                        {featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
+                      </p>
+                    </div>
+                  </>
+                ) : null}
+              </Link>
+
+              <div className="px-5 py-4">
+                <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
+                  <p className={`${headerDisplay.className} text-[14px] font-extrabold tracking-[-0.02em] text-slate-900`}>
+                    {t(labelKey)}
+                  </p>
+                  <Link
+                    href={categoryHref || '/products'}
+                    onClick={() => setOpenMenu(null)}
+                    className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 transition-colors hover:text-[#f4a11a]"
+                  >
+                    Tümünü Gör
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {remainingCards.map((card, index) => (
+                    <DropdownMenuItem
+                      key={`${groupKey}-${card.href}-${index}`}
+                      asChild
+                      className="m-0 rounded-none border-0 bg-transparent p-0 outline-none focus:bg-transparent data-[highlighted]:bg-transparent"
+                    >
+                      <Link
+                        href={card.href}
+                        onClick={() => setOpenMenu(null)}
+                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[12px] font-medium text-slate-700 transition-colors hover:text-slate-950"
+                      >
+                        <span className="truncate pr-3">
+                          {card.translate ? t(card.title) : card.title}
+                        </span>
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#f4a11a]" />
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    )
+  }
+
+  const renderDesktopLink = (href, label, active, helper) => (
+    <Link
+      href={href}
+      className={`${desktopNavItemClass(active)} min-w-0 ${active ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+    >
+      <span className={`${desktopNavLabelClass} max-w-[15ch]`}>{label}</span>
+    </Link>
+  )
 
   return (
     <HeaderWrapper>
@@ -143,30 +344,36 @@ export function HeaderInnerUI(props) {
         <HeaderTopBar />
       </div>
       {/* Ana satır: Logo, Arama, Hesap / Favoriler / Sepet */}
-      <div className="hidden md:block bg-white border-b border-slate-100 shrink-0">
+      <div className="hidden md:block bg-white shadow-[0_2px_16px_rgba(15,23,42,0.07)] border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0">
-          <div className="flex items-center h-[68px] gap-5 min-w-0">
-            <div className="flex-shrink-0 flex items-center [&_img]:max-h-11 [&_img]:w-auto [&_img]:object-contain">
-              <Logo size="md" href="/" />
+          <div className="flex items-center h-[80px] gap-6 sm:gap-8 min-w-0">
+            <div className="flex-shrink-0 flex items-center pr-2">
+              <Logo size="xl" href="/" />
             </div>
-            <div ref={desktopSearchRef} className="flex-1 min-w-0 max-w-2xl relative">
+            <div ref={desktopSearchRef} className="flex-1 min-w-0 max-w-xl mx-auto relative">
               <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   type="text"
                   placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 text-sm transition-all placeholder:text-slate-400"
+                  className="w-full max-w-full min-w-0 h-11 pl-5 pr-12 rounded-full border border-slate-200/90 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.04)] focus:border-brand focus:ring-2 focus:ring-brand/10 text-sm transition-all placeholder:text-slate-400"
                 />
+                <button
+                  type="submit"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-slate-500 hover:text-brand rounded-full transition-colors"
+                  aria-label={t('searchPlaceholder')}
+                >
+                  <Search className="w-4 h-4" />
+                </button>
               </form>
               {renderSearchDropdown()}
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               {isAuthenticated && user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-10 px-3 gap-2 text-slate-700 hover:bg-slate-100 hover:text-ink rounded-xl transition-colors">
+                    <Button variant="ghost" className="h-11 px-3.5 gap-2 text-slate-700 hover:bg-white hover:text-ink rounded-full border border-slate-200/80 bg-white/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] transition-colors">
                       <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                         <User className="w-4 h-4 text-slate-500" />
                       </div>
@@ -216,7 +423,7 @@ export function HeaderInnerUI(props) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button asChild variant="ghost" className="h-10 px-3 gap-2 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors">
+                <Button asChild variant="ghost" className="h-11 px-3.5 gap-2 text-slate-700 hover:bg-white rounded-full border border-slate-200/80 bg-white/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] transition-colors">
                   <Link href="/login">
                     <User className="w-4 h-4 text-slate-500" />
                     <div className="hidden xl:block text-left">
@@ -226,10 +433,10 @@ export function HeaderInnerUI(props) {
                   </Link>
                 </Button>
               )}
-              <Link href="/favorites" className="hidden sm:flex h-10 w-10 items-center justify-center text-slate-500 hover:text-brand hover:bg-brand-light/50 rounded-xl transition-colors shrink-0" aria-label={t('favorites')}>
+              <Link href="/favorites" className="hidden sm:flex h-11 w-11 items-center justify-center text-slate-500 hover:text-brand hover:bg-white rounded-full border border-slate-200/80 bg-white/90 shadow-[0_8px_20px_rgba(15,23,42,0.04)] transition-colors shrink-0" aria-label={t('favorites')}>
                 <Heart className="w-4 h-4" />
               </Link>
-              <Button asChild className="h-10 px-3 gap-2 bg-brand hover:bg-brand-hover text-white rounded-xl transition-colors relative shrink-0 shadow-sm">
+              <Button asChild className="h-11 px-4 gap-2 bg-brand hover:bg-brand-hover text-white rounded-full transition-colors relative shrink-0 shadow-[0_14px_30px_rgba(127,29,29,0.18)]">
                 <Link href="/cart">
                   <ShoppingCart className="w-4 h-4 shrink-0" />
                   <div className="hidden xl:block text-left whitespace-nowrap">
@@ -247,106 +454,21 @@ export function HeaderInnerUI(props) {
           </div>
         </div>
       </div>
-      {/* Ã…Âerit 2: Ana menÃƒÂ¼ Ã¢â‚¬â€œ Anasayfa, ÃƒÅ“rÃƒÂ¼nler, kategori dropdownÃ¢â‚¬â„¢larÃ„Â±, Ã„Â°letiÃ…Å¸im */}
-      {/* Nav + Mega Menu */}
-      <div className="hidden md:block bg-white border-b border-slate-100 shrink-0 relative" onMouseLeave={closeMega}>
-        <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-0 overflow-hidden" aria-label="Ana menu">
-            {/* Anasayfa */}
-            <Link
-              href="/"
-              className={`flex items-center gap-1.5 h-11 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/' ? 'text-brand border-brand' : 'text-slate-500 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
-            >
-              <Home className="w-4 h-4" />
-              <span className="sr-only">{t('navHome')}</span>
-            </Link>
-
-            {/* Tüm Ürünler */}
-            <Link
-              href="/products"
-              className={`flex items-center h-11 px-3 border-b-2 text-sm font-semibold transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/products' && !currentCategory ? 'text-brand border-brand' : 'text-slate-700 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
-            >
-              {t('navProducts')}
-            </Link>
-
-            {/* Kategoriler — mega menu trigger */}
-            <button
-              type="button"
-              onMouseEnter={openMega}
-              className={`h-11 flex items-center gap-1 px-3 border-b-2 text-sm font-semibold transition-colors duration-150 shrink-0 whitespace-nowrap outline-none ${megaOpen ? 'text-brand border-brand' : 'text-slate-700 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
-            >
-              {t('categories')}
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${megaOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {/* İletişim */}
-            <Link
-              href="/contact"
-              className={`flex items-center gap-1.5 h-11 px-3 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/contact' ? 'text-brand border-brand' : 'text-slate-500 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
-            >
-              <Phone className="w-4 h-4" />
-              {t('navContact')}
-            </Link>
+      {/* Şerit 2: Ana menü */}
+      <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
+        <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
+          <nav className="flex items-center gap-0.5 min-w-0 overflow-visible h-[46px]" aria-label="Ana menu">
+            {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
+            {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
+            {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
+            <div className="flex-1" />
+            {renderDesktopLink('/contact', t('navContact'), pathname === '/contact', 'DESTEK')}
           </nav>
         </div>
-
-        {/* Mega Menu Panel */}
-        {megaOpen && (
-          <div
-            className="absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-slate-100 z-50"
-            onMouseEnter={openMega}
-            onMouseLeave={closeMega}
-          >
-            <div className="mx-auto max-w-7xl px-6 py-8">
-              <div className="grid grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-8">
-                {navGroups.map((group) => {
-                  const Icon = GROUP_ICONS[group.id] || Menu
-                  const isGroupActive = pathname.startsWith(`/category/${group.id}`)
-                  return (
-                    <div key={group.id}>
-                      <Link
-                        href={group.href}
-                        onClick={closeMega}
-                        className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-3 transition-colors ${isGroupActive ? 'text-brand' : 'text-slate-800 hover:text-brand'}`}
-                      >
-                        <Icon className="w-4 h-4 shrink-0 text-brand" />
-                        {t(group.labelKey)}
-                      </Link>
-                      <ul className="space-y-1.5">
-                        {group.categories.map((cat) => {
-                          const isActive = pathname === '/products' && currentCategory === cat.value
-                          return (
-                            <li key={cat.value}>
-                              <Link
-                                href={`/products?category=${encodeURIComponent(cat.value)}`}
-                                onClick={closeMega}
-                                className={`text-sm leading-snug block py-0.5 transition-colors ${isActive ? 'text-brand font-semibold' : 'text-slate-600 hover:text-brand'}`}
-                              >
-                                {t(cat.labelKey)}
-                              </Link>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                      <Link
-                        href={group.href}
-                        onClick={closeMega}
-                        className="mt-3 text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
-                      >
-                        {t('viewAll', { category: '' })}
-                        <ChevronDown className="w-3 h-3 -rotate-90" />
-                      </Link>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Mobil: menÃƒÂ¼ + logo + sepet (safe area wrapper'dan gelir) */}
-      <div className="md:hidden flex items-center justify-between min-h-[56px] h-14 px-4 gap-2 bg-white border-b border-slate-200/70 shrink-0">
+      {/* Mobil: menü + logo + sepet (safe area wrapper'dan gelir) */}
+      <div className="md:hidden flex items-center justify-between min-h-[60px] h-[60px] px-4 gap-2 bg-white border-b border-slate-200/70 shrink-0">
         <Button
           variant="ghost"
           size="icon"
@@ -356,7 +478,7 @@ export function HeaderInnerUI(props) {
         >
           <Menu className="w-5 h-5" />
         </Button>
-        <div className="flex-1 flex justify-center min-w-0 py-1.5 [&_img]:max-h-9 [&_img]:w-auto [&_img]:object-contain">
+        <div className="flex-1 flex justify-center min-w-0 py-1">
           <Logo size="sm" href="/" />
         </div>
         <Link href="/cart" className="relative flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center shrink-0 rounded-xl hover:bg-slate-100 text-slate-700 transition-colors touch-manipulation" aria-label={t('cartAria')}>
@@ -377,12 +499,14 @@ export function HeaderInnerUI(props) {
         >
           <SheetTitle className="sr-only">{t('mobileMenu')}</SheetTitle>
 
-          {/* BaÃ…Å¸lÃ„Â±k: sade, tek satÃ„Â±r */}
-          <div className="shrink-0 px-4 pt-4 pb-3">
-            <Logo size="md" href="/" onClick={() => setMobileMenuOpen(false)} className="[&_img]:max-h-10" />
+          {/* Başlık: sade, tek satır */}
+          <div className="shrink-0 px-4 pt-4 pb-2">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center min-h-[44px]">
+              <Logo size="md" href="/" />
+            </Link>
           </div>
 
-          {/* Arama: tek kutu, ikon iÃƒÂ§eride */}
+          {/* Arama: tek kutu, ikon içeride */}
           <div ref={mobileSearchRef} className="shrink-0 px-4 pb-4 relative">
             <form onSubmit={handleSearch} className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -418,7 +542,7 @@ export function HeaderInnerUI(props) {
               </div>
             )}
 
-            {/* Ana menÃƒÂ¼ */}
+            {/* Ana menü */}
             <div className="space-y-0.5">
               <Link href="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium transition-colors touch-manipulation ${pathname === '/' ? 'bg-white text-brand shadow-sm border border-slate-200/80' : 'text-slate-700 hover:bg-white/80'}`}>
                 <Home className={`w-5 h-5 shrink-0 ${pathname === '/' ? 'text-brand' : 'text-slate-400'}`} />
@@ -452,7 +576,7 @@ export function HeaderInnerUI(props) {
                           className={`flex-1 flex items-center gap-3 min-h-[48px] px-3 py-3 text-sm font-medium min-w-0 touch-manipulation ${isGroupActive ? 'text-brand' : 'text-slate-700'}`}
                         >
                           <Icon className={`w-5 h-5 shrink-0 ${isGroupActive ? 'text-brand' : 'text-slate-400'}`} />
-                          <span className="leading-snug">{t(group.labelKey)}</span>
+                          <span className="truncate">{t(group.labelKey)}</span>
                         </Link>
                         <button
                           type="button"
@@ -476,7 +600,7 @@ export function HeaderInnerUI(props) {
                                 className={`flex items-center gap-2 min-h-[40px] px-2 py-2 rounded-lg text-sm font-medium transition-colors touch-manipulation ${isSubActive ? 'text-brand bg-white' : 'text-slate-600 hover:text-brand hover:bg-white/80'}`}
                               >
                                 <ChevronRight className="w-4 h-4 shrink-0 text-slate-300" />
-                                <span className="leading-snug">{label}</span>
+                                <span className="truncate">{label}</span>
                               </Link>
                             )
                           })}
@@ -488,7 +612,7 @@ export function HeaderInnerUI(props) {
               </div>
             </div>
 
-            {/* Ã„Â°letiÃ…Å¸im */}
+            {/* İletişim */}
             <div className="pt-2">
               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium transition-colors touch-manipulation ${pathname === '/contact' ? 'bg-white text-brand shadow-sm border border-slate-200/80' : 'text-slate-700 hover:bg-white/80'}`}>
                 <Phone className={`w-5 h-5 shrink-0 ${pathname === '/contact' ? 'text-brand' : 'text-slate-400'}`} />
@@ -507,4 +631,5 @@ export function HeaderInnerUI(props) {
     </HeaderWrapper>
   )
 }
+
 

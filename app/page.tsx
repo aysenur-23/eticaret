@@ -9,6 +9,7 @@ import {
   HeadphonesIcon,
   CreditCard,
   ShoppingBag,
+  ArrowUpRight,
   Zap,
   Battery,
   Sun,
@@ -37,8 +38,8 @@ const FEATURED_ROW_MAX = 10
 const MIXED_PRODUCTS_COUNT = 20
 
 /** Öne çıkan ürünleri deterministik sırada çeşitlendirir; art arda aynı kategoride ürün gelmez (SSR/CSR uyumu için rastgele değil). */
-function getFeaturedRowProducts(): MockProduct[] {
-  const featured = mockProducts.filter((p) => p.featured || (p.discount != null && p.discount > 0))
+function getFeaturedRowProducts(products: MockProduct[] = mockProducts): MockProduct[] {
+  const featured = products.filter((p) => p.featured || (p.discount != null && p.discount > 0))
   const sliced = featured.slice(0, FEATURED_ROW_MAX)
   if (sliced.length <= 1) return sliced
 
@@ -80,21 +81,29 @@ function getFeaturedRowProducts(): MockProduct[] {
 }
 
 /** Ana sayfa: "Ürünlerimiz" için karışık ürünler (öne çıkan satırda gösterilenler hariç, ~5 satır). */
-function getMixedProductsForHome(featuredIds: Set<string> | undefined): MockProduct[] {
+function getMixedProductsForHome(featuredIds: Set<string> | undefined, products: MockProduct[] = mockProducts): MockProduct[] {
   const ids = featuredIds ?? new Set<string>()
-  const rest = mockProducts.filter((p) => !ids.has(p.id))
+  const rest = products.filter((p) => !ids.has(p.id))
   return rest.slice(0, MIXED_PRODUCTS_COUNT)
 }
 
 export default function HomePage() {
   const t = useTranslations('home')
+  const [allProducts, setAllProducts] = useState(mockProducts)
   const { featuredRowProducts, mixedProducts } = useMemo(() => {
-    const featured = getFeaturedRowProducts()
+    const featured = getFeaturedRowProducts(allProducts)
     const featuredIds = new Set(featured.map((p) => p.id))
-    const mixed = getMixedProductsForHome(featuredIds)
+    const mixed = getMixedProductsForHome(featuredIds, allProducts)
     return { featuredRowProducts: featured, mixedProducts: mixed }
-  }, [])
+  }, [allProducts])
   const [currentSlide, setCurrentSlide] = useState(0)
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => { if (Array.isArray(data) && data.length > 0) setAllProducts(data) })
+      .catch(() => {})
+  }, [])
 
   // Her slayt tam aynı süre (5 sn) görünsün; slayt değişince yeni süre başlar
   useEffect(() => {
@@ -364,35 +373,78 @@ export default function HomePage() {
       {/* Paket Kategorileri */}
       <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`}>
         <div className={containerClass}>
-          <header className="mb-6 sm:mb-8 md:mb-10">
-            <span className={sectionOverlineClass}>Paketler</span>
-            <h2 className={sectionTitleClass}>İhtiyaca Özel Paketler</h2>
-            <p className={sectionDescClass}>Bağ evi, villa, karavan, sulama ve marin kullanım için hazır çözümler.</p>
+          <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <span className={sectionOverlineClass}>Paketler</span>
+              <h2 className={sectionTitleClass}>İhtiyaca Özel Paketler</h2>
+              <p className={sectionDescClass}>Kullanım senaryonuza göre hazırlanmış çözümler.</p>
+            </div>
+            <Link href="/paketler" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+              Tümünü Gör <ArrowUpRight className="w-4 h-4" />
+            </Link>
           </header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
-            {PACKAGE_CATEGORIES.map((item) => (
+          {/* Üst satır: 3 büyük kart */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            {PACKAGE_CATEGORIES.slice(0, 3).map((item) => (
               <Link
                 key={item.slug}
                 href={`/paketler/${item.slug}`}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200 shadow-sm min-h-[360px] sm:min-h-[420px] bg-slate-900"
+                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
               >
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-slate-900/85 via-slate-900/45 to-slate-900/75" />
-                <div className="relative z-10 h-full flex flex-col justify-between p-6">
-                  <h3 className="text-[clamp(1.7rem,2vw,2.4rem)] font-black leading-[1.02] uppercase text-white tracking-tight">
-                    <span className="block text-amber-300">{item.shortTitle}</span>
-                    <span className="block">Paketleri</span>
-                  </h3>
-                  <span className="inline-flex w-fit items-center rounded-full bg-gradient-to-r from-fuchsia-500 to-cyan-400 text-white text-sm font-bold px-4 py-2 shadow-[0_0_18px_rgba(56,189,248,0.45)]">
-                    Hemen İncele
-                  </span>
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    className="object-cover opacity-85 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    style={{ objectPosition: item.objectPosition ?? 'center' }}
+                  />
+                  {/* Bottom gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                  {/* Content */}
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Enerji Paketi</p>
+                    <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
+                    <p className="mt-1 text-sm text-white/60 line-clamp-1">{item.description}</p>
+                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-light group-hover:gap-2 transition-all">
+                      İncele <ArrowUpRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Alt satır: 2 geniş kart */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {PACKAGE_CATEGORIES.slice(3).map((item) => (
+              <Link
+                key={item.slug}
+                href={`/paketler/${item.slug}`}
+                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
+              >
+                <div className="relative aspect-[16/7] overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    className="object-cover opacity-85 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700"
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    style={{ objectPosition: item.objectPosition ?? 'center' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-1">Enerji Paketi</p>
+                      <h3 className="text-xl font-bold text-white leading-tight">{item.title}</h3>
+                      <p className="mt-1 text-sm text-white/60 line-clamp-1">{item.description}</p>
+                    </div>
+                    <span className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white group-hover:bg-brand group-hover:border-brand transition-all duration-300">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -478,3 +530,4 @@ export default function HomePage() {
     </div>
   )
 }
+

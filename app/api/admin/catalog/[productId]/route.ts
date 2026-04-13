@@ -87,6 +87,17 @@ export async function PATCH(
     if (slogan !== undefined) data.slogan = slogan
     if (warranty !== undefined) data.warranty = warranty
 
+    // StockOverride'ı da güncelle — getMergedProducts önceliği StockOverride > ProductOverride.stock
+    // Böylece her iki kaynaktan da doğru stok görünür.
+    if (stock !== undefined) {
+      const stockVal = Math.max(0, Math.floor(Number(stock)))
+      await prisma.stockOverride.upsert({
+        where: { productId },
+        update: { stock: stockVal },
+        create: { productId, stock: stockVal },
+      })
+    }
+
     const updated = await prisma.productOverride.upsert({
       where: { productId },
       update: data as Parameters<typeof prisma.productOverride.update>[0]['data'],

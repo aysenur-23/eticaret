@@ -1,65 +1,47 @@
-/**
- * Admin girişi: Firebase ID token ile doğrulama.
- * Firebase Auth ile giriş yapılmış kullanıcının token'ı gönderilir;
- * backend token'ı doğrular, Firestore users/{uid} içinde role === 'admin' kontrol eder.
- * Sadece admin rolü olanlar için admin_session JWT cookie set edilir.
- */
-
 import { NextRequest, NextResponse } from 'next/server'
 import jwt from 'jsonwebtoken'
-import { getAdminAuth } from '@/lib/firebaseAdminServer'
-import { getAdminFirestore, isFirebaseAdminConfigured } from '@/lib/firebaseAdminServer'
+import { getAdminAuth, isFirebaseAdminConfigured } from '@/lib/firebaseAdminServer'
 
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN
 const JWT_SECRET = process.env.JWT_SECRET
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7 // 7 gün
+const ADMIN_UID = 'admin-panel-user'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const idToken = typeof body?.idToken === 'string' ? body.idToken.trim() : ''
+    const password = typeof body?.password === 'string' ? body.password.trim() : ''
 
-    if (!idToken) {
-      return NextResponse.json({ success: false, error: 'Firebase token gerekli.' }, { status: 400 })
+    if (!password) {
+      return NextResponse.json({ success: false, error: 'Şifre gerekli.' }, { status: 400 })
     }
 
-    if (!isFirebaseAdminConfigured()) {
-      return NextResponse.json(
-        { success: false, error: 'Firebase Admin yapılandırılmamış. Admin girişi kullanılamıyor.' },
-        { status: 503 }
-      )
-    }
-
-    const auth = getAdminAuth()
-    const firestore = getAdminFirestore()
-    if (!auth || !firestore) {
-      return NextResponse.json({ success: false, error: 'Sunucu hatası.' }, { status: 503 })
-    }
-
-    const decoded = await auth.verifyIdToken(idToken)
-    const uid = decoded.uid
-
-    const userDoc = await firestore.collection('users').doc(uid).get()
-    const profile = userDoc.data()
-    const role = profile?.role as string | undefined
-
-    if (role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Bu hesabın admin yetkisi yok.' },
-        { status: 403 }
-      )
-    }
-
-    if (!JWT_SECRET) {
+    if (!ADMIN_TOKEN || !JWT_SECRET) {
       return NextResponse.json({ success: false, error: 'Sunucu yapılandırma hatası.' }, { status: 503 })
     }
 
+    if (password !== ADMIN_TOKEN) {
+      return NextResponse.json({ success: false, error: 'Şifre hatalı.' }, { status: 401 })
+    }
+
     const sessionToken = jwt.sign(
-      { sub: uid, admin: true },
+      { sub: 'admin', admin: true },
       JWT_SECRET,
       { expiresIn: SESSION_MAX_AGE }
     )
 
-    const response = NextResponse.json({ success: true })
+    // Firebase custom token oluştur (Firestore client okumalarında kullanılır)
+    let firebaseCustomToken: string | null = null
+    if (isFirebaseAdminConfigured()) {
+      const auth = getAdminAuth()
+      if (auth) {
+        try {
+          firebaseCustomToken = await auth.createCustomToken(ADMIN_UID, { admin: true })
+        } catch {}
+      }
+    }
+
+    const response = NextResponse.json({ success: true, firebaseCustomToken })
     response.cookies.set('admin_session', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -69,13 +51,7 @@ export async function POST(request: NextRequest) {
     })
     return response
   } catch (err: any) {
-    if (err?.code === 'auth/id-token-expired' || err?.message?.includes('expired')) {
-      return NextResponse.json({ success: false, error: 'Oturum süresi doldu. Tekrar giriş yapın.' }, { status: 401 })
-    }
-    if (err?.code === 'auth/argument-error' || err?.message?.includes('decode')) {
-      return NextResponse.json({ success: false, error: 'Geçersiz token.' }, { status: 401 })
-    }
     console.error('Admin auth error:', err)
-    return NextResponse.json({ success: false, error: 'Doğrulama başarısız.' }, { status: 401 })
+    return NextResponse.json({ success: false, error: 'Giriş başarısız.' }, { status: 500 })
   }
 }

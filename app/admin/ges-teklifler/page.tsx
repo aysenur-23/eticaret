@@ -51,14 +51,6 @@ export default function AdminGesTekliflerPage() {
   const [loadingVerifications, setLoadingVerifications] = useState(true)
 
   useEffect(() => {
-    // Statik hosting: Firestore'dan GES teklifleri oku (API yok)
-    const adminUid = typeof window !== 'undefined' ? localStorage.getItem('admin_uid') : null
-    if (!adminUid) {
-      router.push('/admin/auth')
-      setLoading(false)
-      setLoadingVerifications(false)
-      return
-    }
     (async () => {
       try {
         const { collection: col, getDocs } = await import('firebase/firestore')
