@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Package, ChevronRight, Minus, Plus, ShoppingCart, Zap, Send, ZoomIn, X, ChevronLeft } from 'lucide-react'
+import { ArrowLeft, Package, ChevronRight, Minus, Plus, ShoppingCart, Zap, Send, ZoomIn, X, ChevronLeft, ShieldCheck, Truck, Headset, RotateCcw } from 'lucide-react'
 import { fmtPrice } from '@/lib/format'
 import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
 import { useExchangeRates } from '@/lib/useExchangeRates'
@@ -494,6 +494,84 @@ export default function ProductDetailClient({ initialProduct, productId: product
                   <span className="break-words">{outOfStock ? tCart('outOfStock') : tProduct('buyNow')}</span>
                 </Button>
               </div>
+
+              {/* Güven / servis mini blok */}
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">2 Yıl Garanti</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Resmi yetkili servis</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <Truck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">Hızlı Kargo</p>
+                    <p className="text-xs text-slate-500 mt-0.5">1–3 iş günü teslimat</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <Headset className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">Teknik Destek</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Her zaman yanınızdayız</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <RotateCcw className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">14 Gün İade</p>
+                    <p className="text-xs text-slate-500 mt-0.5">İade kargosu alıcıya aittir</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uyumlu ürünler */}
+              {(() => {
+                const complementary = product.category ? COMPLEMENTARY_BY_CATEGORY[product.category] : undefined
+                if (!complementary) return null
+                const compatProducts = complementary.productIds
+                  .filter((id) => id !== product.id && mockProductsMap[id])
+                  .slice(0, 4)
+                  .map((id) => mockProductsMap[id])
+                  .filter(Boolean) as (typeof mockProducts)[number][]
+                if (compatProducts.length === 0) return null
+                return (
+                  <div className="mt-5 pt-5 border-t border-slate-200">
+                    <p className="text-xs font-bold text-slate-900 uppercase tracking-wide mb-3">Uyumlu Ürünler</p>
+                    {complementary.banner && (
+                      <div className="mb-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 leading-relaxed">
+                        {complementary.banner}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {compatProducts.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/products/${p.id}`}
+                          className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl p-2 hover:border-brand hover:shadow-sm transition-all group"
+                        >
+                          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                            {(p.images?.[0] ?? p.image) ? (
+                              <img
+                                src={p.images?.[0] ?? p.image}
+                                alt={p.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Package className="w-5 h-5 text-slate-300" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-semibold text-slate-800 line-clamp-2 leading-tight group-hover:text-brand transition-colors">{p.name}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Görselin sağında: Bu ürün size uygun mu? – tıklanınca mini form açılır */}
               <div className="mt-6 pt-6 border-t border-slate-200">

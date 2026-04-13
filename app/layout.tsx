@@ -20,6 +20,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
   title: {
     default: 'voltekno | Güneş Paneli, Akü, İnverter, EV Şarj ve Enerji Sistemleri',
     template: '%s | voltekno',
@@ -112,7 +117,7 @@ const organizationJsonLd = {
   sameAs: [],
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+90-534-328-83-83',
+    telephone: '+90-551-829-16-13',
     contactType: 'customer service',
     availableLanguage: ['Turkish', 'English'],
     areaServed: 'TR',
@@ -146,7 +151,7 @@ const localBusinessJsonLd = {
   name: 'voltekno',
   url: SITE_URL,
   logo: `${SITE_URL}/icon.png`,
-  telephone: '+90-534-328-83-83',
+  telephone: '+90-551-829-16-13',
   email: 'info@voltekno.com',
   address: {
     '@type': 'PostalAddress',

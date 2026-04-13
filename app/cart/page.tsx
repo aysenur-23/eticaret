@@ -28,8 +28,10 @@ export default function CartPage() {
   const currency = useCurrencyStore((s) => s.currency)
   const { rates } = useExchangeRates()
   const formatPrice = (amount: number) => fmtPrice(amount, currency, rates?.rates ?? null)
-  const { items, removeItem, updateQuantity, clearCart, getTotalPrice, getTotalItems, _hasHydrated } = useCartStore()
+  const { items, removeItem, updateQuantity, clearCart, getTotalPrice, getTotalItems } = useCartStore()
   const { isAuthenticated } = useAuthStore()
+  const [mounted, setMounted] = useState(false)
+  React.useEffect(() => setMounted(true), [])
   const [couponCode, setCouponCode] = useState('')
   const [couponDiscount, setCouponDiscount] = useState(0)
   const [couponError, setCouponError] = useState('')
@@ -44,7 +46,7 @@ export default function CartPage() {
   const discount = couponDiscount
   const total = subtotal + tax + shipping - discount
 
-  if (!_hasHydrated) {
+  if (!mounted) {
     return (
       <ClassicPageShell breadcrumbs={[{ label: t('title') }]} title={t('title')} description="">
         <div className="max-w-lg mx-auto text-center py-12">
@@ -395,17 +397,19 @@ export default function CartPage() {
                   </label>
                 </div>
 
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="w-full rounded-xl min-h-[48px] touch-manipulation bg-brand hover:bg-brand-hover text-white"
-                  disabled={!contractsAccepted || !privacyAccepted || !termsAccepted}
-                >
-                  <Link href="/checkout" className="flex items-center justify-center gap-2">
-                    <CreditCard className="w-5 h-5" />
+                {contractsAccepted && privacyAccepted && termsAccepted ? (
+                  <Button asChild size="lg" className="w-full rounded-xl min-h-[48px] touch-manipulation bg-brand hover:bg-brand-hover text-white">
+                    <Link href="/checkout" className="flex items-center justify-center gap-2">
+                      <CreditCard className="w-5 h-5" />
+                      Ödemeye Geç
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="lg" className="w-full rounded-xl min-h-[48px] touch-manipulation bg-brand text-white opacity-50 cursor-not-allowed" disabled>
+                    <CreditCard className="w-5 h-5 mr-2" />
                     Ödemeye Geç
-                  </Link>
-                </Button>
+                  </Button>
+                )}
 
                 <div className="text-xs text-slate-500 text-center space-y-1">
                   <div className="flex items-center justify-center gap-1">
@@ -452,9 +456,9 @@ export default function CartPage() {
 Bu Uzaktan Satış Sözleşmesi ("Sözleşme"), aşağıdaki taraflar arasında aşağıdaki şartlarla akdedilmiştir:
 
 SATICI:
-IMORA
-Web Sitesi: www.imora.com
-E-posta: info@imora.com
+Voltekno Enerji Sistemleri
+Web Sitesi: www.voltekno.com
+E-posta: info@voltekno.com
 
 ALICI:
 Bu siteden alışveriş yapan gerçek veya tüzel kişi müşteri.
@@ -520,12 +524,12 @@ Bu sözleşmenin konusu, Alıcı'nın satıcı web sitesi üzerinden elektronik 
 Bu sözleşme, Alıcı'nın sipariş vermesi ve Satıcı'nın siparişi onaylaması ile yürürlüğe girer.
 
 Sözleşme Tarihi: ${new Date().toLocaleDateString('tr-TR')}
-Satıcı: IMORA`}
+Satıcı: Voltekno Enerji Sistemleri`}
                   {showModal === 'privacy' && `GİZLİLİK POLİTİKASI
 
 1. GENEL BİLGİLER
 
-Bu Gizlilik Politikası, IMORA ("Biz", "Bizim", "Site") olarak, www.imora.com web sitesini ziyaret eden ve hizmetlerimizi kullanan kullanıcıların ("Kullanıcı", "Siz") kişisel bilgilerinin nasıl toplandığını, kullanıldığını, korunduğunu ve paylaşıldığını açıklar.
+Bu Gizlilik Politikası, Voltekno Enerji Sistemleri ("Biz", "Bizim", "Site") olarak, www.voltekno.com web sitesini ziyaret eden ve hizmetlerimizi kullanan kullanıcıların ("Kullanıcı", "Siz") kişisel bilgilerinin nasıl toplandığını, kullanıldığını, korunduğunu ve paylaşıldığını açıklar.
 
 2. TOPLANAN BİLGİLER
 
@@ -610,8 +614,8 @@ Bu Gizlilik Politikası, yasal değişiklikler veya işletme gereksinimleri doğ
 12. İLETİŞİM
 
 Gizlilik politikamız hakkında sorularınız için:
-E-posta: info@imora.com
-Web: www.imora.com
+E-posta: info@voltekno.com
+Web: www.voltekno.com
 
 Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
                   {showModal === 'kvkk' && `KVKK AYDINLATMA METNİ
@@ -620,9 +624,9 @@ Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}
 
 1. VERİ SORUMLUSU
 
-IMORA
-Web Sitesi: www.imora.com
-E-posta: info@imora.com
+Voltekno Enerji Sistemleri
+Web Sitesi: www.voltekno.com
+E-posta: info@voltekno.com
 
 2. İŞLENEN KİŞİSEL VERİLER
 
@@ -717,8 +721,8 @@ Kişisel verilerinizin başka bir veri sorumlusuna aktarılmasını isteme hakk�
 8. HAKLARINIZI KULLANMA YÖNTEMİ
 
 Haklarınızı kullanmak için:
-- E-posta: info@imora.com
-- Web: www.imora.com/iletisim
+- E-posta: info@voltekno.com
+- Web: www.voltekno.com/iletisim
 
 Başvurularınız, KVKK'nın 13. maddesi uyarınca en geç 30 gün içinde sonuçlandırılır.
 
@@ -732,7 +736,7 @@ Kişisel verileriniz:
 
 10. ÇEREZLER
 
-Sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerez politikamız hakkında detaylı bilgi için: www.imora.com/cookies
+Sitemiz, kullanıcı deneyimini iyileştirmek için çerezler kullanır. Çerez politikamız hakkında detaylı bilgi için: www.voltekno.com/cookies
 
 11. DEĞİŞİKLİKLER
 
@@ -741,7 +745,7 @@ Bu aydınlatma metni, yasal değişiklikler doğrultusunda güncellenebilir. Gü
 12. İLETİŞİM
 
 KVKK kapsamındaki haklarınız ve kişisel verileriniz hakkında sorularınız için:
-E-posta: info@imora.com
+E-posta: info@voltekno.com
 Adres: [Şirket Adresi]
 
 Son Güncelleme: ${new Date().toLocaleDateString('tr-TR')}`}

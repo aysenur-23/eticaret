@@ -33,11 +33,31 @@ function SuccessContent() {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-left">
             <div className="flex items-start gap-3">
               <Banknote className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-amber-800 mb-1">Havale / EFT Bilgileri</p>
-                <p className="text-sm text-amber-700">
-                  Siparişiniz oluşturuldu. Ödemenizi aşağıdaki hesap bilgilerine yaparak sipariş açıklamasına sipariş numaranızı yazınız. Ödemeniz onaylandıktan sonra siparişiniz hazırlanacaktır.
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-amber-800 mb-2">Havale / EFT Bilgileri</p>
+                <p className="text-sm text-amber-700 mb-3">
+                  Ödemenizi aşağıdaki hesap bilgilerine yaparak açıklama kısmına sipariş numaranızı yazınız. Ödemeniz onaylandıktan sonra siparişiniz hazırlanacaktır.
                 </p>
+                <div className="bg-white rounded-lg border border-amber-200 p-3 space-y-1.5 text-sm">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-amber-700 font-medium shrink-0">Banka:</span>
+                    <span className="text-amber-900 font-semibold">Ziraat Bankası</span>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <span className="text-amber-700 font-medium shrink-0">Hesap Sahibi:</span>
+                    <span className="text-amber-900 font-semibold">Voltekno Enerji Sistemleri</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-amber-700 font-medium">IBAN:</span>
+                    <span className="text-amber-900 font-mono font-bold tracking-wide">TR00 0000 0000 0000 0000 0000 00</span>
+                  </div>
+                  {orderId && (
+                    <div className="flex justify-between gap-2 pt-1 border-t border-amber-200">
+                      <span className="text-amber-700 font-medium shrink-0">Açıklama:</span>
+                      <span className="text-amber-900 font-bold">{orderId}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

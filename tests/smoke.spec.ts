@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('public smoke', () => {
   test('home page renders', async ({ page }) => {
     await page.goto('/')
-    await expect(page).toHaveTitle(/IMORA|voltekno/i)
+    await expect(page).toHaveTitle(/Voltekno|voltekno/i)
     await expect(page.locator('body')).toContainText(/Ürün|Products/i)
   })
 

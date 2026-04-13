@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Cookie } from 'lucide-react'
 
-const STORAGE_KEY = 'bataryakit_cookie_consent'
+const STORAGE_KEY = 'voltekno_cookie_consent'
 
 export function CookieConsent() {
   const t = useTranslations('cookie')

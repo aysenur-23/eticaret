@@ -32,9 +32,9 @@ export default function TermsPage() {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="mb-2"><strong>SATICI:</strong></p>
-                <p className="mb-1">IMORA</p>
-                <p className="mb-1">Web Sitesi: www.imora.com</p>
-                <p>E-posta: info@imora.com</p>
+                <p className="mb-1">Voltekno Enerji Sistemleri</p>
+                <p className="mb-1">Web Sitesi: www.voltekno.com</p>
+                <p>E-posta: info@voltekno.com</p>
               </div>
               <p className="mt-4">
                 <strong>ALICI:</strong> Bu siteden alışveriş yapan gerçek veya tüzel kişi müşteri.
@@ -141,7 +141,7 @@ export default function TermsPage() {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg mt-4">
                 <p className="mb-2"><strong>Sözleşme Tarihi:</strong> {new Date().toLocaleDateString('tr-TR')}</p>
-                <p><strong>Satıcı:</strong> IMORA</p>
+                <p><strong>Satıcı:</strong> Voltekno Enerji Sistemleri</p>
               </div>
             </section>
           </div>

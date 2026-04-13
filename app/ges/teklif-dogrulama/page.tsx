@@ -16,8 +16,8 @@ import {
   Search, Info,
 } from 'lucide-react'
 
-const CONTACT_PHONE = '+90 534 328 83 83'
-const CONTACT_PHONE_HREF = 'tel:+905343288383'
+const CONTACT_PHONE = '+90 551 829 16 13'
+const CONTACT_PHONE_HREF = 'tel:+905518291613'
 
 /** Required field marker */
 const Req = () => <span className="text-red-500 font-bold ml-0.5" aria-hidden="true">*</span>

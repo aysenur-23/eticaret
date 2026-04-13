@@ -17,6 +17,7 @@ import { fmtPrice } from '@/lib/format'
 import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
 import { useExchangeRates } from '@/lib/useExchangeRates'
 import { getAddresses, getUserProfile, setUserProfile, createOrder } from '@/lib/firebase/firestore'
+import { TR_CITIES, getDistrictsByCity } from '@/lib/tr-cities'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -26,7 +27,8 @@ export default function CheckoutPage() {
   const cartItems = useCartStore((state) => state.items)
   const cartTotal = useCartStore((state) => state.getTotalPrice())
   const clearCart = useCartStore((state) => state.clearCart)
-  const cartHydrated = useCartStore((state) => state._hasHydrated)
+  const [mounted, setMounted] = useState(false)
+  React.useEffect(() => setMounted(true), [])
   const { user, isAuthenticated } = useAuthStore()
   
   const isFromCart = cartItems.length > 0
@@ -55,7 +57,6 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
   const [checkoutErrors, setCheckoutErrors] = useState<Record<string, string>>({})
   const [paymentMethod, setPaymentMethod] = useState<'havale' | 'card'>('havale')
-  const [isTestOrderLoading, setIsTestOrderLoading] = useState(false)
 
   // Load saved addresses from Firestore when user is authenticated
   React.useEffect(() => {
@@ -89,15 +90,43 @@ export default function CheckoutPage() {
   const total = subtotal + tax + shipping
 
   React.useEffect(() => {
-    if (!cartHydrated) return
+    if (!mounted) return
     if (!isFromCart) router.push('/cart')
-  }, [cartHydrated, isFromCart, router])
+  }, [mounted, isFromCart, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     if (checkoutErrors[name]) setCheckoutErrors(prev => ({ ...prev, [name]: '' }))
   }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 11)
+    let formatted = digits
+    if (digits.length > 4 && digits.length <= 7) formatted = `${digits.slice(0,4)} ${digits.slice(4)}`
+    else if (digits.length > 7 && digits.length <= 9) formatted = `${digits.slice(0,4)} ${digits.slice(4,7)} ${digits.slice(7)}`
+    else if (digits.length > 9) formatted = `${digits.slice(0,4)} ${digits.slice(4,7)} ${digits.slice(7,9)} ${digits.slice(9)}`
+    setFormData(prev => ({ ...prev, phone: formatted }))
+    if (checkoutErrors.phone) setCheckoutErrors(prev => ({ ...prev, phone: '' }))
+  }
+
+  const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 5)
+    setFormData(prev => ({ ...prev, postalCode: digits }))
+    if (checkoutErrors.postalCode) setCheckoutErrors(prev => ({ ...prev, postalCode: '' }))
+  }
+
+  const handleCityChange = (cityName: string) => {
+    setFormData(prev => ({ ...prev, city: cityName, district: '' }))
+    if (checkoutErrors.city) setCheckoutErrors(prev => ({ ...prev, city: '' }))
+  }
+
+  const handleDistrictChange = (districtName: string) => {
+    setFormData(prev => ({ ...prev, district: districtName }))
+    if (checkoutErrors.district) setCheckoutErrors(prev => ({ ...prev, district: '' }))
+  }
+
+  const districts = getDistrictsByCity(formData.city)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,9 +140,12 @@ export default function CheckoutPage() {
     if (!formData.email?.trim()) err.email = 'E-posta zorunludur.'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) err.email = 'Geçerli bir e-posta adresi girin.'
     if (!formData.phone?.trim()) err.phone = 'Telefon zorunludur.'
+    else if (formData.phone.replace(/\D/g, '').length !== 11) err.phone = 'Geçerli bir telefon numarası girin (05XX XXX XX XX).'
     if (!formData.addressLine?.trim()) err.addressLine = 'Adres zorunludur.'
-    if (!formData.city?.trim()) err.city = 'Şehir zorunludur.'
-    if (!formData.district?.trim()) err.district = 'İlçe zorunludur.'
+    else if (formData.addressLine.trim().length < 20) err.addressLine = 'Adres en az 20 karakter olmalıdır.'
+    if (!formData.city?.trim()) err.city = 'Şehir seçiniz.'
+    if (!formData.district?.trim()) err.district = 'İlçe seçiniz.'
+    if (formData.postalCode && !/^\d{5}$/.test(formData.postalCode)) err.postalCode = 'Posta kodu 5 haneli olmalıdır.'
     if (Object.keys(err).length > 0) {
       setCheckoutErrors(err)
       scrollToTop()
@@ -247,100 +279,7 @@ export default function CheckoutPage() {
     }
   }
 
-  /** Deneme için sipariş oluştur: Firestore'a doğrudan yaz (statik hosting). */
-  const handleTestOrder = async () => {
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
-    const err: Record<string, string> = {}
-    if (!formData.name?.trim()) err.name = 'Ad Soyad zorunludur.'
-    if (!formData.email?.trim()) err.email = 'E-posta zorunludur.'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) err.email = 'Geçerli bir e-posta adresi girin.'
-    if (!formData.phone?.trim()) err.phone = 'Telefon zorunludur.'
-    if (!formData.addressLine?.trim()) err.addressLine = 'Adres zorunludur.'
-    if (!formData.city?.trim()) err.city = 'Şehir zorunludur.'
-    if (!formData.district?.trim()) err.district = 'İlçe zorunludur.'
-    if (Object.keys(err).length > 0) {
-      setCheckoutErrors(err)
-      scrollToTop()
-      return
-    }
-    if (formData.createAccount) {
-      if (!formData.password || formData.password.length < 6) {
-        setCheckoutErrors(prev => ({ ...prev, password: 'Şifre en az 6 karakter olmalıdır' }))
-        scrollToTop()
-        return
-      }
-      if (formData.password !== formData.confirmPassword) {
-        setCheckoutErrors(prev => ({ ...prev, confirmPassword: 'Şifreler eşleşmiyor' }))
-        scrollToTop()
-        return
-      }
-    }
-    setCheckoutErrors({})
-    setIsTestOrderLoading(true)
-    try {
-      const customer = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        addressLine: formData.addressLine,
-        city: formData.city,
-        district: formData.district,
-        postalCode: formData.postalCode,
-        country: formData.country || 'Türkiye',
-        billingType: formData.billingType,
-        address: formData.addressLine,
-        billingName: formData.billingType === 'company' ? formData.companyName : formData.name,
-        taxId: formData.taxId,
-        taxOffice: formData.taxOffice,
-      }
-      const items = cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity }))
-
-      const now = new Date()
-      const orderNo = `ORD-${now.getFullYear().toString().slice(2)}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`
-
-      const orderPayload = {
-        orderId: orderNo,
-        customer,
-        items,
-        pricing: { subtotal, tax, shipping, total },
-        paymentMethod: 'pending',
-        status: 'pending',
-        paymentStatus: 'pending',
-      }
-
-      if (user?.id) {
-        await createOrder(user.id, orderPayload)
-      } else {
-        const { collection: col, addDoc, serverTimestamp: srvTs } = await import('firebase/firestore')
-        const { getDb } = await import('@/lib/firebase/config')
-        const db = getDb()
-        await addDoc(col(db, 'guestOrders'), { ...orderPayload, createdAt: srvTs() })
-      }
-
-      if (isFromCart) clearCart()
-      const successUrl = `/checkout/success?order_id=${orderNo}&payment=test`
-      if (!user?.id && formData.createAccount) {
-        const params = new URLSearchParams({
-          email: formData.email || '',
-          name: formData.name || '',
-          from_order: '1',
-          redirect: successUrl,
-        })
-        if (formData.phone) params.set('phone', formData.phone)
-        router.push(`/register?${params.toString()}`)
-      } else {
-        router.push(successUrl)
-      }
-    } catch (e) {
-      console.error('Test order error:', e)
-      setCheckoutErrors(prev => ({ ...prev, general: 'Sipariş oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.' }))
-      scrollToTop()
-    } finally {
-      setIsTestOrderLoading(false)
-    }
-  }
-
-  if (!cartHydrated) {
+  if (!mounted) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center px-4" id="main-content">
         <Card className="rounded-2xl border border-palette shadow-lg p-8 max-w-md text-center">
@@ -524,43 +463,60 @@ export default function CheckoutPage() {
                       <Input
                         id="phone"
                         name="phone"
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="05XX XXX XX XX"
                         value={formData.phone}
-                        onChange={handleInputChange}
+                        onChange={handlePhoneChange}
                         className={`rounded-xl ${checkoutErrors.phone ? 'border-destructive' : ''}`}
                       />
                       {checkoutErrors.phone && <p className="text-sm text-destructive">{checkoutErrors.phone}</p>}
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="city">Şehir *</Label>
-                      <Input
+                      <select
                         id="city"
-                        name="city"
                         value={formData.city}
-                        onChange={handleInputChange}
-                        className={`rounded-xl ${checkoutErrors.city ? 'border-destructive' : ''}`}
-                      />
+                        onChange={(e) => handleCityChange(e.target.value)}
+                        className={`w-full h-10 rounded-xl border px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand ${checkoutErrors.city ? 'border-destructive' : 'border-slate-200'}`}
+                      >
+                        <option value="">Şehir seçiniz</option>
+                        {TR_CITIES.map((c) => (
+                          <option key={c.name} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
                       {checkoutErrors.city && <p className="text-sm text-destructive">{checkoutErrors.city}</p>}
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="district">İlçe *</Label>
-                      <Input
+                      <select
                         id="district"
-                        name="district"
                         value={formData.district}
-                        onChange={handleInputChange}
-                        className={`rounded-xl ${checkoutErrors.district ? 'border-destructive' : ''}`}
-                      />
+                        onChange={(e) => handleDistrictChange(e.target.value)}
+                        disabled={!formData.city}
+                        className={`w-full h-10 rounded-xl border px-3 text-sm bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand disabled:opacity-50 disabled:cursor-not-allowed ${checkoutErrors.district ? 'border-destructive' : 'border-slate-200'}`}
+                      >
+                        <option value="">{formData.city ? 'İlçe seçiniz' : 'Önce şehir seçiniz'}</option>
+                        {districts.map((d) => (
+                          <option key={d} value={d}>{d}</option>
+                        ))}
+                      </select>
                       {checkoutErrors.district && <p className="text-sm text-destructive">{checkoutErrors.district}</p>}
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <Label htmlFor="postalCode">Posta Kodu</Label>
                       <Input
                         id="postalCode"
                         name="postalCode"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="34000"
+                        maxLength={5}
                         value={formData.postalCode}
-                        onChange={handleInputChange}
-                        className="rounded-xl"
+                        onChange={handlePostalCodeChange}
+                        className={`rounded-xl ${checkoutErrors.postalCode ? 'border-destructive' : ''}`}
                       />
+                      {checkoutErrors.postalCode && <p className="text-sm text-destructive">{checkoutErrors.postalCode}</p>}
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -568,11 +524,13 @@ export default function CheckoutPage() {
                     <Textarea
                       id="addressLine"
                       name="addressLine"
+                      placeholder="Mahalle, sokak, bina no, daire no..."
                       value={formData.addressLine}
                       onChange={handleInputChange}
                       rows={3}
                       className={`rounded-xl ${checkoutErrors.addressLine ? 'border-destructive' : ''}`}
                     />
+                    <p className="text-xs text-slate-400">{formData.addressLine.length}/20 karakter minimum</p>
                     {checkoutErrors.addressLine && <p className="text-sm text-destructive">{checkoutErrors.addressLine}</p>}
                   </div>
 
@@ -698,16 +656,6 @@ export default function CheckoutPage() {
                     {paymentMethod === 'card' ? 'Ödemeye git' : 'Siparişi Onayla'}
                   </Button>
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="lg"
-                    className="w-full rounded-full border-dashed min-h-[48px] touch-manipulation text-ink-muted hover:text-ink hover:border-brand"
-                    disabled={isTestOrderLoading}
-                    onClick={handleTestOrder}
-                  >
-                    {isTestOrderLoading ? 'Oluşturuluyor...' : 'Deneme için sipariş oluştur'}
-                  </Button>
 
                   <div className="text-xs text-ink-muted text-center space-y-1">
                     <div className="flex items-center justify-center gap-1">

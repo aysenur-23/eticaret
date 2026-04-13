@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
             unit_amount: Math.round(total * 100), // Kuruş cinsinden
             product_data: {
               name: `Sipariş ${orderNo}`,
-              description: 'IMORA sipariş ödemesi',
+              description: 'Voltekno sipariş ödemesi',
             },
           },
           quantity: 1,

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 
 interface LogoProps {
@@ -12,22 +13,26 @@ interface LogoProps {
 }
 
 export function Logo({ size = 'md', className, href, asDiv = false }: LogoProps) {
-  const textSizeClasses = {
-    sm: 'text-xl',
-    md: 'text-2xl',
-    lg: 'text-3xl',
-    xl: 'text-4xl',
+  const heightMap = {
+    sm: 28,
+    md: 36,
+    lg: 44,
+    xl: 56,
   }
 
+  const h = heightMap[size]
+  // Logo is 1100x300 px → aspect ratio ≈ 3.67
+  const w = Math.round(h * 3.67)
+
   const logoElement = (
-    <span
-      className={cn(
-        'font-black tracking-tight text-brand select-none',
-        textSizeClasses[size]
-      )}
-    >
-      voltekno
-    </span>
+    <Image
+      src="/logo.png"
+      alt="Voltekno Enerji Sistemleri"
+      width={w}
+      height={h}
+      priority
+      className="object-contain"
+    />
   )
 
   if (asDiv) {

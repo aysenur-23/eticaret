@@ -103,7 +103,7 @@ export default function ShipmentNotice({
 
             <Text style={paragraph}>
               Teşekkürler,<br />
-              IMORA Ekibi
+              Voltekno Ekibi
             </Text>
           </Section>
         </Container>

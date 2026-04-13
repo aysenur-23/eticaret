@@ -37,7 +37,7 @@ export async function sendOrderConfirmation(data: NotificationData): Promise<boo
 // Send new order notification to admin
 export async function sendAdminNewOrderNotification(data: NotificationData): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@voltekno.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -115,7 +115,7 @@ export async function sendOrderStatusUpdate(data: NotificationData, newStatus: s
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>Yeni Durum:</strong> ${newStatus}</p>
           <p>Detaylı bilgi için admin panelimizi ziyaret edebilirsiniz.</p>
-          <p>İyi günler,<br>IMORA Ekibi</p>
+          <p>İyi günler,<br>Voltekno Ekibi</p>
         </div>
       `
     )
@@ -140,7 +140,7 @@ export async function sendPaymentConfirmation(data: NotificationData): Promise<b
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>Ödeme Tutarı:</strong> ${data.pricing?.total || 0} ₺</p>
           <p>Siparişiniz işleme alınacaktır.</p>
-          <p>İyi günler,<br>IMORA Ekibi</p>
+          <p>İyi günler,<br>Voltekno Ekibi</p>
         </div>
       `
     )
@@ -165,7 +165,7 @@ export async function sendPaymentFailureNotification(data: NotificationData): Pr
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p>Lütfen ödeme bilgilerinizi kontrol ederek tekrar deneyiniz.</p>
           <p>Herhangi bir sorunuz olursa bizimle iletişime geçebilirsiniz.</p>
-          <p>İyi günler,<br>IMORA Ekibi</p>
+          <p>İyi günler,<br>Voltekno Ekibi</p>
         </div>
       `
     )
@@ -190,7 +190,7 @@ export async function sendRefundNotification(data: NotificationData, refundAmoun
           <p><strong>Sipariş No:</strong> ${data.orderId}</p>
           <p><strong>İade Tutarı:</strong> ${refundAmount} ₺</p>
           <p>İade tutarı 3-5 iş günü içinde hesabınıza yansıyacaktır.</p>
-          <p>İyi günler,<br>IMORA Ekibi</p>
+          <p>İyi günler,<br>Voltekno Ekibi</p>
         </div>
       `
     )
@@ -204,7 +204,7 @@ export async function sendRefundNotification(data: NotificationData, refundAmoun
 // Send low stock notification to admin
 export async function sendLowStockNotification(productName: string, currentStock: number, minStock: number): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@voltekno.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -232,7 +232,7 @@ export async function sendLowStockNotification(productName: string, currentStock
 // Send system error notification to admin
 export async function sendSystemErrorNotification(error: string, context: string): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@imora.com'
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@voltekno.com'
     
     const result = await sendEmail(
       adminEmail,
@@ -283,7 +283,7 @@ export interface RFQNotificationData {
 
 export async function sendRFQAdminNotification(data: RFQNotificationData): Promise<boolean> {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@imora.com'
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_EMAIL || process.env.SMTP_USER || 'info@voltekno.com'
     const result = await sendEmail(
       adminEmail,
       `Yeni Teklif Talebi - ${data.companyName}`,
@@ -311,7 +311,7 @@ export async function sendRFQCustomerConfirmation(data: RFQNotificationData): Pr
   try {
     const result = await sendEmail(
       data.contactEmail,
-      'Teklif Talebiniz Alındı - IMORA',
+      'Teklif Talebiniz Alındı - Voltekno',
       RFQCustomerConfirmation({
         contactName: data.contactName,
         companyName: data.companyName,
@@ -336,11 +336,11 @@ export async function sendQuoteReadyToCustomer(data: {
   try {
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://imora.com')
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://voltekno.com')
     const tekliflerimUrl = `${String(baseUrl).replace(/\/$/, '')}/tekliflerim`
     const result = await sendEmail(
       data.contactEmail,
-      'Fiyat Teklifiniz Hazır - IMORA',
+      'Fiyat Teklifiniz Hazır - Voltekno',
       QuoteReady({
         contactName: data.contactName,
         companyName: data.companyName,

@@ -32,7 +32,7 @@ export async function generateAndSendInvoice(
         <p>Merhaba ${orderData.customer.name},</p>
         <p><strong>Sipariş No:</strong> ${orderId}</p>
         <p>Faturanız ektedir.${invoiceUrl ? ` İndirmek için: <a href="${invoiceUrl}">Fatura PDF</a>` : ''}</p>
-        <p>İyi günler,<br>IMORA</p>
+        <p>İyi günler,<br>Voltekno</p>
       </div>
     `
 

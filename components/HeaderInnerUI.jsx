@@ -13,18 +13,18 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTitle } from './ui/sheet'
-import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone, Zap, Battery, Sun, Cpu } from 'lucide-react'
+import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone, Zap, Battery, Sun, Cpu, Thermometer, Activity } from 'lucide-react'
 
 const GROUP_ICONS = {
-  'ev-sarj': Zap,
-  'enerji-depolama': Battery,
+  'elektrikli-arac-sarj-urunleri': Zap,
+  'batarya-depolama': Battery,
   'gunes-enerjisi': Sun,
   'inverterler': Cpu,
+  'isi-pompasi-hvac': Thermometer,
+  'enerji-yonetimi': Activity,
 }
 
 export function HeaderInnerUI(props) {
@@ -53,11 +53,16 @@ export function HeaderInnerUI(props) {
     navLinks,
   } = props
 
-  const [openMenu, setOpenMenu] = React.useState(null)
+  const [megaOpen, setMegaOpen] = React.useState(false)
   const [expandedGroups, setExpandedGroups] = React.useState(new Set())
-  const timeoutRef = React.useRef(null)
+  const megaTimeoutRef = React.useRef(null)
   const desktopSearchRef = useRef(null)
   const mobileSearchRef = useRef(null)
+
+  const openMega = () => { clearTimeout(megaTimeoutRef.current); setMegaOpen(true) }
+  const closeMega = () => { megaTimeoutRef.current = setTimeout(() => setMegaOpen(false), 150) }
+
+  useEffect(() => { setMegaOpen(false) }, [pathname])
 
   useEffect(() => {
     if (!searchOpen) return
@@ -131,117 +136,33 @@ export function HeaderInnerUI(props) {
     })
   }
 
-  /** Ã„Â°mleÃƒÂ§ trigger Ã¢â€ â€ content arasÃ„Â±nda geÃƒÂ§erken kapanmayÃ„Â± geciktirmek iÃƒÂ§in (sadece timeout temizlenir, aÃƒÂ§ma tÃ„Â±klamayla) */
-  const handleMouseEnter = () => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current)
-  }
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setOpenMenu(null)
-    }, 200)
-  }
-
-  const menuPanelClass = 'min-w-[240px] max-w-[320px] max-h-[85vh] overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/30 p-1.5 animate-in fade-in slide-in-from-top-1 duration-150'
-  const menuHeaderClass = 'hidden'
-  const menuGridClass = () => 'flex flex-col gap-0.5'
-
-  const navDropdown = (labelKey, items, categoryHref, groupKey) => {
-    const isGroupPageActive = categoryHref && pathname.startsWith(categoryHref)
-    return (
-      <div
-        key={groupKey}
-        className="relative"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <DropdownMenu open={openMenu === labelKey} onOpenChange={(open) => setOpenMenu(open ? labelKey : null)}>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className={`h-10 flex items-center gap-1 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 outline-none whitespace-nowrap ${isGroupPageActive ? 'text-slate-900 border-brand' : 'text-slate-600 border-transparent hover:text-slate-900 data-[state=open]:text-slate-900 data-[state=open]:border-slate-300'}`}
-              onMouseEnter={() => { handleMouseEnter(); setOpenMenu(labelKey) }}
-            >
-              {t(labelKey)}
-              <ChevronDown className="w-3.5 h-3.5 opacity-50" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            sideOffset={1}
-            className={menuPanelClass}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div className={menuGridClass()}>
-              {items.map((item) => {
-                const href = `/products?category=${encodeURIComponent(item.value)}`
-                const isActive = pathname === '/products' && currentCategory === item.value
-                return (
-                  <DropdownMenuItem key={item.value} asChild className="rounded-lg border-0 m-0 focus:bg-transparent data-[highlighted]:bg-transparent outline-none p-0">
-                    <Link
-                      href={href}
-                      onClick={() => setOpenMenu(null)}
-                      className={`group flex items-center px-4 py-2.5 text-sm font-medium transition-colors rounded-lg mx-1 my-0.5 ${isActive
-                        ? 'text-brand bg-brand-light/60 font-semibold'
-                        : 'text-slate-700 hover:text-brand hover:bg-slate-50'
-                        }`}
-                    >
-                      <span className="flex-1 truncate">{t(item.labelKey)}</span>
-                      {!isActive && <ChevronDown className="w-3.5 h-3.5 opacity-0 -rotate-90 group-hover:opacity-40 transition-all group-hover:translate-x-0.5" />}
-                    </Link>
-                  </DropdownMenuItem>
-                )
-              })}
-            </div>
-            <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/60 rounded-b-xl mt-1">
-              <Link
-                href={categoryHref || '/products'}
-                onClick={() => setOpenMenu(null)}
-                className="text-sm font-semibold text-slate-700 hover:text-slate-900 hover:underline flex items-center gap-2"
-              >
-                {t('viewAll', { category: t(labelKey) })}
-                <span className="text-base">-&gt;</span>
-              </Link>
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    )
-  }
 
   return (
     <HeaderWrapper>
       <div className="hidden md:block shrink-0">
         <HeaderTopBar />
       </div>
-      {/* Ana satÃ„Â±r: Logo, Arama, Hesap / Favoriler / Sepet */}
-      <div className="hidden md:block bg-white border-b border-slate-200/70 shrink-0">
+      {/* Ana satır: Logo, Arama, Hesap / Favoriler / Sepet */}
+      <div className="hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0">
-          <div className="flex items-center h-16 gap-4 sm:gap-6 min-w-0">
-            <div className="flex-shrink-0 flex items-center h-10 [&_img]:max-h-10 [&_img]:w-auto [&_img]:object-contain">
-              <Logo size="sm" href="/" />
+          <div className="flex items-center h-[68px] gap-5 min-w-0">
+            <div className="flex-shrink-0 flex items-center [&_img]:max-h-11 [&_img]:w-auto [&_img]:object-contain">
+              <Logo size="md" href="/" />
             </div>
-            <div ref={desktopSearchRef} className="flex-1 min-w-0 max-w-xl mx-auto relative">
+            <div ref={desktopSearchRef} className="flex-1 min-w-0 max-w-2xl relative">
               <form onSubmit={handleSearch} className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <Input
                   type="text"
                   placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full max-w-full min-w-0 h-11 pl-4 pr-11 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 text-sm transition-all placeholder:text-slate-400"
+                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/10 text-sm transition-all placeholder:text-slate-400"
                 />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center text-slate-500 hover:text-brand rounded-lg transition-colors"
-                  aria-label={t('searchPlaceholder')}
-                >
-                  <Search className="w-4 h-4" />
-                </button>
               </form>
               {renderSearchDropdown()}
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
               {isAuthenticated && user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -327,32 +248,101 @@ export function HeaderInnerUI(props) {
         </div>
       </div>
       {/* Ã…Âerit 2: Ana menÃƒÂ¼ Ã¢â‚¬â€œ Anasayfa, ÃƒÅ“rÃƒÂ¼nler, kategori dropdownÃ¢â‚¬â„¢larÃ„Â±, Ã„Â°letiÃ…Å¸im */}
-      <div className="hidden md:block bg-white border-b border-slate-200/80 shrink-0">
-        <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
-          <nav className="flex flex-wrap items-center gap-0 min-w-0 py-1 min-h-12 overflow-hidden" aria-label="Ana menu">
+      {/* Nav + Mega Menu */}
+      <div className="hidden md:block bg-white border-b border-slate-100 shrink-0 relative" onMouseLeave={closeMega}>
+        <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center gap-0 overflow-hidden" aria-label="Ana menu">
+            {/* Anasayfa */}
             <Link
               href="/"
-              className={`flex items-center gap-2 h-10 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/' ? 'text-slate-900 border-brand' : 'text-slate-600 border-transparent hover:text-slate-900'}`}
+              className={`flex items-center gap-1.5 h-11 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/' ? 'text-brand border-brand' : 'text-slate-500 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
             >
               <Home className="w-4 h-4" />
               <span className="sr-only">{t('navHome')}</span>
             </Link>
+
+            {/* Tüm Ürünler */}
             <Link
               href="/products"
-              className={`flex items-center h-10 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/products' && !currentCategory ? 'text-slate-900 border-brand' : 'text-slate-600 border-transparent hover:text-slate-900'}`}
+              className={`flex items-center h-11 px-3 border-b-2 text-sm font-semibold transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/products' && !currentCategory ? 'text-brand border-brand' : 'text-slate-700 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
             >
               {t('navProducts')}
             </Link>
-            {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
+
+            {/* Kategoriler — mega menu trigger */}
+            <button
+              type="button"
+              onMouseEnter={openMega}
+              className={`h-11 flex items-center gap-1 px-3 border-b-2 text-sm font-semibold transition-colors duration-150 shrink-0 whitespace-nowrap outline-none ${megaOpen ? 'text-brand border-brand' : 'text-slate-700 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
+            >
+              {t('categories')}
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${megaOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* İletişim */}
             <Link
               href="/contact"
-              className={`flex items-center gap-2 h-10 px-2 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/contact' ? 'text-slate-900 border-brand' : 'text-slate-600 border-transparent hover:text-slate-900'}`}
+              className={`flex items-center gap-1.5 h-11 px-3 border-b-2 text-sm font-medium transition-colors duration-150 shrink-0 whitespace-nowrap ${pathname === '/contact' ? 'text-brand border-brand' : 'text-slate-500 border-transparent hover:text-slate-900 hover:border-slate-300'}`}
             >
               <Phone className="w-4 h-4" />
               {t('navContact')}
             </Link>
           </nav>
         </div>
+
+        {/* Mega Menu Panel */}
+        {megaOpen && (
+          <div
+            className="absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-slate-100 z-50"
+            onMouseEnter={openMega}
+            onMouseLeave={closeMega}
+          >
+            <div className="mx-auto max-w-7xl px-6 py-8">
+              <div className="grid grid-cols-3 xl:grid-cols-6 gap-x-6 gap-y-8">
+                {navGroups.map((group) => {
+                  const Icon = GROUP_ICONS[group.id] || Menu
+                  const isGroupActive = pathname.startsWith(`/category/${group.id}`)
+                  return (
+                    <div key={group.id}>
+                      <Link
+                        href={group.href}
+                        onClick={closeMega}
+                        className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-3 transition-colors ${isGroupActive ? 'text-brand' : 'text-slate-800 hover:text-brand'}`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0 text-brand" />
+                        {t(group.labelKey)}
+                      </Link>
+                      <ul className="space-y-1.5">
+                        {group.categories.map((cat) => {
+                          const isActive = pathname === '/products' && currentCategory === cat.value
+                          return (
+                            <li key={cat.value}>
+                              <Link
+                                href={`/products?category=${encodeURIComponent(cat.value)}`}
+                                onClick={closeMega}
+                                className={`text-sm leading-snug block py-0.5 transition-colors ${isActive ? 'text-brand font-semibold' : 'text-slate-600 hover:text-brand'}`}
+                              >
+                                {t(cat.labelKey)}
+                              </Link>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                      <Link
+                        href={group.href}
+                        onClick={closeMega}
+                        className="mt-3 text-xs font-semibold text-brand hover:underline inline-flex items-center gap-1"
+                      >
+                        {t('viewAll', { category: '' })}
+                        <ChevronDown className="w-3 h-3 -rotate-90" />
+                      </Link>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobil: menÃƒÂ¼ + logo + sepet (safe area wrapper'dan gelir) */}
@@ -389,12 +379,7 @@ export function HeaderInnerUI(props) {
 
           {/* BaÃ…Å¸lÃ„Â±k: sade, tek satÃ„Â±r */}
           <div className="shrink-0 px-4 pt-4 pb-3">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 min-h-[44px]">
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white shadow-sm border border-slate-200/80">
-                <Logo size="sm" href="/" className="[&_img]:max-h-5" />
-              </div>
-              <span className="text-lg font-bold text-slate-800 tracking-tight">voltekno</span>
-            </Link>
+            <Logo size="md" href="/" onClick={() => setMobileMenuOpen(false)} className="[&_img]:max-h-10" />
           </div>
 
           {/* Arama: tek kutu, ikon iÃƒÂ§eride */}
@@ -467,7 +452,7 @@ export function HeaderInnerUI(props) {
                           className={`flex-1 flex items-center gap-3 min-h-[48px] px-3 py-3 text-sm font-medium min-w-0 touch-manipulation ${isGroupActive ? 'text-brand' : 'text-slate-700'}`}
                         >
                           <Icon className={`w-5 h-5 shrink-0 ${isGroupActive ? 'text-brand' : 'text-slate-400'}`} />
-                          <span className="truncate">{t(group.labelKey)}</span>
+                          <span className="leading-snug">{t(group.labelKey)}</span>
                         </Link>
                         <button
                           type="button"
@@ -491,7 +476,7 @@ export function HeaderInnerUI(props) {
                                 className={`flex items-center gap-2 min-h-[40px] px-2 py-2 rounded-lg text-sm font-medium transition-colors touch-manipulation ${isSubActive ? 'text-brand bg-white' : 'text-slate-600 hover:text-brand hover:bg-white/80'}`}
                               >
                                 <ChevronRight className="w-4 h-4 shrink-0 text-slate-300" />
-                                <span className="truncate">{label}</span>
+                                <span className="leading-snug">{label}</span>
                               </Link>
                             )
                           })}

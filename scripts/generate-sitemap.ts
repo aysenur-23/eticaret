@@ -8,7 +8,7 @@ import { writeFileSync } from 'fs'
 import { join } from 'path'
 
 const prisma = new PrismaClient()
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://bataryakit.com'
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://voltekno.com'
 
 interface SitemapUrl {
   loc: string

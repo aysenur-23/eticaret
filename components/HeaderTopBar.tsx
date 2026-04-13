@@ -3,8 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ShoppingCart, ChevronDown, Sun } from 'lucide-react'
-import { useCartStore } from '@/lib/store/useCartStore'
+import { ChevronDown, Zap } from 'lucide-react'
 import { useCurrencyStore } from '@/lib/store/useCurrencyStore'
 import {
   DropdownMenu,
@@ -22,50 +21,50 @@ const CURRENCIES = [
 
 export function HeaderTopBar() {
   const t = useTranslations('headerTopBar')
-  const tAuth = useTranslations('auth')
-  const tHeader = useTranslations('header')
   const currency = useCurrencyStore((s) => s.currency)
   const setCurrency = useCurrencyStore((s) => s.setCurrency)
-  const cartItems = useCartStore((state) => state.items)
-  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0)
 
   return (
-    <div className="bg-slate-50/90 border-b border-slate-200/60">
+    <div className="bg-slate-900 border-b border-slate-800">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-9 text-xs font-medium text-slate-600">
-          {/* Sol: GES, Teklif Kontrol, Dil, Para birimi (Ürünler/İletişim/Giriş/Sepet ana header’da) */}
-          <div className="hidden md:flex items-center gap-5">
+        <div className="flex items-center justify-between h-9 text-xs font-medium">
+          {/* Sol: GES & Teklif */}
+          <div className="flex items-center gap-5">
             <Link
               href="/ges"
-              className="flex items-center gap-1.5 font-semibold text-brand hover:text-brand-hover transition-colors"
+              className="flex items-center gap-1.5 text-yellow-400 hover:text-yellow-300 font-semibold transition-colors"
             >
-              <Sun className="w-3.5 h-3.5" />
+              <Zap className="w-3.5 h-3.5" />
               {t('gesButton')}
             </Link>
             <Link
               href="/ges/teklif-dogrulama"
-              className="text-slate-600 hover:text-brand transition-colors"
+              className="text-slate-400 hover:text-white transition-colors hidden sm:block"
             >
               {t('gesQuoteButton')}
             </Link>
-            <span className="w-px h-4 bg-slate-200" aria-hidden />
+          </div>
+
+          {/* Sağ: Dil + Para Birimi */}
+          <div className="flex items-center gap-4">
             <LanguageSwitcher />
+            <span className="w-px h-3.5 bg-slate-700" aria-hidden />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="flex items-center gap-1 text-slate-600 hover:text-brand transition-colors"
+                  className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors"
                 >
                   {CURRENCIES.find((c) => c.code === currency)?.label ?? 'TL'}
                   <ChevronDown className="w-3 h-3" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[100px] rounded-xl border-slate-200 shadow-lg">
+              <DropdownMenuContent align="end" className="min-w-[90px] rounded-xl border-slate-200 shadow-xl bg-white">
                 {CURRENCIES.map((c) => (
                   <DropdownMenuItem
                     key={c.code}
                     onClick={() => setCurrency(c.code)}
-                    className="cursor-pointer rounded-lg"
+                    className="cursor-pointer rounded-lg text-sm"
                   >
                     {c.label}
                   </DropdownMenuItem>
@@ -73,27 +72,6 @@ export function HeaderTopBar() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          <div className="flex md:hidden items-center gap-2.5 text-xs">
-            <Link href="/ges" className="flex items-center gap-1 font-semibold text-brand">
-              <Sun className="w-3.5 h-3.5" />
-              {t('gesButton')}
-            </Link>
-            <span className="text-slate-300">|</span>
-            <Link href="/ges/teklif-dogrulama" className="text-slate-600 hover:text-brand">
-              {t('gesQuoteButton')}
-            </Link>
-            <span className="text-slate-300">|</span>
-            <Link href="/login" className="text-slate-600 hover:text-brand">
-              {tAuth('login')}
-            </Link>
-            <span className="text-slate-300">|</span>
-            <Link href="/cart" className="text-slate-600 hover:text-brand flex items-center gap-1">
-              <ShoppingCart className="w-3.5 h-3.5" />
-              {tHeader('cart')} {cartCount > 0 && `(${cartCount})`}
-            </Link>
-          </div>
-
         </div>
       </div>
     </div>

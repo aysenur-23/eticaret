@@ -95,7 +95,7 @@ export default function OrderConfirmation({
 
             <Text style={paragraph}>
               Teşekkürler,<br />
-              IMORA Ekibi
+              Voltekno Ekibi
             </Text>
           </Section>
         </Container>
