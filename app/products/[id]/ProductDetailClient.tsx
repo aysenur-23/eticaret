@@ -264,7 +264,7 @@ export default function ProductDetailClient({ initialProduct, productId: product
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10 lg:gap-16">
             <div className="space-y-3">
               <div
-                className="relative aspect-square overflow-hidden rounded-xl bg-white group cursor-zoom-in p-6 sm:p-10"
+                className="relative aspect-square overflow-hidden rounded-2xl bg-slate-50 group cursor-zoom-in p-4 sm:p-8 border border-slate-100"
                 onClick={() => { if (mainImage) { setLightboxIndex(selectedIndex); setLightboxOpen(true) } }}
               >
                 {mainImage ? (
@@ -414,10 +414,10 @@ export default function ProductDetailClient({ initialProduct, productId: product
                 </div>
               )}
 
-              <p className="text-2xl font-bold text-slate-900 tracking-tight">
+              <p className="text-3xl font-extrabold text-slate-900 tracking-tight">
                 {formatPrice(effectiveVariant ? effectiveVariant.price : product.price)}
               </p>
-              <p className="text-sm text-slate-500 mb-2">
+              <p className="text-sm text-slate-400 mb-3">
                 {tProduct('priceWithVAT')} {formatPrice((effectiveVariant ? effectiveVariant.price : product.price) * 1.20)}
               </p>
               <div className="mb-6">
@@ -512,34 +512,30 @@ export default function ProductDetailClient({ initialProduct, productId: product
               </div>
 
               {/* Güven / servis mini blok */}
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">2 Yıl Garanti</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Resmi yetkili servis</p>
+              <div className="mt-5 grid grid-cols-4 gap-2">
+                <div className="flex flex-col items-center text-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                   </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">2 Yıl<br/>Garanti</p>
                 </div>
-                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <Truck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Hızlı Kargo</p>
-                    <p className="text-xs text-slate-500 mt-0.5">1–3 iş günü teslimat</p>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-blue-50 border border-blue-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Truck className="w-4 h-4 text-blue-600" />
                   </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Hızlı<br/>Kargo</p>
                 </div>
-                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <Headphones className="w-4 h-4 text-brand shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">Teknik Destek</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Her zaman yanınızdayız</p>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-brand/5 border border-brand/15 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
+                    <Headphones className="w-4 h-4 text-brand" />
                   </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Teknik<br/>Destek</p>
                 </div>
-                <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <RotateCcw className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-bold text-slate-800">14 Gün İade</p>
-                    <p className="text-xs text-slate-500 mt-0.5">İade kargosu alıcıya aittir</p>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-amber-50 border border-amber-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <RotateCcw className="w-4 h-4 text-amber-600" />
                   </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">14 Gün<br/>İade</p>
                 </div>
               </div>
 
