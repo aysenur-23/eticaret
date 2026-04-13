@@ -308,7 +308,7 @@ export function HeaderInnerUI(props) {
                       <Link
                         href={card.href}
                         onClick={() => setOpenMenu(null)}
-                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[12px] font-medium text-slate-700 transition-colors hover:text-slate-950"
+                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[13px] font-semibold text-slate-700 transition-colors hover:text-slate-950"
                       >
                         <span className="truncate pr-3">
                           {card.translate ? t(card.title) : card.title}
@@ -329,7 +329,7 @@ export function HeaderInnerUI(props) {
   const renderDesktopLink = (href, label, active, helper) => (
     <Link
       href={href}
-      className={`${desktopNavItemClass(active)} min-w-0 ${active ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+      className={`${desktopNavItemClass(active)} flex-1 min-w-0 ${active ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
     >
       <span className={desktopNavLabelClass}>{label}</span>
     </Link>
@@ -458,7 +458,6 @@ export function HeaderInnerUI(props) {
             {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
             {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
-            <div className="flex-1" />
             {renderDesktopLink('/contact', t('navContact'), pathname === '/contact', 'DESTEK')}
           </nav>
         </div>
