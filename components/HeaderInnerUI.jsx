@@ -214,7 +214,7 @@ export function HeaderInnerUI(props) {
   const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
   const desktopNavItemClass = (isActive) =>
     `group relative flex items-center justify-center px-2 py-1 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
-  const desktopNavLabelClass = `${headerDisplay.className} text-[11px] font-bold tracking-[-0.01em] leading-[1.25] text-center break-words`
+  const desktopNavLabelClass = `${headerDisplay.className} text-[13px] font-bold tracking-[-0.01em] leading-[1.25] text-center break-words`
   const desktopNavSubLabelClass = 'hidden'
 
   const navDropdown = (labelKey, items, categoryHref, groupKey) => {

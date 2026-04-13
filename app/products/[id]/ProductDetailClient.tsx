@@ -74,10 +74,11 @@ export default function ProductDetailClient({ initialProduct, productId: product
   const tProduct = useTranslations('productDetail')
   const tCart = useTranslations('addToCart')
   const tCommon = useTranslations('common')
-  const { addItem } = useCartStore()
+  const { addItem, removeItem, updateQuantity } = useCartStore()
   const { addToast } = useToast()
   const router = useRouter()
   const [quantity, setQuantity] = useState(1)
+  const [cartQty, setCartQty] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   /** Varyantlı ürünlerde seçilen seçenek (model/kapasite); yoksa ilk varyant veya null */
@@ -436,107 +437,75 @@ export default function ProductDetailClient({ initialProduct, productId: product
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6 min-w-0">
-                <div className="flex items-center h-12 rounded-xl border border-slate-200 bg-white overflow-hidden shrink-0">
-                  <button
-                    type="button"
+              <div className="flex gap-2 sm:gap-3 mb-6">
+                {cartQty === 0 ? (
+                  <Button
                     disabled={outOfStock}
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="flex items-center justify-center h-12 w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                    aria-label={tCart('decreaseQty')}
+                    onClick={() => {
+                      if (outOfStock) return
+                      const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
+                      const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
+                      const price = effectiveVariant ? effectiveVariant.price : product.price
+                      addItem({ id: cartId, name: displayName, description: product.description, price, image: product.image, category: product.category, quantity: 1 })
+                      setCartQty(1)
+                    }}
+                    className="flex-1 rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 bg-brand hover:bg-brand-hover text-white font-semibold text-sm sm:text-base disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center"
                   >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="flex items-center justify-center h-12 w-11 font-semibold text-slate-900 tabular-nums text-sm border-x border-slate-100 bg-white">
-                    {outOfStock ? 0 : quantity}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={outOfStock || quantity >= maxQuantity}
-                    onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-                    className="flex items-center justify-center h-12 w-11 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                    aria-label={tCart('increaseQty')}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+                    <ShoppingCart className="w-4 h-4 mr-2 shrink-0" />
+                    {outOfStock ? tCart('outOfStock') : tCart('addToCart')}
+                  </Button>
+                ) : (
+                  <div className="flex-1 flex items-center h-12 rounded-xl border-2 border-brand bg-brand/5 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQty = cartQty - 1
+                        const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
+                        if (newQty === 0) {
+                          removeItem(cartId)
+                        } else {
+                          updateQuantity(cartId, newQty)
+                        }
+                        setCartQty(newQty)
+                      }}
+                      className="flex items-center justify-center h-12 w-12 text-brand hover:bg-brand/10 transition-colors"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="flex-1 flex items-center justify-center text-brand font-bold text-base tabular-nums select-none">
+                      {cartQty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newQty = Math.min(cartQty + 1, maxQuantity)
+                        const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
+                        updateQuantity(cartId, newQty)
+                        setCartQty(newQty)
+                      }}
+                      className="flex items-center justify-center h-12 w-12 text-brand hover:bg-brand/10 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
                 <Button
                   disabled={outOfStock}
                   onClick={() => {
-                    const qty = displayQuantity
-                    if (outOfStock || qty < 1) return
+                    if (outOfStock) return
                     const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
                     const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
                     const price = effectiveVariant ? effectiveVariant.price : product.price
-                    addItem({
-                      id: cartId,
-                      name: displayName,
-                      description: product.description,
-                      price,
-                      image: product.image,
-                      category: product.category,
-                      quantity: qty,
-                    })
-                    addToast({ type: 'success', title: tProduct('addedToCartTitle'), description: tProduct('addedToCartDesc', { name: displayName }) })
-                  }}
-                  className="rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 flex-1 min-w-0 sm:min-w-[140px] bg-brand hover:bg-brand-hover text-white font-semibold text-sm sm:text-base text-center disabled:opacity-60 disabled:pointer-events-none"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2 shrink-0" />
-                  <span className="break-words">{outOfStock ? tCart('outOfStock') : tCart('addToCart')}</span>
-                </Button>
-                <Button
-                  disabled={outOfStock}
-                  onClick={() => {
-                    const qty = displayQuantity
-                    if (outOfStock || qty < 1) return
-                    const cartId = effectiveVariant ? `${product.id}-${effectiveVariant.key}` : product.id
-                    const displayName = effectiveVariant ? `${product.name} (${effectiveVariant.label})` : product.name
-                    const price = effectiveVariant ? effectiveVariant.price : product.price
-                    addItem({
-                      id: cartId,
-                      name: displayName,
-                      description: product.description,
-                      price,
-                      image: product.image,
-                      category: product.category,
-                      quantity: qty,
-                    })
+                    const qty = cartQty > 0 ? cartQty : 1
+                    addItem({ id: cartId, name: displayName, description: product.description, price, image: product.image, category: product.category, quantity: qty })
                     router.push('/cart')
                   }}
                   variant="destructive"
-                  className="rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 flex-1 min-w-0 sm:min-w-[160px] font-semibold text-sm sm:text-base text-center disabled:opacity-60 disabled:pointer-events-none"
+                  className="flex-1 rounded-xl min-h-12 h-auto py-3 px-4 sm:px-5 font-semibold text-sm sm:text-base disabled:opacity-60 disabled:pointer-events-none flex items-center justify-center"
                 >
                   <Zap className="w-4 h-4 mr-2 shrink-0" />
                   <span className="break-words">{outOfStock ? tCart('outOfStock') : tProduct('buyNow')}</span>
                 </Button>
-              </div>
-
-              {/* Güven / servis mini blok */}
-              <div className="mt-5 grid grid-cols-4 gap-2">
-                <div className="flex flex-col items-center text-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">2 Yıl<br/>Garanti</p>
-                </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-blue-50 border border-blue-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Truck className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Hızlı<br/>Kargo</p>
-                </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-brand/5 border border-brand/15 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
-                    <Headphones className="w-4 h-4 text-brand" />
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Teknik<br/>Destek</p>
-                </div>
-                <div className="flex flex-col items-center text-center gap-1.5 bg-amber-50 border border-amber-100 rounded-2xl p-3">
-                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                    <RotateCcw className="w-4 h-4 text-amber-600" />
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-800 leading-tight">14 Gün<br/>İade</p>
-                </div>
               </div>
 
               {/* Uyumlu ürünler */}
@@ -584,6 +553,34 @@ export default function ProductDetailClient({ initialProduct, productId: product
                   </div>
                 )
               })()}
+
+              {/* Güven / servis mini blok */}
+              <div className="mt-5 grid grid-cols-4 gap-2">
+                <div className="flex flex-col items-center text-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">2 Yıl<br/>Garanti</p>
+                </div>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-blue-50 border border-blue-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Truck className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Hızlı<br/>Kargo</p>
+                </div>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-brand/5 border border-brand/15 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
+                    <Headphones className="w-4 h-4 text-brand" />
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">Teknik<br/>Destek</p>
+                </div>
+                <div className="flex flex-col items-center text-center gap-1.5 bg-amber-50 border border-amber-100 rounded-2xl p-3">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                    <RotateCcw className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-800 leading-tight">14 Gün<br/>İade</p>
+                </div>
+              </div>
 
               {/* Görselin sağında: Bu ürün size uygun mu? – tıklanınca mini form açılır */}
               <div className="mt-6 pt-6 border-t border-slate-200">
