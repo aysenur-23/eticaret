@@ -21,6 +21,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info, Tag, FileText, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { getCategoryKey } from '@/lib/categories'
+import { CartRelatedProducts } from '@/components/CartRelatedProducts'
 
 export default function CartPage() {
   const router = useRouter()
@@ -235,6 +236,12 @@ export default function CartPage() {
                 ))}
               </CardContent>
             </Card>
+
+            {/* Tamamlayıcı / Birlikte alınan ürünler */}
+            <CartRelatedProducts
+              cartItemIds={items.map((i) => i.id)}
+              cartCategories={[...new Set(items.map((i) => i.category).filter((c): c is string => !!c))]}
+            />
 
             <Button asChild variant="outline" className="w-full rounded-xl min-h-[48px] touch-manipulation">
               <Link href="/products" className="flex items-center justify-center gap-2">

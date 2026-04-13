@@ -1,10 +1,19 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
 
-// Register font for Turkish characters
+// Register font for Turkish characters (TTF format — woff2 is not supported by fontkit/react-pdf)
 Font.register({
   family: 'Roboto',
-  src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2',
+  fonts: [
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Regular.ttf',
+      fontWeight: 400,
+    },
+    {
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/fonts/Roboto/Roboto-Medium.ttf',
+      fontWeight: 700,
+    },
+  ],
 })
 
 const styles = StyleSheet.create({

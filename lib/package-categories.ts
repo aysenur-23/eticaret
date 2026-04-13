@@ -26,6 +26,7 @@
   useCases: string[]
   includedHighlights: string[]
   faq: Array<{ question: string; answer: string }>
+  deviceCapacity?: string
 }
 
 export const PACKAGE_CATEGORIES: PackageCategory[] = [
@@ -50,6 +51,7 @@ export const PACKAGE_CATEGORIES: PackageCategory[] = [
     upgradeOptions: ['Ek güneş paneli ekleyerek kapasite artırımı', 'Batarya modülü büyütme (ek kWh)', 'Akıllı izleme ve uygulama desteği', 'Hibrit invertera yükseltme ile şebeke entegrasyonu'],
     useCases: ['Aydınlatma', 'Küçük ev aletleri', 'Mini buzdolabı', 'Yedek enerji'],
     includedHighlights: ['Monokristal panel seçeneği', 'Hibrit/off-grid inverter uyumu', 'İsteğe bağlı batarya kapasitesi', 'Kompakt yaşam alanları için uygun kurulum'],
+    deviceCapacity: '4–8 cihaz (aydınlatma, şarj cihazları, mini buzdolabı, fan)',
     faq: [
       { question: 'Bağ evi paketi hangi güç aralığına uygundur?', answer: 'Tüketim durumuna göre 1 kWp–3 kWp arası başlangıç seçenekleri önerilir. Uzman ekibimiz ihtiyaç analizi yaparak doğru kapasiteyi belirler.' },
       { question: 'Kış aylarında performans nasıl olur?', answer: 'Kışın güneş ışınım süresi kısalsa da doğru panel ve batarya kombinasyonu ile temel ihtiyaçlar (aydınlatma, şarj) rahatlıkla karşılanabilir.' },
@@ -77,6 +79,7 @@ export const PACKAGE_CATEGORIES: PackageCategory[] = [
     upgradeOptions: ['Panel dizisi büyütme ile daha derin kuyu desteği', 'Gece sulama için batarya modülü ekleme', 'GSM/uzaktan izleme ve kontrol sistemi', 'Birden fazla pompa için paralel bağlantı genişletmesi'],
     useCases: ['Gündüz sulama', 'Kuyu pompası besleme', 'Şebekeden uzak tarla uygulamaları'],
     includedHighlights: ['Sulama inverteri uyumu', 'Dış saha koşullarına dayanıklı ekipman', 'Yüksek verimli panel kombinasyonları'],
+    deviceCapacity: '1–3 sulama pompası (0.5–7.5 kW)',
     faq: [
       { question: 'Sulama pompası için paket nasıl seçilir?', answer: 'Pompa gücü (kW), çalışma süresi (saat/gün) ve günlük su ihtiyacı baz alınarak doğru panel ve inverter kapasitesi belirlenir.' },
       { question: 'Gece sulama için batarya gerekir mi?', answer: 'Evet. Gece veya bulutlu havalarda çalışma planı varsa uygun kapasitede batarya modülü eklenmesi önerilir.' },
@@ -104,6 +107,7 @@ export const PACKAGE_CATEGORIES: PackageCategory[] = [
     upgradeOptions: ['Ek panel ile şarj hızını artırma', 'Karavan çatısına sabit panel montajı', 'Daha büyük kapasiteli güç istasyonuna geçiş', 'Araç şarj adaptörü entegrasyonu'],
     useCases: ['Telefon/laptop şarjı', 'Kamp buzdolabı', 'Mini aydınlatma sistemleri'],
     includedHighlights: ['Katlanabilir panel opsiyonları', 'Taşınabilir güç istasyonu uyumu', 'Düşük ağırlık ve kolay kurulum'],
+    deviceCapacity: '3–6 cihaz (telefon, laptop, kamp buzdolabı, aydınlatma)',
     faq: [
       { question: 'Karavan çatısına sabit montaj gerekiyor mu?', answer: 'İhtiyaca göre sabit veya taşınabilir panel seçenekleri kullanılabilir. Taşınabilir paneller farklı konumlarda yönlendirilebilir.' },
       { question: 'Paket şehir şebekesinden bağımsız çalışır mı?', answer: 'Evet. Güç istasyonu ve güneş paneli kombinasyonuyla birkaç günlük bağımsız kullanım rahatlıkla sağlanabilir.' },
@@ -131,6 +135,7 @@ export const PACKAGE_CATEGORIES: PackageCategory[] = [
     upgradeOptions: ['Batarya kapasitesini genişletme', '3 fazlı sisteme yükseltme', 'EV şarj noktası entegrasyonu (V2H)', 'Uzaktan izleme ve otomasyon ekleme'],
     useCases: ['Klima ve havuz ekipmanları', 'Beyaz eşya yükleri', 'Kesinti anında yedekleme'],
     includedHighlights: ['Yüksek güçlü inverter seçenekleri', 'Akıllı enerji yönetimi', 'Genişletilebilir depolama altyapısı'],
+    deviceCapacity: '15–30 cihaz (klima, beyaz eşya, aydınlatma, havuz pompası)',
     faq: [
       { question: 'Villa paketinde batarya şart mı?', answer: 'Şart değil; ancak kesintisiz kullanım, gece tüketimi ve şebeke kesintilerinde yedekleme için batarya kesinlikle önerilir.' },
       { question: 'Paket sonradan büyütülebilir mi?', answer: 'Evet. Modüler hibrit inverter ve batarya altyapısıyla sistem kolayca genişletilebilir, ek panel veya modül eklenebilir.' },
@@ -158,6 +163,7 @@ export const PACKAGE_CATEGORIES: PackageCategory[] = [
     upgradeOptions: ['Rüzgar türbini ile hibrit üretim sistemi', 'Yük izleme ve akıllı dağıtım paneli', 'İkinci batarya bankı (kabin + start ayrımı)', '220V invertör eklenerek AC cihaz desteği'],
     useCases: ['Aydınlatma ve elektronik sistemler', 'Navigasyon ekipmanları', 'Uzun süreli seyir destek enerjisi'],
     includedHighlights: ['Marin tip lityum batarya seçenekleri', 'Düşük voltaj sistem uyumu', 'Kompakt ve dayanıklı tasarım'],
+    deviceCapacity: '5–12 deniz elektroniği (navigasyon, aydınlatma, VHF, fridge)',
     faq: [
       { question: 'Marin paketleri tuzlu su koşullarına uygun mu?', answer: 'Evet. Önerilen tüm ekipmanlar deniz koşullarına uygunluk (IP67/IP68) ve tuz spreyi dayanımı gözetilerek seçilir.' },
       { question: 'Teknede alan kısıtı varsa hangi paket önerilir?', answer: 'Esnek güneş paneli + yüksek yoğunluklu LiFePO4 batarya kombinasyonu en az yer kaplarken maksimum kapasiteyi sağlar.' },

@@ -73,8 +73,10 @@ export async function POST(request: NextRequest) {
       const lineVat = lineSubtotal * (VAT_RATE / 100)
       const lineTotal = Math.round((lineSubtotal + lineVat) * 100) / 100
       return {
-        variantId: null, // mock/statik ürünlerde DB'de variant kaydı yok; FK hatasını önlemek için null
+        variantId: item.variantId || null, // Prisma variant varsa bağla, yoksa null (mock ürün)
         productName: (item.name || 'Ürün').slice(0, 500),
+        // mock ürünlerde stok geri iadesi için productId'yi variantMatrix'e sakla
+        variantMatrix: item.variantId ? undefined : (item.id ? { productId: item.id } : undefined),
         quantity: qty,
         unitPrice,
         vatRate: VAT_RATE,
@@ -120,6 +122,52 @@ export async function POST(request: NextRequest) {
       },
       include: { lines: true },
     })
+
+    // ── Stok düşme ─────────────────────────────────────────────────────────
+    // Sipariş başarıyla oluşturuldu; her kalem için stok azalt.
+    // Hata olursa sipariş iptal edilmez, sadece loglanır.
+    try {
+      for (const item of (Array.isArray(items) ? items : [])) {
+        const qty = Math.max(1, Number(item.quantity) || 1)
+
+        if (item.variantId) {
+          // Prisma Variant → Stock.reserved artır, Stock.onHand azalt
+          await prisma.stock.updateMany({
+            where: { variantId: item.variantId },
+            data: {
+              reserved: { increment: qty },
+              onHand: { decrement: qty },
+            },
+          })
+        } else if (item.id) {
+          // Mock/statik ürün → StockOverride.stock azalt (minimum 0)
+          await prisma.$transaction(async (tx) => {
+            const override = await tx.stockOverride.findUnique({
+              where: { productId: String(item.id) },
+            })
+            if (override) {
+              await tx.stockOverride.update({
+                where: { productId: String(item.id) },
+                data: { stock: Math.max(0, override.stock - qty) },
+              })
+            }
+            // ProductOverride.stock alanını da güncelle (varsa)
+            const prodOverride = await tx.productOverride.findUnique({
+              where: { productId: String(item.id) },
+            })
+            if (prodOverride && typeof prodOverride.stock === 'number') {
+              await tx.productOverride.update({
+                where: { productId: String(item.id) },
+                data: { stock: Math.max(0, prodOverride.stock - qty) },
+              })
+            }
+          })
+        }
+      }
+    } catch (stockErr) {
+      console.error('Stock decrement error (order still created):', stockErr)
+    }
+    // ───────────────────────────────────────────────────────────────────────
 
     const notificationData = {
       orderId: order.orderNo,

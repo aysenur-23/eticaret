@@ -131,12 +131,13 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Reserve stock
+    // Stok düşme: onHand azalt + reserved artır
     for (const item of cartItemsWithData) {
       await prisma.stock.update({
         where: { variantId: item.variantId },
         data: {
           reserved: { increment: item.quantity },
+          onHand: { decrement: item.quantity },
         },
       })
     }

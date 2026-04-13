@@ -232,6 +232,45 @@ export async function PATCH(
         })
       }
 
+      // ── Stok iadesi: İptal / İade durumuna geçilince stoğu geri al ────────
+      if (status === 'CANCELLED' || status === 'RETURNED') {
+        const prevStatus = order.status
+        const isNewCancelOrReturn = prevStatus !== 'CANCELLED' && prevStatus !== 'RETURNED'
+        if (isNewCancelOrReturn) {
+          try {
+            for (const line of order.lines) {
+              if (line.variantId) {
+                // Prisma variant → onHand geri artır, reserved azalt
+                await prisma.stock.updateMany({
+                  where: { variantId: line.variantId },
+                  data: {
+                    onHand: { increment: line.quantity },
+                    reserved: { decrement: line.quantity },
+                  },
+                })
+              } else if (line.variantMatrix) {
+                // Mock ürün → productId variantMatrix'den al, StockOverride artır
+                const matrix = line.variantMatrix as Record<string, unknown>
+                const productId = matrix?.productId as string | undefined
+                if (productId) {
+                  await prisma.stockOverride.updateMany({
+                    where: { productId },
+                    data: { stock: { increment: line.quantity } },
+                  })
+                  await prisma.productOverride.updateMany({
+                    where: { productId },
+                    data: { stock: { increment: line.quantity } },
+                  })
+                }
+              }
+            }
+          } catch (stockErr) {
+            console.error('Stock restore error on cancel/return:', stockErr)
+          }
+        }
+      }
+      // ──────────────────────────────────────────────────────────────────────
+
       const customer = {
         name: order.shippingName,
         email: order.user?.email ?? '',
