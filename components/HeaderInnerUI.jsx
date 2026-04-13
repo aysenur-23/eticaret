@@ -213,8 +213,8 @@ export function HeaderInnerUI(props) {
 
   const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
   const desktopNavItemClass = (isActive) =>
-    `group relative flex items-center justify-center px-3 xl:px-4 py-1.5 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
-  const desktopNavLabelClass = `${headerDisplay.className} text-[12px] xl:text-[13px] font-bold tracking-[-0.01em] leading-[1.2] truncate`
+    `group relative flex items-center justify-center px-2 py-1 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
+  const desktopNavLabelClass = `${headerDisplay.className} text-[11px] font-bold tracking-[-0.01em] leading-[1.25] text-center break-words`
   const desktopNavSubLabelClass = 'hidden'
 
   const navDropdown = (labelKey, items, categoryHref, groupKey) => {
@@ -243,7 +243,7 @@ export function HeaderInnerUI(props) {
               className={`${desktopNavItemClass(isGroupPageActive || openMenu === labelKey)} border-0 outline-none ring-0 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 ${(isGroupPageActive || openMenu === labelKey) ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
               onMouseEnter={() => { handleMouseEnter(); setOpenMenu(labelKey) }}
             >
-              <span className={`${desktopNavLabelClass} max-w-[15ch]`}>
+              <span className={desktopNavLabelClass}>
                 {t(labelKey)}
               </span>
               <ChevronDown className={`ml-1 h-3 w-3 shrink-0 text-slate-400 transition-transform duration-200 ${openMenu === labelKey ? 'rotate-180' : ''}`} />
@@ -331,7 +331,7 @@ export function HeaderInnerUI(props) {
       href={href}
       className={`${desktopNavItemClass(active)} min-w-0 ${active ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
     >
-      <span className={`${desktopNavLabelClass} max-w-[15ch]`}>{label}</span>
+      <span className={desktopNavLabelClass}>{label}</span>
     </Link>
   )
 
@@ -454,7 +454,7 @@ export function HeaderInnerUI(props) {
       {/* Şerit 2: Ana menü */}
       <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
-          <nav className="flex items-center gap-0.5 min-w-0 overflow-visible h-[46px]" aria-label="Ana menu">
+          <nav className="flex items-center gap-0.5 min-w-0 overflow-visible h-[52px]" aria-label="Ana menu">
             {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
             {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
