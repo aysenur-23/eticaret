@@ -544,17 +544,18 @@ export default function HomePage() {
             <p className={sectionDescClass}>{t('categoriesDesc')}</p>
           </header>
 
-          {/* Orijinal 3 büyük fotoğraf kartı */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 md:gap-6 min-w-0 mb-4">
+          {/* 5 kategori — tek unified grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5 md:gap-6 min-w-0">
             {[
               { href: '/category/elektrikli-arac-sarj-urunleri', title: t('categoryCharge'), subtitle: t('categoryChargeDesc'), image: '/images/categories/sarj.png', objectPosition: 'center center' },
               { href: '/category/batarya-depolama', title: t('categoryBattery'), subtitle: t('categoryBatteryDesc'), image: '/images/categories/batarya.png', objectPosition: 'center center' },
               { href: '/category/gunes-enerjisi', title: t('categorySolar'), subtitle: t('categorySolarDesc'), image: '/images/categories/panel.png', objectPosition: 'center center' },
-            ].map((item) => (
+              ...EXTRA_CATEGORY_ITEMS.map(i => ({ href: i.href, title: i.title, subtitle: i.subtitle, image: i.image, objectPosition: 'center center' })),
+            ].map((item, idx) => (
               <Link
-                key={item.title}
+                key={item.href}
                 href={item.href}
-                className="group relative block rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-300 min-w-0 touch-manipulation"
+                className={`group relative block rounded-xl sm:rounded-2xl overflow-hidden bg-white border border-slate-200/80 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-0.5 transition-all duration-300 min-w-0 touch-manipulation${idx === 4 ? ' col-span-2 sm:col-span-1' : ''}`}
               >
                 <div className="aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-slate-100">
                   <Image
@@ -565,7 +566,7 @@ export default function HomePage() {
                     sizes="(max-width: 640px) 50vw, 33vw"
                     style={{ objectPosition: item.objectPosition }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" aria-hidden />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" aria-hidden />
                 </div>
                 <div className="p-3 sm:p-4 border-t border-slate-100">
                   <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5 group-hover:text-brand transition-colors line-clamp-1">{item.title}</h3>
@@ -576,48 +577,6 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
-          </div>
-
-          {/* Ekstra kategoriler — gerçek görsel kartlar */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {EXTRA_CATEGORY_ITEMS.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group relative block rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 touch-manipulation"
-                >
-                  <div className={`aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-slate-100`}>
-                    {item.image ? (
-                      <>
-                        <Image
-                          src={item.image}
-                          alt={item.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          sizes="(max-width: 640px) 50vw, 25vw"
-                        />
-                      </>
-                    ) : (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                        <Icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
-                      </div>
-                    )}
-                    <div className="absolute bottom-2 left-3">
-                      <Icon className="w-5 h-5 text-white/70" />
-                    </div>
-                  </div>
-                  <div className="p-3 sm:p-4 border-t border-slate-100 bg-white">
-                    <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5 group-hover:text-brand transition-colors line-clamp-1">{item.title}</h3>
-                    <p className="text-slate-600 text-xs sm:text-sm line-clamp-2 mb-3">{item.subtitle}</p>
-                    <span className="inline-flex items-center rounded-lg sm:rounded-xl bg-brand text-white text-[10px] sm:text-xs font-bold px-3 py-2 sm:px-4 sm:py-2.5 transition-all duration-300 shadow-sm group-hover:opacity-90">
-                      {t('categoryIncele')}
-                    </span>
-                  </div>
-                </Link>
-              )
-            })}
           </div>
         </div>
       </section>
