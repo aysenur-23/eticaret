@@ -247,7 +247,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 container mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 xl:px-20">
-          <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-center py-12 lg:py-10">
+          <div className="grid lg:grid-cols-2 gap-8 xl:gap-16 items-center py-8 lg:py-6">
 
             {/* ─ Sol: metin ─ */}
             <div className="order-2 lg:order-1">

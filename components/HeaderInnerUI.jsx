@@ -201,8 +201,8 @@ export function HeaderInnerUI(props) {
 
   const menuPanelClass = 'w-[min(520px,calc(100vw-3rem))] max-w-[520px] overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-[0_8px_32px_rgba(15,23,42,0.08),0_1px_3px_rgba(15,23,42,0.04)] animate-in fade-in slide-in-from-top-1 duration-150'
   const desktopNavItemClass = (isActive) =>
-    `group relative flex items-center justify-center px-2 py-1 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
-  const desktopNavLabelClass = `${headerDisplay.className} text-[13px] font-bold tracking-[-0.01em] leading-[1.25] text-center break-words`
+    `group relative flex items-center justify-center px-3 py-1.5 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
+  const desktopNavLabelClass = `${headerDisplay.className} text-[14px] font-bold tracking-[-0.01em] leading-[1.25] text-center whitespace-nowrap`
   const desktopNavSubLabelClass = 'hidden'
 
   const navDropdown = (labelKey, items, categoryHref, groupKey) => {
@@ -213,7 +213,7 @@ export function HeaderInnerUI(props) {
     return (
       <div
         key={groupKey}
-        className="relative min-w-0 flex-1"
+        className="relative shrink-0"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -421,8 +421,18 @@ export function HeaderInnerUI(props) {
       {/* Şerit 2: Ana menü */}
       <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
-          <nav className="flex items-center gap-0.5 min-w-0 overflow-hidden h-[52px]" aria-label="Ana menu">
+          <nav className="flex items-center gap-0.5 h-[52px]" aria-label="Ana menu">
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
+            <div className="w-px h-5 bg-slate-200 mx-1 shrink-0" aria-hidden />
+            {navLinks.filter(l => l.href === '/contact').map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`${desktopNavItemClass(pathname === link.href)} shrink-0 ${pathname === link.href ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+              >
+                <span className={desktopNavLabelClass}>{t(link.labelKey)}</span>
+              </Link>
+            ))}
           </nav>
         </div>
       </div>
