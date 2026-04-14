@@ -171,9 +171,9 @@ const BLOG_PLACEHOLDER = [
 const EXTRA_CATEGORY_ITEMS = [
   {
     href: '/category/inverterler',
-    title: 'İnverter',
+    title: 'Inverter',
     subtitle: 'Hibrit, off-grid ve mikro inverterler',
-    image: '/images/products/deye-12kw-trifaze-hybrid-1.jpg',
+    image: '/images/categories/inverter.png',
     icon: Cpu,
     bg: 'from-teal-600 to-teal-800',
   },
@@ -181,7 +181,7 @@ const EXTRA_CATEGORY_ITEMS = [
     href: '/category/isi-pompasi-hvac',
     title: 'Isı Pompası',
     subtitle: 'İklimlendirme ve ısıtma sistemleri',
-    image: '/images/hero/hero-3.png',
+    image: '/images/categories/isi-pompasi.png',
     icon: Flame,
     bg: 'from-red-600 to-orange-700',
   },
