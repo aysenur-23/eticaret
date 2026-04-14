@@ -1,14 +1,15 @@
 export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminCookie } from '@/lib/adminAuth'
+import { checkAdmin } from '@/lib/adminAuth'
 import { getAdminAuth, isFirebaseAdminConfigured } from '@/lib/firebaseAdminServer'
 
 const ADMIN_UID = 'admin-panel-user'
 
 export async function GET(request: NextRequest) {
-  if (!verifyAdminCookie(request)) {
-    return NextResponse.json({ success: false }, { status: 401 })
+  const auth = await checkAdmin(request)
+  if ('error' in auth) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: auth.status })
   }
 
   if (!isFirebaseAdminConfigured()) {
