@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Product Detail API by ID or Slug
  * Önce site kataloğu (mock + ProductOverride) aranır; yoksa Prisma Product döner.

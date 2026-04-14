@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import PDFDocument from 'pdfkit'
 import { prisma } from '@/lib/prisma'

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin: GES teklif istekleri listesi.
  */

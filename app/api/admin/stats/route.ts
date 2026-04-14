@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin Stats API
  * GET /api/admin/stats

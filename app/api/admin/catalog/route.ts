@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin Catalog API
  * GET: merged list (mock + ProductOverride)

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Test Email API
  * Tests SMTP connection and sends a test email

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Adresler API - Firestore proxy (tek kaynak: users/{uid}/addresses).
  * Profil ve checkout client tarafında doğrudan Firestore kullanır; bu API aynı veri kaynağına proxy sağlar.

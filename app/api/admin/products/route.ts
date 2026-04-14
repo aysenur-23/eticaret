@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin Products API
  * CRUD operations for products (Prisma).

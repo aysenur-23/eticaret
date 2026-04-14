@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Test Storage API
  * Tests file upload and storage functionality

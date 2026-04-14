@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * GES teklif formu dosya yükleme (elektrik panosu, fatura, çatı fotoğrafı).
  * PDF ve resim (JPEG, PNG, WebP) kabul eder. Google Drive'a yükler, webViewLink döner.

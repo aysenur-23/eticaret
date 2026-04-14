@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * PayTR Webhook Handler
  * Processes PayTR payment webhooks. PAID durumunda fatura oluşturup gönderir ve ödeme onay e-postası atar.

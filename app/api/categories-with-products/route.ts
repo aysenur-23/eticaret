@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Kategori listesini döndürür (header/sidebar filtreleme için).
  * Sadece statik liste kullanır; Prisma/DB yok, production'da 500 oluşmaz.

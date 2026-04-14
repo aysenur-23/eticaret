@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * GES form bildirimi: Sadece e-posta gönderir (Firestore istemci tarafında kaydedilir).
  * Her gönderimde 1 mail (form özeti). fullQuoteRequested=true ise ek olarak "Teklif al basıldı" maili.

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Stripe Webhook Handler
  * Processes Stripe payment webhooks. PAID durumunda fatura oluşturup gönderir ve ödeme onay e-postası atar.

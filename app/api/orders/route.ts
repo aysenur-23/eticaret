@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { sendOrderConfirmation, sendAdminNewOrderNotification } from '@/lib/notifications'
 import { prisma } from '@/lib/prisma'

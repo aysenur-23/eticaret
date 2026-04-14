@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin Discounts API
  * GET: list all discounts

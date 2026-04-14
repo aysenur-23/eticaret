@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Kupon kodu doğrulama.
  * POST body: { code: string, subtotal?: number }

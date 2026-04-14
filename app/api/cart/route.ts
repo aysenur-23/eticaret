@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Cart API Routes
  * Handles cart operations (get, add, update, remove)

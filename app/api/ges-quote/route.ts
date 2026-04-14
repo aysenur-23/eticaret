@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * GES (Güneş Enerjisi Santrali) teklif isteği.
  * Zorunlu: fullName, phone, city. Kayıt Prisma'ya + isteğe bağlı admin e-postası.

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin Stock Management API
  * Handles stock updates (Prisma Variant/Stock).

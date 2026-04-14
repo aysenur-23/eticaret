@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Sipariş bildirimleri (müşteri onay e-postası + admin yeni sipariş bildirimi).
  * Checkout'ta Firestore'a yazılan siparişler için kullanılır.

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Bir sonraki unique sipariş numarasını döner (ORD-YYYY-NNNNN).
  * Firestore siparişi (havale) oluşturulurken kullanılır; böylece tüm siparişler aynı numara havuzunu kullanır.

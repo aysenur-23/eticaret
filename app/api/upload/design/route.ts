@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Tasarım dosyası yükleme (Teklif Al - 3D Baskı / Mekanik Üretim).
  * Multipart ile alınan dosyayı Google Drive'a yükler, webViewLink döner.

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Public API: active discounts (for storefront)
  * Returns discounts that are active and within date range.

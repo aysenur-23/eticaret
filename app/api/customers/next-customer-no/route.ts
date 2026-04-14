@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Sonraki unique müşteri numarasını döner (CUS-NNNNN).
  * Firestore kullanıcıları ilk siparişte veya profilde bu numarayı alıp users/{uid}.customerNo olarak kaydeder.

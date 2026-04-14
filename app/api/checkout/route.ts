@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Checkout API Route
  * Handles order creation and payment initiation

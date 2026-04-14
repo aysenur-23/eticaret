@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin: Stok override yönetimi (site mock ürünleri için).
  * Auth: Bearer JWT (firebase-session sonrası).

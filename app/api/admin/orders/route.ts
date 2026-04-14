@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin: Sipariş listesi
  * - Prisma Order (misafir / variant siparişleri)

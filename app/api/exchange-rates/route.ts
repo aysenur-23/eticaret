@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Resmi kur (TCMB) – TRY bazlı. Saatlik önbellek.
  * Öncelik: TCMB today.xml (gösterge niteliğindeki kurlar), yedek: open.er-api.com

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Public: Stok override listesi (ürün kartları ve detay sayfası için).
  * GET: Tüm productId -> stock eşlemesini döner.

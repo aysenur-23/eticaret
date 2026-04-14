@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * GES Teklif Doğrulama formu – kayıt + kırmızı bayrak hesaplama.
  */

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { sendEmailSMTP } from '@/lib/email-smtp'
 import { isRateLimited } from '@/lib/rate-limit'

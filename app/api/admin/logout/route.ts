@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Admin çıkışı: admin_session cookie'sini siler.
  */

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Firebase ID token → Backend JWT (auth bridge).
  * Giriş/kayıt sonrası frontend bu endpoint'i çağırır; dönen JWT ile Tekliflerim ve Admin API kullanılır.

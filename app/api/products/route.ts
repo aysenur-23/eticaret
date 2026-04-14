@@ -3,6 +3,8 @@
  * GET: Mock + ProductOverride merge listesi. Query: category?, q? (arama), brand?.
  */
 
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getMergedProducts } from '@/lib/catalog-merge'
 import { productMatchesQuery } from '@/lib/search-product'
