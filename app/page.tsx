@@ -702,42 +702,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 8. NEDEN VOLTEKNO (orijinal yapı) ───────────────────────────── */}
-      <div className="w-full border-t border-slate-200/80 bg-slate-100/40" aria-hidden />
-      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-voltekno-heading">
-        <div className={containerClass}>
-          <header className="text-center mb-10 md:mb-14">
-            <span className={sectionOverlineClass}>{t('whyUs')}</span>
-            <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
-              {t('whyVoltekno')}
-            </h2>
-            <p className={`${sectionDescClass} max-w-2xl mx-auto mt-2 text-center`}>
-              {t('whyVolteknoDesc')}
-            </p>
-          </header>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            {[
-              { icon: Shield, titleKey: 'reliableQuality' as const, descKey: 'reliableQualityDesc' as const, color: 'bg-brand' },
-              { icon: ShoppingBag, titleKey: 'rightProduct' as const, descKey: 'rightProductDesc' as const, color: 'bg-emerald-500' },
-              { icon: Truck, titleKey: 'fastDelivery' as const, descKey: 'fastDeliveryDesc' as const, color: 'bg-sky-500' },
-              { icon: HeadphonesIcon, titleKey: 'techSupport' as const, descKey: 'techSupportDesc' as const, color: 'bg-violet-500' },
-            ].map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.titleKey} className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
-                  <div className={`w-14 h-14 ${item.color} rounded-2xl flex items-center justify-center mb-5 shadow-sm`}>
-                    <Icon className="w-7 h-7 text-white" aria-hidden />
-                  </div>
-                  <h3 className="font-bold text-base md:text-lg text-slate-900 mb-2">{t(item.titleKey)}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{t(item.descKey)}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 9. REFERANS PROJELER ─────────────────────────────────────────── */}
+      {/* ─── 8. REFERANS PROJELER ─────────────────────────────────────────── */}
       <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="reference-projects-heading">
         <div className={containerClass}>
           <header className="mb-8 md:mb-10">
@@ -843,6 +808,41 @@ export default function HomePage() {
             <Button asChild variant="outline" className="rounded-xl border-slate-300 text-slate-700 hover:bg-slate-50">
               <Link href="/faq">{t('seeAllFaq')}</Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── NEDEN VOLTEKNO (footer öncesi) ──────────────────────────────── */}
+      <div className="w-full border-t border-slate-200/80 bg-slate-100/40" aria-hidden />
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-voltekno-heading">
+        <div className={containerClass}>
+          <header className="text-center mb-10 md:mb-14">
+            <span className={sectionOverlineClass}>{t('whyUs')}</span>
+            <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
+              {t('whyVoltekno')}
+            </h2>
+            <p className={`${sectionDescClass} max-w-2xl mx-auto mt-2 text-center`}>
+              {t('whyVolteknoDesc')}
+            </p>
+          </header>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {[
+              { icon: Shield, titleKey: 'reliableQuality' as const, descKey: 'reliableQualityDesc' as const, color: 'bg-brand' },
+              { icon: ShoppingBag, titleKey: 'rightProduct' as const, descKey: 'rightProductDesc' as const, color: 'bg-emerald-500' },
+              { icon: Truck, titleKey: 'fastDelivery' as const, descKey: 'fastDeliveryDesc' as const, color: 'bg-sky-500' },
+              { icon: HeadphonesIcon, titleKey: 'techSupport' as const, descKey: 'techSupportDesc' as const, color: 'bg-violet-500' },
+            ].map((item) => {
+              const Icon = item.icon
+              return (
+                <div key={item.titleKey} className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
+                  <div className={`w-14 h-14 ${item.color} rounded-2xl flex items-center justify-center mb-5 shadow-sm`}>
+                    <Icon className="w-7 h-7 text-white" aria-hidden />
+                  </div>
+                  <h3 className="font-bold text-base md:text-lg text-slate-900 mb-2">{t(item.titleKey)}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{t(item.descKey)}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
