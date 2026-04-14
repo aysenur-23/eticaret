@@ -322,19 +322,6 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
               </div>
 
-              {/* İstatistik kartları */}
-              <div className="absolute bottom-5 left-5 right-5 grid grid-cols-3 gap-2.5">
-                {[
-                  { value: '500+',   label: 'Proje' },
-                  { value: '2.000+', label: 'Müşteri' },
-                  { value: '7/24',   label: 'Destek' },
-                ].map((s) => (
-                  <div key={s.label} className="bg-white/85 backdrop-blur-md rounded-xl p-3 border border-white/60 shadow-sm text-center">
-                    <p className="text-base font-black text-slate-900 leading-none mb-0.5">{s.value}</p>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
-                  </div>
-                ))}
-              </div>
             </div>
 
           </div>
