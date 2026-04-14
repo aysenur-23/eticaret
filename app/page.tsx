@@ -588,17 +588,16 @@ export default function HomePage() {
                   href={item.href}
                   className="group relative block rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 touch-manipulation"
                 >
-                  <div className={`aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-gradient-to-br ${item.bg}`}>
+                  <div className={`aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-slate-100`}>
                     {item.image ? (
                       <>
                         <Image
                           src={item.image}
                           alt={item.title}
                           fill
-                          className="object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                           sizes="(max-width: 640px) 50vw, 25vw"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                       </>
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
