@@ -38,46 +38,6 @@ const HERO_SLIDES: { src: string; href: string }[] = [
 ]
 const HERO_SLIDE_INTERVAL_MS = 5000
 
-// Orijinal 5 paket + 4 yeni senaryo
-const EXTRA_USE_CASES = [
-  {
-    slug: 'isletme',
-    title: 'İşletme',
-    description: 'Ticari tesis ve işyerleri için enerji çözümleri.',
-    image: '/images/hero/hero-4.png',
-    objectPosition: 'center 40%',
-    imageAlt: 'İşletme ve ticari tesis enerji çözümleri',
-    href: '/ges',
-  },
-  {
-    slug: 'ev-sarj-senaryosu',
-    title: 'EV Şarj',
-    description: 'Araç şarj istasyonu kurulumu ve ürünleri.',
-    image: '/images/categories/sarj.png',
-    objectPosition: 'center center',
-    imageAlt: 'Elektrikli araç şarj istasyonu',
-    href: '/category/elektrikli-arac-sarj-urunleri',
-  },
-  {
-    slug: 'cati-ges',
-    title: 'Çatı GES',
-    description: 'Şehir evi ve apartman güneş enerji sistemleri.',
-    image: '/images/categories/panel.png',
-    objectPosition: 'center center',
-    imageAlt: 'Çatı güneş enerji sistemi',
-    href: '/ges',
-  },
-  {
-    slug: 'endustriyel',
-    title: 'Endüstriyel',
-    description: 'Fabrika ve büyük tesis enerji projeleri.',
-    image: '/images/hero/hero-3.png',
-    objectPosition: 'center 40%',
-    imageAlt: 'Endüstriyel enerji projesi',
-    href: '/contact',
-  },
-]
-
 const FEATURED_ROW_MAX = 10
 
 function getFeaturedRowProducts(products: MockProduct[] = mockProducts): MockProduct[] {
@@ -183,8 +143,8 @@ const BLOG_PLACEHOLDER = [
     title: 'Ev için EV Şarj İstasyonu Nasıl Seçilir?',
     desc: 'AC ve DC şarj farkları, güç seviyeleri ve ev elektrik altyapısına uygunluk rehberi.',
     category: 'EV Şarj',
+    image: '/images/categories/sarj.png',
     icon: Zap,
-    iconBg: 'bg-blue-50',
     iconColor: 'text-blue-400',
   },
   {
@@ -192,8 +152,8 @@ const BLOG_PLACEHOLDER = [
     title: 'Güneş Paneli Verimi Nasıl Hesaplanır?',
     desc: 'Panel gücü, yıllık üretim tahmini ve yatırım geri dönüş hesabı hakkında kapsamlı rehber.',
     category: 'Güneş Enerjisi',
+    image: '/images/categories/panel.png',
     icon: Sun,
-    iconBg: 'bg-orange-50',
     iconColor: 'text-orange-400',
   },
   {
@@ -201,32 +161,27 @@ const BLOG_PLACEHOLDER = [
     title: 'Lityum mu, Kurşun Asit mi? Akü Karşılaştırması',
     desc: 'Fiyat, ömür, derinlik deşarj ve kullanım senaryolarına göre kapsamlı akü karşılaştırması.',
     category: 'Batarya',
+    image: '/images/categories/batarya.png',
     icon: Battery,
-    iconBg: 'bg-emerald-50',
     iconColor: 'text-emerald-400',
   },
 ]
 
-// Orijinal 3 kategori + genişletilmiş liste — fotoğraf yoksa renk+ikon
+// Genişletilmiş kategori listesi — gerçek görseller
 const EXTRA_CATEGORY_ITEMS = [
   {
     href: '/category/inverterler',
-    title: 'İnverterler',
+    title: 'İnverter',
     subtitle: 'Hibrit, off-grid ve mikro inverterler',
+    image: '/images/products/deye-12kw-trifaze-hybrid-1.jpg',
     icon: Cpu,
     bg: 'from-teal-600 to-teal-800',
   },
   {
-    href: '/category/batarya-depolama',
-    title: 'Enerji Depolama',
-    subtitle: 'ESS ve taşınabilir güç istasyonları',
-    icon: Package,
-    bg: 'from-violet-600 to-violet-800',
-  },
-  {
     href: '/category/isi-pompasi-hvac',
-    title: 'Isı Pompası / HVAC',
+    title: 'Isı Pompası',
     subtitle: 'İklimlendirme ve ısıtma sistemleri',
+    image: '/images/hero/hero-3.png',
     icon: Flame,
     bg: 'from-red-600 to-orange-700',
   },
@@ -234,6 +189,7 @@ const EXTRA_CATEGORY_ITEMS = [
     href: '/category/enerji-yonetimi',
     title: 'Enerji Yönetimi',
     subtitle: 'Akıllı sayaç ve izleme sistemleri',
+    image: '/images/hero/hero-4.png',
     icon: Zap,
     bg: 'from-cyan-600 to-sky-700',
   },
@@ -244,6 +200,7 @@ export default function HomePage() {
   const [allProducts, setAllProducts] = useState(mockProducts)
   const featuredRowProducts = useMemo(() => getFeaturedRowProducts(allProducts), [allProducts])
   const [currentSlide, setCurrentSlide] = useState(0)
+
 
   useEffect(() => {
     fetch('/api/products')
@@ -285,83 +242,106 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-full w-full max-w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50/80">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      {/* ─── 1. YENİ HERO ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950" aria-label="Ana başlık">
-        {/* Subtle background glows */}
-        <div className="absolute -top-60 -left-60 w-[700px] h-[700px] rounded-full bg-brand/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] rounded-full bg-violet-500/8 blur-3xl pointer-events-none" />
+      {/* ─── 1. HERO ─────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-white" aria-label="Ana başlık">
 
-        <div className="relative container mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 py-16 md:py-20 lg:py-24">
+        {/* Arka plan: çok hafif gradient */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[700px] h-[700px] rounded-full bg-brand/[0.05] blur-[120px]" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-blue-50 blur-[100px]" />
+        </div>
 
-            {/* Left: text + CTAs */}
-            <div className="flex-1 min-w-0 flex flex-col items-start text-left max-w-xl lg:max-w-none">
-              <div className="inline-flex items-center gap-2 rounded-full bg-brand/20 border border-brand/40 px-4 py-1.5 text-xs font-bold text-brand-light uppercase tracking-widest mb-7">
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                Türkiye'nin Enerji Mağazası
+        <div className="relative z-10 container mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 xl:px-20">
+          <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-center py-12 lg:py-10">
+
+            {/* ─ Sol: metin ─ */}
+            <div className="order-2 lg:order-1">
+
+              {/* Rozet */}
+              <div className="inline-flex items-center gap-2 bg-brand/8 border border-brand/15 rounded-full px-3.5 py-1.5 mb-10">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse shrink-0" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand">1.500+ Ürün Stokta</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight leading-[1.06] mb-5">
-                Temiz Enerji<br />
-                <span className="text-brand">Her Yerde,</span><br />
-                Her İhtiyaç İçin
+
+              {/* Başlık */}
+              <h1 className="text-[clamp(2rem,3.4vw,3.2rem)] font-black text-slate-900 tracking-[-0.025em] leading-[1.08] mb-6 max-w-[500px]">
+                Enerjini Kendin<br />
+                Üret, <span className="text-brand">Depola</span><br />
+                ve Yönet.
               </h1>
-              <p className="text-base sm:text-lg text-slate-300 mb-9 leading-relaxed max-w-lg">
-                Güneş paneli, batarya, inverter ve EV şarj çözümleri.
-                Enerji bağımsızlığınız için doğru ürün, uzman destek.
+
+              <p className="text-sm text-slate-500 mb-10 leading-relaxed max-w-[390px]">
+                Güneş paneli, inverter, batarya ve EV şarj ürünleri — güvenilir markalar, hızlı teslimat, tek sepet.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <Button asChild size="lg" className="bg-brand hover:bg-brand-hover text-white font-bold rounded-xl shadow-lg shadow-brand/30 px-7 h-12">
+
+              {/* 3 CTA */}
+              <div className="flex flex-wrap gap-3 mb-12">
+                <Button asChild className="bg-brand hover:bg-brand-hover text-white font-bold rounded-xl h-11 px-6 text-sm shadow-md shadow-brand/20">
+                  <Link href="/ges" className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 shrink-0" />
+                    Teklif Al
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 rounded-xl h-11 px-6 text-sm">
                   <Link href="/products" className="flex items-center gap-2">
-                    <ShoppingBag className="w-4 h-4" />
+                    <ShoppingBag className="w-4 h-4 shrink-0" />
                     Ürünleri İncele
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="border-slate-600 bg-white/5 text-white hover:bg-white/15 hover:border-slate-400 rounded-xl px-7 h-12">
-                  <Link href="/paketler" className="flex items-center gap-2">
-                    <Package className="w-4 h-4" />
-                    Paketleri Gör
-                  </Link>
-                </Button>
-                <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 px-7 h-12">
-                  <Link href="/ges" className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Teklif Al
+                <Button asChild variant="ghost" className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl h-11 px-5 text-sm">
+                  <Link href="/paketler" className="flex items-center gap-1.5">
+                    Hazır Paketler
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </Button>
               </div>
-              <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-slate-400 text-xs font-medium">
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Güvenli Ödeme</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Hızlı Kargo</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Teknik Destek</span>
-                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />Vade Farksız Taksit</span>
+
+              {/* Güven rozetleri */}
+              <div className="flex flex-wrap gap-x-5 gap-y-2.5 border-t border-slate-100 pt-7">
+                {[
+                  { icon: Truck,          label: 'Ücretsiz Kargo' },
+                  { icon: Shield,         label: '2 Yıl Garanti' },
+                  { icon: Clock,          label: 'Hızlı Teslimat' },
+                  { icon: HeadphonesIcon, label: '7/24 Destek' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-1.5 text-slate-400">
+                    <Icon className="w-3.5 h-3.5 text-brand/60 shrink-0" />
+                    <span className="text-[12px] font-medium">{label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right: hero image */}
-            <div className="relative flex-shrink-0 w-full lg:w-[48%] xl:w-[50%]">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
-                {/* Gradient fade at bottom-left to blend into the dark bg */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/60 via-transparent to-transparent z-10 pointer-events-none rounded-2xl" />
+            {/* ─ Sağ: tek büyük görsel ─ */}
+            <div className="order-1 lg:order-2 relative">
+              <div className="relative overflow-hidden rounded-3xl aspect-[4/5] lg:aspect-[9/11] shadow-xl shadow-slate-200/60">
                 <Image
                   src="/images/ges/solar-hero-premium.png"
-                  alt="Voltekno güneş enerji sistemi kurulumu"
-                  width={900}
-                  height={620}
-                  className="w-full h-auto object-cover"
+                  alt="Enerji sistemleri"
+                  fill
                   priority
+                  className="object-cover object-center"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-                {/* Floating stat badges */}
-                <div className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Toplam Kurulum</p>
-                  <p className="text-lg font-extrabold text-slate-900 leading-tight">500+ Proje</p>
-                </div>
-                <div className="absolute bottom-4 left-4 z-20 bg-emerald-500/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg">
-                  <p className="text-[10px] font-bold text-white/80 uppercase tracking-wide">Enerji Tasarrufu</p>
-                  <p className="text-lg font-extrabold text-white leading-tight">%80'e kadar</p>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
+              </div>
+
+              {/* İstatistik kartları */}
+              <div className="absolute bottom-5 left-5 right-5 grid grid-cols-3 gap-2.5">
+                {[
+                  { value: '500+',   label: 'Proje' },
+                  { value: '2.000+', label: 'Müşteri' },
+                  { value: '7/24',   label: 'Destek' },
+                ].map((s) => (
+                  <div key={s.label} className="bg-white/85 backdrop-blur-md rounded-xl p-3 border border-white/60 shadow-sm text-center">
+                    <p className="text-base font-black text-slate-900 leading-none mb-0.5">{s.value}</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{s.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -369,7 +349,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 2. KULLANIM SENARYOLARI (orijinal Paket Kategorileri yapısı + eklemeler) ── */}
+      {/* ─── 3. KULLANIM SENARYOLARI ─────────────────────────────────────── */}
       <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="use-cases-heading">
         <div className={containerClass}>
           <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
@@ -447,39 +427,10 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Alt satır: 4 ek senaryo (aynı kart stili) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {EXTRA_USE_CASES.map((item) => (
-              <Link
-                key={item.slug}
-                href={item.href}
-                className="group relative block overflow-hidden rounded-2xl bg-slate-900 shadow-md hover:shadow-xl transition-all duration-500"
-              >
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={item.imageAlt}
-                    fill
-                    className="object-cover opacity-75 group-hover:opacity-60 group-hover:scale-105 transition-all duration-700"
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                    style={{ objectPosition: item.objectPosition }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                    <h3 className="text-base sm:text-lg font-bold text-white leading-tight">{item.title}</h3>
-                    <p className="mt-0.5 text-xs text-white/55 line-clamp-1">{item.description}</p>
-                    <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand-light group-hover:gap-2 transition-all">
-                      İncele <ArrowUpRight className="w-3 h-3" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* ─── 3. POPÜLER ÜRÜNLER (orijinal "Öne Çıkan" scroll yapısı, yeni başlık) ── */}
+      {/* ─── 4. POPÜLER ÜRÜNLER ──────────────────────────────────────────── */}
       <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-1`} aria-labelledby="popular-products-heading">
         <div className={containerClass}>
           <header className="mb-6 md:mb-8">
@@ -522,10 +473,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 4. SLIDER (sayfanın ortasına taşındı) ──────────────────────── */}
+      {/* ─── 5. BANNER SLİDER ────────────────────────────────────────────── */}
       <section className="pt-0 pb-8 sm:pb-12 px-4 sm:px-6 md:px-8 lg:px-10" aria-label={t('heroTitle2')}>
         <div className="w-full max-w-[1600px] mx-auto min-w-0">
-          <div className="relative w-full rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-900 shadow-xl min-h-[28vh] sm:min-h-0 aspect-[3/2] sm:aspect-[9/4] md:aspect-[5/2] ring-1 ring-slate-200/30 overflow-hidden">
+          <div className="relative w-full rounded-xl sm:rounded-2xl md:rounded-3xl bg-slate-900 shadow-xl min-h-[18vh] sm:min-h-0 aspect-[3/2] sm:aspect-[9/4] md:aspect-[5/2] ring-1 ring-slate-200/30 overflow-hidden">
             {HERO_SLIDES.map((slide, index) => (
               <div
                 key={slide.src + index}
@@ -565,7 +516,45 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 5. KATEGORİLER (orijinal fotoğraf kart yapısı + genişletilmiş) ─ */}
+      {/* ─── 6. ÖNE ÇIKAN ÜRÜNLER GRID ──────────────────────────────────── */}
+      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="featured-grid-heading">
+        <div className={containerClass}>
+          <header className="mb-8 md:mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <span className={sectionOverlineClass}>Seçili Ürünler</span>
+              <h2 id="featured-grid-heading" className={sectionTitleClass}>Öne Çıkan Ürünler</h2>
+              <p className={sectionDescClass}>En çok tercih edilen ve en yüksek puanlı ürünler.</p>
+            </div>
+            <Link href="/products" className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
+              Tüm Ürünler <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </header>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-5">
+            {featuredRowProducts.slice(0, 8).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={{
+                  id: product.id,
+                  name: product.name,
+                  description: product.description,
+                  price: product.price,
+                  image: product.image,
+                  category: product.category,
+                  brand: product.brand,
+                }}
+                oldPrice={product.oldPrice}
+                discount={product.discount}
+                badges={product.tags}
+                sku={product.sku}
+                stock={product.stock}
+                isVariantProduct={product.isVariantProduct}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 7. KATEGORİLER ──────────────────────────────────────────────── */}
       <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in`} aria-labelledby="main-categories-heading">
         <div className={containerClass}>
           <header className="mb-5 sm:mb-8 md:mb-10">
@@ -610,8 +599,8 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Ekstra kategoriler — ikon+renk kart (görsel yok olanlar) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {/* Ekstra kategoriler — gerçek görsel kartlar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {EXTRA_CATEGORY_ITEMS.map((item) => {
               const Icon = item.icon
               return (
@@ -620,9 +609,26 @@ export default function HomePage() {
                   href={item.href}
                   className="group relative block rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 touch-manipulation"
                 >
-                  <div className={`aspect-[4/3] sm:aspect-[3/2] bg-gradient-to-br ${item.bg} flex flex-col items-center justify-center gap-2 p-4`}>
-                    <Icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
-                    <span className="text-white/60 text-[9px] font-bold uppercase tracking-widest group-hover:text-white/80 transition-colors">Kategori</span>
+                  <div className={`aspect-[4/3] sm:aspect-[3/2] relative overflow-hidden bg-gradient-to-br ${item.bg}`}>
+                    {item.image ? (
+                      <>
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          className="object-cover opacity-70 group-hover:opacity-60 group-hover:scale-105 transition-all duration-500"
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <Icon className="w-8 h-8 text-white/80 group-hover:text-white transition-colors" />
+                      </div>
+                    )}
+                    <div className="absolute bottom-2 left-3">
+                      <Icon className="w-5 h-5 text-white/70" />
+                    </div>
                   </div>
                   <div className="p-3 sm:p-4 border-t border-slate-100 bg-white">
                     <h3 className="font-bold text-slate-900 text-sm sm:text-base mb-0.5 group-hover:text-brand transition-colors line-clamp-1">{item.title}</h3>
@@ -639,14 +645,14 @@ export default function HomePage() {
       </section>
 
       {/* ─── 6. NASIL ÇALIŞIR ─────────────────────────────────────────────── */}
-      <section className={`${sectionPadding} bg-slate-950 min-w-0 opacity-0 animate-section-in`} aria-labelledby="how-it-works-heading">
+      <section className={`${sectionPadding} bg-slate-50 min-w-0 opacity-0 animate-section-in`} aria-labelledby="how-it-works-heading">
         <div className={containerClass}>
           <header className="text-center mb-10 md:mb-14">
             <span className="block text-xs font-bold uppercase tracking-widest text-brand mb-2">Nasıl Çalışır?</span>
-            <h2 id="how-it-works-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">
+            <h2 id="how-it-works-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
               3 Adımda Enerji Çözümü
             </h2>
-            <p className="text-slate-400 text-sm sm:text-base mt-2 max-w-xl mx-auto leading-relaxed">
+            <p className="text-slate-500 text-sm sm:text-base mt-2 max-w-xl mx-auto leading-relaxed">
               İhtiyacından siparişe, siparişten teslimat ve kuruluma kadar tüm süreçte yanınızdayız.
             </p>
           </header>
@@ -654,13 +660,13 @@ export default function HomePage() {
             {HOW_IT_WORKS.map((item) => {
               const Icon = item.icon
               return (
-                <div key={item.step} className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300">
-                  <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg`}>
+                <div key={item.step} className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                  <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-5 shadow-md`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <span className="text-xs font-black text-white/30 uppercase tracking-widest mb-2">{item.step}</span>
-                  <h3 className="text-lg font-bold text-white mb-3">{item.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{item.desc}</p>
+                  <span className="text-xs font-black text-slate-200 uppercase tracking-widest mb-2">{item.step}</span>
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">{item.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
                 </div>
               )
             })}
@@ -698,41 +704,6 @@ export default function HomePage() {
                 </Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 8. NEDEN VOLTEKNO (orijinal yapı) ───────────────────────────── */}
-      <div className="w-full border-t border-slate-200/80 bg-slate-100/40" aria-hidden />
-      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-3 bg-slate-50/60`} aria-labelledby="why-voltekno-heading">
-        <div className={containerClass}>
-          <header className="text-center mb-10 md:mb-14">
-            <span className={sectionOverlineClass}>{t('whyUs')}</span>
-            <h2 id="why-voltekno-heading" className={`${sectionTitleClass} max-w-2xl mx-auto`}>
-              {t('whyVoltekno')}
-            </h2>
-            <p className={`${sectionDescClass} max-w-2xl mx-auto mt-2 text-center`}>
-              {t('whyVolteknoDesc')}
-            </p>
-          </header>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            {[
-              { icon: Shield, titleKey: 'reliableQuality' as const, descKey: 'reliableQualityDesc' as const, color: 'bg-brand' },
-              { icon: ShoppingBag, titleKey: 'rightProduct' as const, descKey: 'rightProductDesc' as const, color: 'bg-emerald-500' },
-              { icon: Truck, titleKey: 'fastDelivery' as const, descKey: 'fastDeliveryDesc' as const, color: 'bg-sky-500' },
-              { icon: HeadphonesIcon, titleKey: 'techSupport' as const, descKey: 'techSupportDesc' as const, color: 'bg-violet-500' },
-            ].map((item) => {
-              const Icon = item.icon
-              return (
-                <div key={item.titleKey} className="flex flex-col items-center text-center p-6 md:p-8 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 hover:-translate-y-1 transition-all duration-300">
-                  <div className={`w-14 h-14 ${item.color} rounded-2xl flex items-center justify-center mb-5 shadow-sm`}>
-                    <Icon className="w-7 h-7 text-white" aria-hidden />
-                  </div>
-                  <h3 className="font-bold text-base md:text-lg text-slate-900 mb-2">{t(item.titleKey)}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{t(item.descKey)}</p>
-                </div>
-              )
-            })}
           </div>
         </div>
       </section>
@@ -802,8 +773,20 @@ export default function HomePage() {
                   href="/blog"
                   className="group rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  <div className={`h-40 ${post.iconBg} flex items-center justify-center`}>
-                    <Icon className={`w-12 h-12 ${post.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                  <div className="relative h-44 overflow-hidden bg-slate-100">
+                    <Image
+                      src={post.image}
+                      alt={post.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <div className="w-8 h-8 rounded-lg bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm">
+                        <Icon className={`w-4 h-4 ${post.iconColor}`} />
+                      </div>
+                    </div>
                   </div>
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-3">
@@ -823,26 +806,76 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── 11. SSS (orijinal yapı) ──────────────────────────────────────── */}
-      <section className={`${sectionPadding} min-w-0 opacity-0 animate-section-in animate-section-in-delay-2`} aria-labelledby="home-faq-heading">
-        <div className={containerClass}>
-          <header className="mb-8 md:mb-10">
-            <span className={sectionOverlineClass}>{t('faqOverline')}</span>
-            <h2 id="home-faq-heading" className={sectionTitleClass}>{t('faqTitle')}</h2>
-            <p className={sectionDescClass}>{t('faqDesc')}</p>
-          </header>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-            {faqItems.map((item) => (
-              <article key={item.q} className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-900">{item.q}</h3>
-                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{item.a}</p>
-              </article>
-            ))}
-          </div>
-          <div className="mt-8">
-            <Button asChild variant="outline" className="rounded-xl border-slate-300 text-slate-700 hover:bg-slate-50">
-              <Link href="/faq">{t('seeAllFaq')}</Link>
-            </Button>
+      {/* ─── NEDEN VOLTEKNO — Footer üstü ───────────────────────────────── */}
+      <section className="bg-slate-50 min-w-0 opacity-0 animate-section-in" aria-labelledby="why-voltekno-heading">
+        <div className="container mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 xl:px-20 py-20 lg:py-28">
+          <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start">
+
+            {/* Sol — başlık + CTA */}
+            <div className="flex-shrink-0 lg:w-[38%] lg:sticky lg:top-24">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-6 h-[2px] bg-brand" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand">Neden Voltekno</span>
+              </div>
+              <h2 id="why-voltekno-heading" className="text-4xl sm:text-5xl lg:text-[3.2rem] font-black text-slate-900 tracking-[-0.025em] leading-[1.06] mb-8">
+                Enerji<br />
+                dönüşümünüz<br />
+                <span className="text-brand">güvende.</span>
+              </h2>
+              <p className="text-slate-500 text-base leading-relaxed mb-10 max-w-sm">
+                2018'den bu yana 500'ü aşkın kurulum, yüzlerce memnun müşteri ve sıfır taviz politikasıyla Türkiye'nin güvenilir enerji çözüm ortağı.
+              </p>
+              <Button asChild className="bg-brand hover:bg-brand-hover text-white font-semibold rounded-xl px-7 h-11 text-sm shadow-md shadow-brand/20">
+                <Link href="/contact" className="flex items-center gap-2">
+                  Bizimle Çalışın <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Sağ — özellik kartları */}
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                {
+                  icon: Shield,
+                  title: 'Kanıtlanmış Kalite',
+                  desc: 'CE, IEC ve EN sertifikalı, Avrupa standartlarında ürün portföyü. Her ürün titizlikle seçilir.',
+                  accent: 'text-brand',
+                  bg: 'bg-brand/5',
+                },
+                {
+                  icon: HeadphonesIcon,
+                  title: '7/24 Teknik Destek',
+                  desc: 'Satış öncesi danışmanlıktan kurulum sonrası bakıma kadar uzman ekibimiz her zaman yanınızda.',
+                  accent: 'text-emerald-600',
+                  bg: 'bg-emerald-50',
+                },
+                {
+                  icon: Truck,
+                  title: 'Hızlı & Güvenli Teslimat',
+                  desc: 'Türkiye geneli sigortalı kargo, özel paketleme ve takip sistemi ile kapınıza teslim.',
+                  accent: 'text-sky-600',
+                  bg: 'bg-sky-50',
+                },
+                {
+                  icon: Calculator,
+                  title: 'Özel Proje Çözümleri',
+                  desc: 'Konuttan endüstriyele, küçük ölçekten büyük GES projelerine kadar her ihtiyaca özel sistem tasarımı.',
+                  accent: 'text-violet-600',
+                  bg: 'bg-violet-50',
+                },
+              ].map((item) => {
+                const Icon = item.icon
+                return (
+                  <div key={item.title} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 p-6 lg:p-7">
+                    <div className={`w-11 h-11 ${item.bg} rounded-xl flex items-center justify-center mb-4`}>
+                      <Icon className={`w-5 h-5 ${item.accent}`} />
+                    </div>
+                    <h3 className="text-slate-900 font-bold text-base mb-2">{item.title}</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
