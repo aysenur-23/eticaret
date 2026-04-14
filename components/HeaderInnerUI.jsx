@@ -422,6 +422,16 @@ export function HeaderInnerUI(props) {
       <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
           <nav className="flex items-center gap-0.5 h-[52px]" aria-label="Ana menu">
+            {navLinks.filter(l => l.href === '/' || l.href === '/products').map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`${desktopNavItemClass(pathname === link.href)} shrink-0 ${pathname === link.href ? 'bg-slate-100' : 'hover:bg-slate-100'}`}
+              >
+                <span className={desktopNavLabelClass}>{t(link.labelKey)}</span>
+              </Link>
+            ))}
+            <div className="w-px h-5 bg-slate-200 mx-1 shrink-0" aria-hidden />
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
             <div className="w-px h-5 bg-slate-200 mx-1 shrink-0" aria-hidden />
             {navLinks.filter(l => l.href === '/contact').map((link) => (
