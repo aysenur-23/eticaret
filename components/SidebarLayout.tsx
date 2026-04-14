@@ -37,7 +37,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       <div
         className={
           isHome
-            ? 'w-full min-w-0 overflow-x-hidden pt-0 pb-4 lg:pb-8'
+            ? 'w-full min-w-0 overflow-x-hidden pt-0 pb-0'
             : isProducts
               ? 'w-full min-w-0 overflow-x-hidden pt-0 mt-0'
               : 'container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px] w-full min-w-0 overflow-x-hidden pt-5 pb-4 lg:pt-7 lg:pb-8'

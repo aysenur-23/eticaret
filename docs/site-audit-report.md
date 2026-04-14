@@ -1,6 +1,6 @@
 # Site Audit Report
 
-Generated: 2026-03-08T01:15:20.700Z
+Generated: 2026-04-14T20:04:27.657Z
 
 - Critical: 0
 - Warnings: 0
@@ -8,4 +8,4 @@ Generated: 2026-03-08T01:15:20.700Z
 
 ## Info
 - i18n key count tr=671, en=671
-- Admin API routes checked: 15
+- Admin API routes checked: 19
