@@ -81,7 +81,7 @@ function SidebarContent({
             <ul className="space-y-0.5">
               {section.items.map((item) => {
                 const Icon = item.icon
-                const isActive = item.exact
+                const isActive = ('exact' in item && item.exact)
                   ? pathname === item.href
                   : pathname?.startsWith(item.href) && item.href !== '/admin'
                   || (item.href === '/admin' && pathname === '/admin')
