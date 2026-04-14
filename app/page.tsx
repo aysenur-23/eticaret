@@ -217,15 +217,8 @@ const EXTRA_CATEGORY_ITEMS = [
     bg: 'from-teal-600 to-teal-800',
   },
   {
-    href: '/category/batarya-depolama',
-    title: 'Enerji Depolama',
-    subtitle: 'ESS ve taşınabilir güç istasyonları',
-    icon: Package,
-    bg: 'from-violet-600 to-violet-800',
-  },
-  {
     href: '/category/isi-pompasi-hvac',
-    title: 'Isı Pompası / HVAC',
+    title: 'Isı Pompası ve HVAC',
     subtitle: 'İklimlendirme ve ısıtma sistemleri',
     icon: Flame,
     bg: 'from-red-600 to-orange-700',
@@ -611,7 +604,7 @@ export default function HomePage() {
           </div>
 
           {/* Ekstra kategoriler — ikon+renk kart (görsel yok olanlar) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {EXTRA_CATEGORY_ITEMS.map((item) => {
               const Icon = item.icon
               return (
