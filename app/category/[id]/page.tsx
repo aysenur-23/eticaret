@@ -62,6 +62,7 @@ export default function CategoryPage({ params }: { params: { id: string } }) {
   if (params.id === 'gunes-panelleri') redirect('/category/gunes-enerjisi')
   if (params.id === 'enerji-depolama') redirect('/category/batarya-depolama')
   if (params.id === 'enerji-depolama-sistemleri') redirect('/category/batarya-depolama')
+  if (params.id === 'enerji-yonetimi') redirect('/category/batarya-depolama')
 
   const title = getCategoryTitle(params.id)
   const meta = CATEGORY_META[params.id]

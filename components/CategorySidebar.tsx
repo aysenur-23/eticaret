@@ -25,7 +25,6 @@ const GROUP_ICONS: Record<string, React.ElementType> = {
   'inverterler': Cpu,
   'gunes-enerjisi': Sun,
   'isi-pompasi-hvac': Cpu,
-  'enerji-yonetimi': Cpu,
 }
 
 /**

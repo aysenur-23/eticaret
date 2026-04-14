@@ -185,14 +185,6 @@ const EXTRA_CATEGORY_ITEMS = [
     icon: Flame,
     bg: 'from-red-600 to-orange-700',
   },
-  {
-    href: '/category/enerji-yonetimi',
-    title: 'Enerji Yönetimi',
-    subtitle: 'Akıllı sayaç ve izleme sistemleri',
-    image: '/images/hero/hero-4.png',
-    icon: Zap,
-    bg: 'from-cyan-600 to-sky-700',
-  },
 ]
 
 export default function HomePage() {
@@ -600,7 +592,7 @@ export default function HomePage() {
           </div>
 
           {/* Ekstra kategoriler — gerçek görsel kartlar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {EXTRA_CATEGORY_ITEMS.map((item) => {
               const Icon = item.icon
               return (

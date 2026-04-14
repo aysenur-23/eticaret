@@ -21,19 +21,13 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Sheet, SheetContent, SheetTitle } from './ui/sheet'
-import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone, Zap, Battery, Sun, Cpu } from 'lucide-react'
+import { ShoppingCart, Heart, User, Search, Menu, ChevronDown, ChevronRight, Home, Phone } from 'lucide-react'
 
 const headerDisplay = Manrope({
   subsets: ['latin'],
   weight: ['700', '800'],
 })
 
-const GROUP_ICONS = {
-  'elektrikli-arac-sarj-urunleri': Zap,
-  'batarya-depolama': Battery,
-  'gunes-enerjisi': Sun,
-  'inverterler': Cpu,
-}
 
 const CATEGORY_MENU_IMAGE_BY_VALUE = mockProducts.reduce((acc, product) => {
   if (!product.category || !product.image || product.image === PLACEHOLDER_PRODUCT_IMAGE) return acc
@@ -71,12 +65,6 @@ const GROUP_MENU_META = {
     eyebrow: 'Iklimlendirme',
     accent: '#7c3aed',
     surface: 'from-violet-50/80 via-white to-slate-50',
-  },
-  'enerji-yonetimi': {
-    badge: 'ENERJI YONETIMI',
-    eyebrow: 'Akilli Izleme',
-    accent: '#0891b2',
-    surface: 'from-cyan-50/80 via-white to-slate-50',
   },
 }
 
@@ -211,7 +199,7 @@ export function HeaderInnerUI(props) {
     }, 200)
   }
 
-  const menuPanelClass = 'w-[min(680px,calc(100vw-8rem))] max-w-[680px] overflow-hidden rounded-[18px] border border-slate-200 bg-white p-0 shadow-[0_18px_40px_rgba(15,23,42,0.10)] animate-in fade-in slide-in-from-top-2 duration-200'
+  const menuPanelClass = 'w-[min(520px,calc(100vw-3rem))] max-w-[520px] overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-[0_8px_32px_rgba(15,23,42,0.08),0_1px_3px_rgba(15,23,42,0.04)] animate-in fade-in slide-in-from-top-1 duration-150'
   const desktopNavItemClass = (isActive) =>
     `group relative flex items-center justify-center px-2 py-1 rounded-lg text-center transition-all duration-200 ${isActive ? 'text-slate-950' : 'text-slate-600 hover:text-slate-950'}`
   const desktopNavLabelClass = `${headerDisplay.className} text-[13px] font-bold tracking-[-0.01em] leading-[1.25] text-center break-words`
@@ -252,71 +240,51 @@ export function HeaderInnerUI(props) {
           <DropdownMenuContent
             align="center"
             collisionPadding={24}
-            sideOffset={1}
+            sideOffset={2}
             className={menuPanelClass}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="grid grid-cols-[140px_minmax(0,1fr)] gap-0">
-              <Link
-                href={featuredCard?.href || categoryHref || '/products'}
-                onClick={() => setOpenMenu(null)}
-                className="group relative hidden min-h-[160px] overflow-hidden border-r border-slate-200 bg-slate-100 md:block"
-              >
-                {featuredCard ? (
-                  <>
-                    <Image
-                      src={featuredCard.image}
-                      alt={featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
-                      fill
-                      sizes="140px"
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-3">
-                      <p className={`${headerDisplay.className} text-[13px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]`}>
-                        {featuredCard.translate ? t(featuredCard.title) : featuredCard.title}
-                      </p>
-                    </div>
-                  </>
-                ) : null}
-              </Link>
+            {/* Üst accent çizgisi */}
+            <div className="h-[3px] bg-gradient-to-r from-brand via-brand/70 to-transparent" />
 
-              <div className="px-5 py-4">
-                <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-3">
-                  <p className={`${headerDisplay.className} text-[14px] font-extrabold tracking-[-0.02em] text-slate-900`}>
-                    {t(labelKey)}
-                  </p>
-                  <Link
-                    href={categoryHref || '/products'}
-                    onClick={() => setOpenMenu(null)}
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 transition-colors hover:text-[#f4a11a]"
+            <div className="px-5 pt-4 pb-5">
+              {/* Başlık satırı */}
+              <div className="flex items-center justify-between mb-4">
+                <span className={`${headerDisplay.className} text-[10.5px] font-black uppercase tracking-[0.16em] text-brand`}>
+                  {t(labelKey)}
+                </span>
+                <Link
+                  href={categoryHref || '/products'}
+                  onClick={() => setOpenMenu(null)}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-brand transition-colors"
+                >
+                  Tümünü Gör
+                  <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+
+              {/* Kategoriler */}
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+                {remainingCards.map((card, index) => (
+                  <DropdownMenuItem
+                    key={`${groupKey}-${card.href}-${index}`}
+                    asChild
+                    className="m-0 rounded-none border-0 bg-transparent p-0 outline-none focus:bg-transparent data-[highlighted]:bg-transparent"
                   >
-                    Tümünü Gör
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                  {remainingCards.map((card, index) => (
-                    <DropdownMenuItem
-                      key={`${groupKey}-${card.href}-${index}`}
-                      asChild
-                      className="m-0 rounded-none border-0 bg-transparent p-0 outline-none focus:bg-transparent data-[highlighted]:bg-transparent"
+                    <Link
+                      href={card.href}
+                      onClick={() => setOpenMenu(null)}
+                      className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors"
                     >
-                      <Link
-                        href={card.href}
-                        onClick={() => setOpenMenu(null)}
-                        className="group flex items-center justify-between rounded-lg px-0 py-1.5 text-[13px] font-semibold text-slate-800 transition-colors hover:text-slate-950"
-                      >
-                        <span className="truncate pr-3">
-                          {card.translate ? t(card.title) : card.title}
-                        </span>
-                        <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#f4a11a]" />
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-                </div>
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-200 group-hover:bg-brand transition-colors shrink-0" />
+                      <span className="text-[13px] font-medium text-slate-600 group-hover:text-slate-900 transition-colors leading-tight truncate">
+                        {card.translate ? t(card.title) : card.title}
+                      </span>
+                      <ChevronRight className="h-3 w-3 ml-auto shrink-0 text-slate-200 opacity-0 group-hover:opacity-100 group-hover:text-brand transition-all duration-150" />
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
               </div>
             </div>
           </DropdownMenuContent>
@@ -454,11 +422,7 @@ export function HeaderInnerUI(props) {
       <div className="relative hidden md:block bg-white border-b border-slate-100 shrink-0">
         <div className="mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 min-w-0 overflow-x-hidden">
           <nav className="flex items-center gap-0.5 min-w-0 overflow-hidden h-[52px]" aria-label="Ana menu">
-            {renderDesktopLink('/', t('navHome'), pathname === '/', 'VOLTEKNO')}
-            {renderDesktopLink('/products', t('navProducts'), pathname === '/products' && !currentCategory, 'KATALOG')}
             {navGroups.map((g) => navDropdown(g.labelKey, g.categories, g.href, g.id))}
-            {renderDesktopLink('/blog', 'Blog', pathname === '/blog' || pathname?.startsWith('/blog/'), 'BLOG')}
-            {renderDesktopLink('/contact', t('navContact'), pathname === '/contact', 'DESTEK')}
           </nav>
         </div>
       </div>
@@ -559,7 +523,6 @@ export function HeaderInnerUI(props) {
               <p className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('categories')}</p>
               <div className="space-y-1">
                 {navGroups.map((group) => {
-                  const Icon = GROUP_ICONS[group.id] || Menu
                   const isExpanded = expandedGroups.has(group.id)
                   const isGroupActive = pathname.startsWith(`/category/${group.id}`)
 
@@ -571,7 +534,6 @@ export function HeaderInnerUI(props) {
                           onClick={() => setMobileMenuOpen(false)}
                           className={`flex-1 flex items-center gap-3 min-h-[48px] px-3 py-3 text-sm font-medium min-w-0 touch-manipulation ${isGroupActive ? 'text-brand' : 'text-slate-700'}`}
                         >
-                          <Icon className={`w-5 h-5 shrink-0 ${isGroupActive ? 'text-brand' : 'text-slate-400'}`} />
                           <span className="truncate">{t(group.labelKey)}</span>
                         </Link>
                         <button
@@ -611,7 +573,6 @@ export function HeaderInnerUI(props) {
             {/* Blog */}
             <div className="pt-1">
               <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 h-12 px-3 rounded-xl text-sm font-medium transition-colors touch-manipulation ${pathname === '/blog' ? 'bg-white text-brand shadow-sm border border-slate-200/80' : 'text-slate-700 hover:bg-white/80'}`}>
-                <Sun className={`w-5 h-5 shrink-0 ${pathname === '/blog' ? 'text-brand' : 'text-slate-400'}`} />
                 Blog
               </Link>
             </div>

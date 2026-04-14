@@ -39,6 +39,7 @@ export const CATEGORY_GROUPS = [
       'Batarya Modülleri',
       'Enerji Depolama Sistemleri',
       'Taşınabilir Güç İstasyonları',
+      'Enerji Yönetimi',
     ],
   },
   {
@@ -64,13 +65,6 @@ export const CATEGORY_GROUPS = [
     labelKey: 'groupHeatPumpsHVAC', // Isı Pompası ve HVAC
     categoryValues: [
       'Isı Pompası ve HVAC',
-    ],
-  },
-  {
-    id: 'enerji-yonetimi',
-    labelKey: 'groupEnergyManagement', // Enerji Yönetimi
-    categoryValues: [
-      'Enerji Yönetimi',
     ],
   },
 ] as const
